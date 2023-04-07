@@ -88,6 +88,13 @@
 			</includes>
 		</fileSet>
 
+		<!-- 将模块drivers驱动等打包目录/drivers 下 -->
+		<fileSet>
+			<directory>${project.parent.basedir}/drivers/
+			</directory>
+			<outputDirectory>drivers</outputDirectory>
+		</fileSet>
+
 	</fileSets>
 
 </assembly>

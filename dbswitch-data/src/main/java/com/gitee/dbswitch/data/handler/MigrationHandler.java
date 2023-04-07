@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.handler;
 
+import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.DatabaseAwareUtils;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
@@ -20,7 +21,7 @@ import com.gitee.dbswitch.data.config.DbswichProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.util.BytesUnitUtils;
 import com.gitee.dbswitch.dbchange.ChangeCalculatorService;
-import com.gitee.dbswitch.dbchange.IDatabaseChangeCaculator;
+import com.gitee.dbswitch.dbchange.IDatabaseChangeCalculator;
 import com.gitee.dbswitch.dbchange.IDatabaseRowHandler;
 import com.gitee.dbswitch.dbchange.RecordChangeTypeEnum;
 import com.gitee.dbswitch.dbchange.TaskParamEntity;
@@ -31,7 +32,6 @@ import com.gitee.dbswitch.dbsynch.DatabaseSynchronizeFactory;
 import com.gitee.dbswitch.dbsynch.IDatabaseSynchronize;
 import com.gitee.dbswitch.dbwriter.DatabaseWriterFactory;
 import com.gitee.dbswitch.dbwriter.IDatabaseWriter;
-import com.zaxxer.hikari.HikariDataSource;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class MigrationHandler implements Supplier<Long> {
   private volatile boolean interrupted = false;
 
   // 来源端
-  private final HikariDataSource sourceDataSource;
+  private final CloseableDataSource sourceDataSource;
   private ProductTypeEnum sourceProductType;
   private String sourceSchemaName;
   private String sourceTableName;
@@ -76,7 +76,7 @@ public class MigrationHandler implements Supplier<Long> {
   private IMetaDataByDatasourceService sourceMetaDataService;
 
   // 目的端
-  private final HikariDataSource targetDataSource;
+  private final CloseableDataSource targetDataSource;
   private ProductTypeEnum targetProductType;
   private Set<String> targetExistTables;
   private String targetSchemaName;
@@ -90,8 +90,8 @@ public class MigrationHandler implements Supplier<Long> {
   public static MigrationHandler createInstance(TableDescription td,
       DbswichProperties properties,
       Integer sourcePropertiesIndex,
-      HikariDataSource sds,
-      HikariDataSource tds,
+      CloseableDataSource sds,
+      CloseableDataSource tds,
       Set<String> targetExistTables) {
     return new MigrationHandler(td, properties, sourcePropertiesIndex, sds, tds, targetExistTables);
   }
@@ -99,8 +99,8 @@ public class MigrationHandler implements Supplier<Long> {
   private MigrationHandler(TableDescription td,
       DbswichProperties properties,
       Integer sourcePropertiesIndex,
-      HikariDataSource sds,
-      HikariDataSource tds,
+      CloseableDataSource sds,
+      CloseableDataSource tds,
       Set<String> targetExistTables) {
     this.sourceSchemaName = td.getSchemaName();
     this.sourceTableName = td.getTableName();
@@ -441,7 +441,7 @@ public class MigrationHandler implements Supplier<Long> {
         .createDatabaseWriter(writer.getDataSource());
     synchronizer.prepare(targetSchemaName, targetTableName, targetFields, targetPrimaryKeys);
 
-    IDatabaseChangeCaculator calculator = new ChangeCalculatorService();
+    IDatabaseChangeCalculator calculator = new ChangeCalculatorService();
     calculator.setFetchSize(fetchSize);
     calculator.setRecordIdentical(false);
     calculator.setCheckJdbcType(false);

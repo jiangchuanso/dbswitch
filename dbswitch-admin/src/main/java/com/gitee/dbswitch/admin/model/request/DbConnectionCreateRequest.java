@@ -20,6 +20,7 @@ public class DbConnectionCreateRequest {
 
   private String name;
   private SupportDbTypeEnum type;
+  private String version;
   private String driver;
   private String url;
   private String username;
@@ -30,6 +31,7 @@ public class DbConnectionCreateRequest {
     databaseConnectionEntity.setId(null);
     databaseConnectionEntity.setName(name.trim());
     databaseConnectionEntity.setType(type);
+    databaseConnectionEntity.setVersion(version.trim());
     databaseConnectionEntity.setDriver(driver.trim());
     databaseConnectionEntity.setUrl(url.trim());
     databaseConnectionEntity.setUsername(username);

@@ -12,7 +12,7 @@ import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.core.model.SchemaTableData;
 import com.gitee.dbswitch.core.model.SchemaTableMeta;
 import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByJdbcService;
+import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,90 +27,95 @@ import org.springframework.stereotype.Service;
 public class MetaDataService {
 
   @Resource
-  private DbConnectionService connectionService;
+  private ConnectionService connectionService;
 
   public PageResult<MetadataSchemaDetailResponse> allSchemas(Long id, Integer page, Integer size) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByJdbcService metaDataService = connectionService.getMetaDataCoreService(dbConn);
-    List<String> schemas = metaDataService.querySchemaList(
-        dbConn.getUrl(), dbConn.getUsername(), dbConn.getPassword());
-    List<MetadataSchemaDetailResponse> responses = schemas.stream()
-        .map(s -> new MetadataSchemaDetailResponse(dbConn.getName(), s))
-        .collect(Collectors.toList());
-    return PageUtils.getPage(responses, page, size);
+    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      List<String> schemas = metaDataService.querySchemaList();
+      List<MetadataSchemaDetailResponse> responses = schemas.stream()
+          .map(s -> new MetadataSchemaDetailResponse(dbConn.getName(), s))
+          .collect(Collectors.toList());
+      return PageUtils.getPage(responses, page, size);
+    } finally {
+      metaDataService.close();
+    }
   }
 
   public PageResult<MetadataTableInfoResponse> allTables(Long id, String schema, Integer page,
       Integer size) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByJdbcService metaDataService = connectionService.getMetaDataCoreService(dbConn);
-    List<TableDescription> tables = metaDataService.queryTableList(
-        dbConn.getUrl(), dbConn.getUsername(), dbConn.getPassword(), schema);
-    List<MetadataTableInfoResponse> responses = tables.stream()
-        .map(one -> MetadataTableInfoResponse.builder()
-            .tableName(one.getTableName())
-            .schemaName(one.getSchemaName())
-            .remarks(one.getRemarks())
-            .type(one.getTableType())
-            .build()
-        ).collect(Collectors.toList());
-    return PageUtils.getPage(responses, page, size);
+    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      List<TableDescription> tables = metaDataService.queryTableList(schema);
+      List<MetadataTableInfoResponse> responses = tables.stream()
+          .map(one -> MetadataTableInfoResponse.builder()
+              .tableName(one.getTableName())
+              .schemaName(one.getSchemaName())
+              .remarks(one.getRemarks())
+              .type(one.getTableType())
+              .build()
+          ).collect(Collectors.toList());
+      return PageUtils.getPage(responses, page, size);
+    } finally {
+      metaDataService.close();
+    }
   }
 
   public Result<MetadataTableDetailResponse> tableDetail(Long id, String schema, String table) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByJdbcService metaDataService = connectionService.getMetaDataCoreService(dbConn);
-    SchemaTableMeta tableMeta = metaDataService.queryTableMeta(
-        dbConn.getUrl(),
-        dbConn.getUsername(),
-        dbConn.getPassword(),
-        schema,
-        table);
-
-    List<String> pks = tableMeta.getPrimaryKeys();
-    List<MetadataColumnDetailResponse> columnDetailResponses = tableMeta.getColumns().stream()
-        .map(one -> MetadataColumnDetailResponse.builder()
-            .fieldName(one.getFieldName())
-            .typeName(one.getFieldTypeName())
-            .typeClassName(one.getFiledTypeClassName())
-            .fieldType(String.valueOf(one.getFieldType()))
-            .displaySize(String.valueOf(one.getDisplaySize()))
-            .precisionSize(String.valueOf(one.getPrecisionSize()))
-            .scaleSize(String.valueOf(one.getScaleSize()))
-            .isPrimaryKey(
-                toStr(
-                    CollectionUtils.isNotEmpty(pks)
-                        && pks.contains(one.getFieldName())))
-            .isAutoIncrement(toStr(one.isAutoIncrement()))
-            .isNullable(toStr(one.isNullable()))
-            .remarks(one.getRemarks())
-            .build()
-        ).collect(Collectors.toList());
-
-    return Result.success(MetadataTableDetailResponse.builder()
-        .tableName(tableMeta.getTableName())
-        .schemaName(tableMeta.getSchemaName())
-        .remarks(tableMeta.getRemarks())
-        .type(tableMeta.getTableType())
-        .createSql(tableMeta.getCreateSql())
-        .primaryKeys(tableMeta.getPrimaryKeys())
-        .columns(columnDetailResponses)
-        .build());
+    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      SchemaTableMeta tableMeta = metaDataService.queryTableMeta(schema, table);
+      List<String> pks = tableMeta.getPrimaryKeys();
+      List<MetadataColumnDetailResponse> columnDetailResponses = tableMeta.getColumns().stream()
+          .map(one -> MetadataColumnDetailResponse.builder()
+              .fieldName(one.getFieldName())
+              .typeName(one.getFieldTypeName())
+              .typeClassName(one.getFiledTypeClassName())
+              .fieldType(String.valueOf(one.getFieldType()))
+              .displaySize(String.valueOf(one.getDisplaySize()))
+              .precisionSize(String.valueOf(one.getPrecisionSize()))
+              .scaleSize(String.valueOf(one.getScaleSize()))
+              .isPrimaryKey(
+                  toStr(
+                      CollectionUtils.isNotEmpty(pks)
+                          && pks.contains(one.getFieldName())))
+              .isAutoIncrement(toStr(one.isAutoIncrement()))
+              .isNullable(toStr(one.isNullable()))
+              .remarks(one.getRemarks())
+              .build()
+          ).collect(Collectors.toList());
+      return Result.success(MetadataTableDetailResponse.builder()
+          .tableName(tableMeta.getTableName())
+          .schemaName(tableMeta.getSchemaName())
+          .remarks(tableMeta.getRemarks())
+          .type(tableMeta.getTableType())
+          .createSql(tableMeta.getCreateSql())
+          .primaryKeys(tableMeta.getPrimaryKeys())
+          .columns(columnDetailResponses)
+          .build());
+    } finally {
+      metaDataService.close();
+    }
   }
 
   public Result<SchemaTableDataResponse> tableData(Long id, String schema, String table) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByJdbcService metaDataService = connectionService.getMetaDataCoreService(dbConn);
-    SchemaTableData data = metaDataService.queryTableData(
-        dbConn.getUrl(), dbConn.getUsername(), dbConn.getPassword(),
-        schema, table, 10);
-    return Result.success(SchemaTableDataResponse.builder()
-        .schemaName(data.getSchemaName())
-        .tableName(data.getTableName())
-        .columns(data.getColumns())
-        .rows(convertRows(data.getColumns(), data.getRows()))
-        .build()
-    );
+    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      SchemaTableData data = metaDataService.queryTableData(schema, table, 10);
+      return Result.success(SchemaTableDataResponse.builder()
+          .schemaName(data.getSchemaName())
+          .tableName(data.getTableName())
+          .columns(data.getColumns())
+          .rows(convertRows(data.getColumns(), data.getRows()))
+          .build()
+      );
+    } finally {
+      metaDataService.close();
+    }
   }
 
   private List<Map<String, Object>> convertRows(List<String> columns, List<List<Object>> rows) {

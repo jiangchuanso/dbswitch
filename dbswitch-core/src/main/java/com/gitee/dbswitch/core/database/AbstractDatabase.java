@@ -41,12 +41,7 @@ public abstract class AbstractDatabase implements IDatabaseInterface {
   protected String catalogName = null;
 
   public AbstractDatabase(String driverClassName) {
-    try {
-      this.driverClassName = driverClassName;
-      Class.forName(driverClassName);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    this.driverClassName = driverClassName;
   }
 
   @Override

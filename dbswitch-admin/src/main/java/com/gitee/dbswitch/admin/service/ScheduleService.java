@@ -15,7 +15,7 @@ import com.gitee.dbswitch.admin.entity.AssignmentJobEntity;
 import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
-import com.gitee.dbswitch.admin.util.UuidUtils;
+import com.gitee.dbswitch.common.util.UuidUtils;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;

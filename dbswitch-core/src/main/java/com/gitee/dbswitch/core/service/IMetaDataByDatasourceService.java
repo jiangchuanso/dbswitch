@@ -11,6 +11,11 @@ import javax.sql.DataSource;
 public interface IMetaDataByDatasourceService {
 
   /**
+   * 资源释放
+   */
+  void close();
+
+  /**
    * 获取数据源对象
    *
    * @return

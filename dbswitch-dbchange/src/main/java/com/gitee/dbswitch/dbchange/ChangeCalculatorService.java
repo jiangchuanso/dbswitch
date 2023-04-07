@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
  * @author tang
  */
 @Slf4j
-public final class ChangeCalculatorService implements IDatabaseChangeCaculator {
+public final class ChangeCalculatorService implements IDatabaseChangeCalculator {
 
   /**
    * 是否记录不变化的记录
@@ -393,10 +393,10 @@ public final class ChangeCalculatorService implements IDatabaseChangeCaculator {
       throw new RuntimeException("Invalid compare object list !");
     }
 
-    for (int fieldnr : fieldnrs) {
-      int jdbcType = metaData.getColumnType(fieldnr + 1);
-      Object o1 = obj1[fieldnr];
-      Object o2 = obj2[fieldnr];
+    for (int nr : fieldnrs) {
+      int jdbcType = metaData.getColumnType(nr + 1);
+      Object o1 = obj1[nr];
+      Object o2 = obj2[nr];
 
       int cmp = typeCompare(jdbcType, o1, o2);
       if (cmp != 0) {

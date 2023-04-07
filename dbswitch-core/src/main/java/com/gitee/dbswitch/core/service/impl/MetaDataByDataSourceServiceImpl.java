@@ -46,6 +46,17 @@ public class MetaDataByDataSourceServiceImpl implements IMetaDataByDatasourceSer
   }
 
   @Override
+  public void close() {
+    if (dataSource instanceof AutoCloseable) {
+      try {
+        ((AutoCloseable) dataSource).close();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  @Override
   public DataSource getDataSource() {
     return this.dataSource;
   }

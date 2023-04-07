@@ -21,6 +21,7 @@ public class DbConnectionUpdateRequest {
   private Long id;
   private String name;
   private SupportDbTypeEnum type;
+  private String version;
   private String driver;
   private String url;
   private String username;
@@ -31,6 +32,7 @@ public class DbConnectionUpdateRequest {
     databaseConnectionEntity.setId(id);
     databaseConnectionEntity.setName(name.trim());
     databaseConnectionEntity.setType(type);
+    databaseConnectionEntity.setVersion(version.trim());
     databaseConnectionEntity.setDriver(driver.trim());
     databaseConnectionEntity.setUrl(url.trim());
     databaseConnectionEntity.setUsername(username);

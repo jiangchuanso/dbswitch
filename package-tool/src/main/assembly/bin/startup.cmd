@@ -19,6 +19,7 @@ set APP_HOME=%cd%
 set APP_BIN_PATH=%APP_HOME%\bin
 set APP_LIB_PATH=%APP_HOME%\lib
 set APP_CONF_PATH=%APP_HOME%\conf
+set APP_DRIVERS_PATH=%APP_HOME%\drivers
 
 ::java虚拟机启动参数
 set JAVA_OPTS=-server -Xms4096m -Xmx4096m -Xmn2048m -XX:+DisableExplicitGC -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Doracle.jdbc.J2EE13Compliant=true

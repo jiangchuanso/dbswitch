@@ -1,6 +1,6 @@
 package com.gitee.dbswitch.admin.service;
 
-import com.gitee.dbswitch.admin.common.excption.DbswitchException;
+import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
@@ -10,7 +10,7 @@ import com.gitee.dbswitch.admin.model.response.PreviewNameMapperResponse;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
 import com.gitee.dbswitch.core.model.ColumnDescription;
 import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByJdbcService;
+import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +26,7 @@ public class PatternMapperService {
   private final String STRING_DELETE = "<!删除>";
 
   @Resource
-  private DbConnectionService connectionService;
+  private ConnectionService connectionService;
 
   public Result<List<PreviewNameMapperResponse>> previewTableNamesMapper(
       PreviewTableNameMapperRequest request) {
@@ -85,26 +85,29 @@ public class PatternMapperService {
     if (null == dbConn) {
       throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
-    IMetaDataByJdbcService service = connectionService.getMetaDataCoreService(dbConn);
-    List<ColumnDescription> tables = service.queryTableColumnMeta(
-        dbConn.getUrl(), dbConn.getUsername(), dbConn.getPassword(), request.getSchemaName(),
-        request.getTableName());
-    for (ColumnDescription cd : tables) {
-      String targetName = PatterNameUtils.getFinalName(cd.getFieldName(), request.getNameMapper());
-      if (StringUtils.isNotBlank(targetName)) {
-        result.add(PreviewNameMapperResponse.builder()
-            .originalName(cd.getFieldName())
-            .targetName(targetName)
-            .build());
-      } else {
-        result.add(PreviewNameMapperResponse.builder()
-            .originalName(cd.getFieldName())
-            .targetName(STRING_DELETE)
-            .build());
+    IMetaDataByDatasourceService service = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      List<ColumnDescription> tables = service.queryTableColumnMeta(request.getSchemaName(),
+          request.getTableName());
+      for (ColumnDescription cd : tables) {
+        String targetName = PatterNameUtils.getFinalName(cd.getFieldName(), request.getNameMapper());
+        if (StringUtils.isNotBlank(targetName)) {
+          result.add(PreviewNameMapperResponse.builder()
+              .originalName(cd.getFieldName())
+              .targetName(targetName)
+              .build());
+        } else {
+          result.add(PreviewNameMapperResponse.builder()
+              .originalName(cd.getFieldName())
+              .targetName(STRING_DELETE)
+              .build());
+        }
       }
-    }
 
-    return Result.success(result);
+      return Result.success(result);
+    } finally {
+      service.close();
+    }
   }
 
   private List<TableDescription> getAllTableNames(PreviewTableNameMapperRequest request) {
@@ -117,11 +120,14 @@ public class PatternMapperService {
     if (null == dbConn) {
       throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
-    
-    IMetaDataByJdbcService service = connectionService.getMetaDataCoreService(dbConn);
-    return service.queryTableList(dbConn.getUrl(), dbConn.getUsername(), dbConn.getPassword(),
-        request.getSchemaName()).stream().filter(td -> !td.isViewTable())
-        .collect(Collectors.toList());
+
+    IMetaDataByDatasourceService service = connectionService.getMetaDataCoreService(dbConn);
+    try {
+      return service.queryTableList(request.getSchemaName()).stream().filter(td -> !td.isViewTable())
+          .collect(Collectors.toList());
+    } finally {
+      service.close();
+    }
   }
 
 }

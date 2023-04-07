@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS DBSWITCH_DATABASE_CONNECTION (
   "id"                  bigserial             not null,
   "name"                varchar(200)          not null default '',
   "type"                varchar(200)          not null default '',
+  "version"             varchar(255)          not null default '',
   "driver"              varchar(200)          not null default '',
   "url"                 text                                     ,
   "username"            varchar(200)          not null default '',
@@ -72,6 +73,7 @@ COMMENT ON TABLE DBSWITCH_DATABASE_CONNECTION IS '数据库连接';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."id" IS '主键';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."name" IS '连接名称';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."type" IS '数据库类型';
+COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."version" IS '驱动版本';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."driver" IS '驱动类名称';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."url" IS 'jdbc-url连接串';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."username" IS '连接账号';

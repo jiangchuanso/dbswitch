@@ -24,6 +24,9 @@
         <el-table-column prop="type"
                          label="数据库类型"
                          min-width="10%"></el-table-column>
+        <el-table-column prop="version"
+                         label="驱动版本"
+                         min-width="15%"></el-table-column>
         <el-table-column prop="url"
                          label="JDBC连接串"
                          show-overflow-tooltip
@@ -90,6 +93,13 @@
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
+          <el-form-item label="驱动版本号"
+                        label-width="120px"
+                        style="width:85%">
+            <el-input v-model="queryForm.version"
+                      auto-complete="off"
+                      :readonly=true></el-input>
+          </el-form-item>
           <el-form-item label="JDBC连接串"
                         label-width="120px"
                         style="width:85%">
@@ -144,11 +154,25 @@
                         prop="type"
                         style="width:85%">
             <el-select v-model="createform.type"
+                       @change="selectChangedDriverVersion"
                        placeholder="请选择数据库">
               <el-option v-for="(item,index) in databaseType"
                          :key="index"
                          :label="item.type"
                          :value="item.type"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="驱动版本"
+                        label-width="120px"
+                        :required=true
+                        prop="version"
+                        style="width:85%">
+            <el-select v-model="createform.version"
+                       placeholder="请选择版本">
+              <el-option v-for="(item,index) in connectionDriver"
+                         :key="index"
+                         :label="item.driverVersion"
+                         :value="item.driverVersion"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="JDBC连接串"
@@ -208,13 +232,26 @@
                         prop="type"
                         style="width:85%">
             <el-select v-model="updateform.type"
+                       @change="selectChangedDriverVersion"
                        placeholder="请选择数据库">
               <el-option v-for="(item,index) in databaseType"
                          :key="index"
                          :label="item.type"
                          :value="item.type"></el-option>
             </el-select>
-
+          </el-form-item>
+          <el-form-item label="驱动版本"
+                        label-width="120px"
+                        :required=true
+                        prop="version"
+                        style="width:85%">
+            <el-select v-model="updateform.version"
+                       placeholder="请选择版本">
+              <el-option v-for="(item,index) in connectionDriver"
+                         :key="index"
+                         :label="item.driverVersion"
+                         :value="item.driverVersion"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="JDBC连接串"
                         label-width="120px"
@@ -264,6 +301,7 @@ export default {
       pageSize: 10,
       totalCount: 2,
       databaseType: [],
+      connectionDriver: [],
       tableData: [
       ],
       queryForm: {
@@ -271,6 +309,7 @@ export default {
         type: "",
         url: "",
         diver: "",
+        version: "",
         username: "",
         password: ""
       },
@@ -278,6 +317,7 @@ export default {
         title: "",
         type: "",
         diver: "",
+        version: "",
         username: "",
         password: ""
       },
@@ -286,6 +326,7 @@ export default {
         title: "",
         type: "",
         diver: "",
+        version: "",
         username: "",
         password: ""
       },
@@ -434,6 +475,7 @@ export default {
             data: JSON.stringify({
               name: this.createform.name,
               type: this.createform.type,
+              version: this.createform.version,
               driver: driverClass,
               url: this.createform.url,
               username: this.createform.username,
@@ -454,9 +496,32 @@ export default {
         }
       });
     },
+    selectChangedDriverVersion: function (value) {
+      this.connectionDriver = [];
+      this.$http.get(
+        "/dbswitch/admin/api/v1/connection/" + value + "/drivers"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.connectionDriver = res.data.data;
+        } else {
+          this.$message.error("查询数据库可用的驱动版本失败," + res.data.message);
+          this.connectionDriver = [];
+        }
+      });
+    },
     handleUpdate: function (index, row) {
-      this.updateFormVisible = true;
       this.updateform = JSON.parse(JSON.stringify(row));
+      this.$http.get(
+        "/dbswitch/admin/api/v1/connection/" + this.updateform.type + "/drivers"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.connectionDriver = res.data.data;
+        } else {
+          this.$message.error("查询数据库可用的驱动版本失败," + res.data.message);
+          this.connectionDriver = [];
+        }
+      });
+      this.updateFormVisible = true;
     },
     handleSave: function () {
       let driverClass = "";
@@ -482,6 +547,7 @@ export default {
               id: this.updateform.id,
               name: this.updateform.name,
               type: this.updateform.type,
+              version: this.updateform.version,
               driver: driverClass,
               url: this.updateform.url,
               username: this.updateform.username,

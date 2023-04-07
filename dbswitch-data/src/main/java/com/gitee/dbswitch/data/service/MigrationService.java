@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.service;
 
+import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.LoggingFunction;
 import com.gitee.dbswitch.common.entity.LoggingRunnable;
 import com.gitee.dbswitch.common.entity.LoggingSupplier;
@@ -24,7 +25,6 @@ import com.gitee.dbswitch.data.handler.MigrationHandler;
 import com.gitee.dbswitch.data.util.BytesUnitUtils;
 import com.gitee.dbswitch.data.util.DataSourceUtils;
 import com.gitee.dbswitch.data.util.JsonUtils;
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -125,7 +125,7 @@ public class MigrationService {
     log.info("dbswitch data service is started....");
     //log.info("Application properties configuration \n{}", properties);
 
-    try (HikariDataSource targetDataSource = DataSourceUtils.createTargetDataSource(properties.getTarget())) {
+    try (CloseableDataSource targetDataSource = DataSourceUtils.createTargetDataSource(properties.getTarget())) {
       IMetaDataByDatasourceService tdsService = new MetaDataByDataSourceServiceImpl(targetDataSource);
       Set<String> tablesAlreadyExist = tdsService.queryTableList(properties.getTarget().getTargetSchema())
           .stream().map(TableDescription::getTableName).collect(Collectors.toSet());
@@ -137,7 +137,7 @@ public class MigrationService {
           log.info("task job is interrupted!");
           throw new RuntimeException("task is interrupted");
         }
-        try (HikariDataSource sourceDataSource = DataSourceUtils.createSourceDataSource(sourceProperties)) {
+        try (CloseableDataSource sourceDataSource = DataSourceUtils.createSourceDataSource(sourceProperties)) {
           IMetaDataByDatasourceService
               sourceMetaDataService = new MetaDataByDataSourceServiceImpl(sourceDataSource);
 
@@ -224,9 +224,12 @@ public class MigrationService {
         }
       }
       log.info("service run all success, total migrate table count={} ", totalTableCount);
+    } catch (RuntimeException e){
+      log.error("service run failed:{}", e.getMessage(), e);
+      throw e;
     } catch (Throwable t) {
       log.error("service run failed:{}", t.getMessage(), ExceptionUtils.getRootCause(t));
-      throw t;
+      throw new RuntimeException(t);
     } finally {
       watch.stop();
       log.info("total ellipse = {} s", watch.getTotalTimeSeconds());
@@ -261,8 +264,8 @@ public class MigrationService {
   private CompletableFuture<Void> makeFutureTask(
       TableDescription td,
       Integer indexInternal,
-      HikariDataSource sds,
-      HikariDataSource tds,
+      CloseableDataSource sds,
+      CloseableDataSource tds,
       Set<String> exists,
       AtomicInteger numberOfFailures,
       AtomicLong totalBytesSize) {
@@ -285,8 +288,8 @@ public class MigrationService {
   private Supplier<Long> getMigrateHandler(
       TableDescription td,
       Integer indexInternal,
-      HikariDataSource sds,
-      HikariDataSource tds,
+      CloseableDataSource sds,
+      CloseableDataSource tds,
       Set<String> exists) {
     MigrationHandler instance = MigrationHandler.createInstance(td, properties, indexInternal, sds, tds, exists);
     migrationHandlers.add(instance);

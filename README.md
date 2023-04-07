@@ -58,7 +58,6 @@
     ├── dbswitch-pgwriter  // PostgreSQL的二进制写入封装模块
     ├── dbswitch-dbwriter  // 数据库的通用批量Insert封装模块
     ├── dbswitch-core      // 数据库元数据抽取与建表结构语句转换模块
-    ├── dbswitch-sql       // 基于calcite的DML语句转换与DDL拼接模块
     ├── dbswitch-dbcommon  // 数据库操作通用封装模块
     ├── dbswitch-dbchange  // 基于全量比对计算变更（变化量）数据模块
     ├── dbswitch-dbsynch   // 将dbchange模块计算的变更数据同步入库模块
@@ -132,10 +131,10 @@ sh ./docker-maven-build.sh
 dbswitch:
   source:
     # source database connection information
-    ## support MySQL/MariaDB/DB2/DM/Kingbase8/Oracle/SQLServer/PostgreSQL/Greenplum etc.
     ## support multiple source database connection
     - url: jdbc:oracle:thin:@172.17.2.10:1521:ORCL
       driver-class-name: 'oracle.jdbc.driver.OracleDriver'
+      driver-path: D:/Workspace/dbswitch/driver/oracle/oracle-12c
       username: 'system'
       password: '123456'
       # source database configuration parameters
@@ -158,10 +157,11 @@ dbswitch:
 
   target:
     # target database connection information
-    ## Best support for Oracle/PostgreSQL/Greenplum/DM etc.
+    ## Best support for Oracle/PostgreSQL/Greenplum/DM(But not is Hive) etc.
     url: jdbc:postgresql://172.17.2.10:5432/test
     driver-class-name: org.postgresql.Driver
-    username: tang
+    driver-path: D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4
+    username: test
     password: 123456
     # target database configuration parameters
     ## schema name for create/insert table data
@@ -181,8 +181,9 @@ dbswitch:
 | :------| :------ | :------ | :------ |
 | dbswitch.source[i].url | 来源端JDBC连接的URL | jdbc:oracle:thin:@10.17.1.158:1521:ORCL | 可为：oracle/mysql/mariadb/sqlserver/postgresql/db2/dm/kingbase8/highgo |
 | dbswitch.source[i].driver-class-name | 来源端数据库的驱动类名称 | oracle.jdbc.driver.OracleDriver | 对应数据库的驱动类 |
-| dbswitch.source[i].username | 来源端连接帐号名 | tangyibo | 无 |
-| dbswitch.source[i].password | 来源端连接帐号密码 | tangyibo | 无 |
+| dbswitch.source[i].driver-path | 来源端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/oracle/oracle-12c | 对应数据库的驱动JAR所在目录 |
+| dbswitch.source[i].username | 来源端连接帐号名 | test | 无 |
+| dbswitch.source[i].password | 来源端连接帐号密码 | 123456 | 无 |
 | dbswitch.source[i].fetch-size | 来源端数据库查询时的fetch_size设置 | 10000 | 需要大于100有效 |
 | dbswitch.source[i].source-schema | 来源端的schema名称 | dbo,test | 多个之间用英文逗号分隔 |
 | dbswitch.source[i].table-type | 来源端表的类型 | TABLE | 可选值为：TABLE、VIEW ,分别代表物理表和试图表 |
@@ -191,8 +192,9 @@ dbswitch:
 | dbswitch.source[i].regex-table-mapper | 基于正则表达式的表名称映射关系 | [{"from-pattern": "^","to-value": "T_"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.source[i].regex-column-mapper | 基于正则表达式的字段名映射关系 | [{"from-pattern": "$","to-value": "_x"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.target.url | 目的端JDBC连接的URL | jdbc:postgresql://10.17.1.90:5432/study | 可为：oracle/sqlserver/postgresql/greenplum,mysql/mariadb/db2/dm/kingbase8/highgo也支持，但字段类型兼容性问题比较多 |
-| dbswitch.target.driver-class-name |目的端 数据库的驱动类名称 | org.postgresql.Driver | 对应数据库的驱动类 |
-| dbswitch.target.username | 目的端连接帐号名 | study | 无 |
+| dbswitch.target.driver-class-name |目的端数据库的驱动类名称 | org.postgresql.Driver | 对应数据库的驱动类 |
+| dbswitch.source[i].driver-path | 目的端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4 | 对应数据库的驱动JAR所在目录 |
+| dbswitch.target.username | 目的端连接帐号名 | test | 无 |
 | dbswitch.target.password | 目的端连接帐号密码 | 123456 | 无 |
 | dbswitch.target.target-schema | 目的端的schema名称 | public | 目的端的schema名称只能有且只有一个 |
 | dbswitch.target.target-drop | 是否执行先drop表然后create表命令,当target.datasource-target.drop=true时有效 | true | 可选值为：true、false |
@@ -284,14 +286,14 @@ jdbc驱动名称：com.kingbase8.Driver
 **神通Oscar数据库**
  
 ```
-jdbc连接地址：jdbc:oscar://172.17.2.1:2003/OSRDB
+jdbc连接地址：jdbc:oscar://172.17.2.10:2003/OSRDB
 jdbc驱动名称：com.oscar.Driver
 ```
 
 **南大通用GBase8a数据库**
  
 ```
-jdbc连接地址：jdbc:gbase://172.17.2.1:5258/gbase
+jdbc连接地址：jdbc:gbase://172.17.2.10:5258/gbase
 jdbc驱动名称：com.gbase.jdbc.Driver
 ```
 
@@ -400,7 +402,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://192.168.31.57:3306/dbswitch?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF8&useSSL=false
-    username: tangyibo
+    username: test
     password: 123456
     validation-query: SELECT 1
     test-on-borrow: true
@@ -420,9 +422,14 @@ mybatis:
 mapper:
   wrap-keyword: "`{0}`"
   enable-method-annotation: true
+  
+dbswitch:
+  configuration:
+    # 驱动JAR文件所在的目录位置
+    drivers-base-path: D:/Workspace/dbswitch/drivers
 ```
 
-按照上述配置，修改```conf/application.yml```配置文件中的```spring.datasource.url```和```spring.datasource.username```及```spring.datasource.password```三个字段值的配置。
+按照上述配置，修改```conf/application.yml```配置文件中的```spring.datasource.url```和```spring.datasource.username```及```spring.datasource.password```及```dbswitch.configuration.drivers-base-path```四个字段值的配置。
 
 #### (3)、启动dbswitch-admin系统
 
@@ -444,8 +451,6 @@ bin/startup.sh
 - dbswitch-admin的WEB端会根据用户的配置调用dbswitch-data模块执行数据迁移同步；
 
 - dbswitch-admin服务启动时会基于flyway自动建库建表，需要保证配置的mysql连接账号具有建库建表等权限；
-
-- dbswitch离线同步工具提供各种数据库间表结构转换RESTful在线API接口如下:（详见[接口文档](/INTERFACE.md)）
 
 - WEB系统的访问如下：
 

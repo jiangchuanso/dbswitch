@@ -38,6 +38,9 @@ public class DatabaseConnectionEntity {
   @Column(name = "type")
   private SupportDbTypeEnum type;
 
+  @Column(name = "version")
+  private String version;
+
   @Column(name = "driver")
   private String driver;
 

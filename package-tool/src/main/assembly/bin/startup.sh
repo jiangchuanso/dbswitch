@@ -19,6 +19,7 @@ APP_HOME="$(cd "$(dirname ${APP_HOME})"; pwd)"
 APP_BIN_PATH=$APP_HOME/bin
 APP_LIB_PATH=$APP_HOME/lib
 APP_CONF_PATH=$APP_HOME/conf
+export APP_DRIVERS_PATH=$APP_HOME/drivers
 
 APP_PID_FILE="${APP_HOME}/run/${APP_MAIN}.pid"
 APP_RUN_LOG="${APP_HOME}/run/run_${APP_MAIN}.log"

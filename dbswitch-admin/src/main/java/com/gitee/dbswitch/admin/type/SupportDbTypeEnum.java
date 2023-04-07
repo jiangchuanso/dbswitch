@@ -94,6 +94,10 @@ public enum SupportDbTypeEnum {
     return this != SQLITE3;
   }
 
+  public static boolean exists(String name) {
+    return Arrays.stream(values()).anyMatch(item -> item.name().equalsIgnoreCase(name));
+  }
+
   public static SupportDbTypeEnum of(String name) {
     if (!StringUtils.isEmpty(name)) {
       for (SupportDbTypeEnum type : SupportDbTypeEnum.values()) {

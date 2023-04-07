@@ -62,7 +62,7 @@
                 </li>
                 <li>PostgreSQL
                 </li>
-                <li>Greenplum
+                <li>Greenplum(需使用PostgreSQL类型)
                 </li>
                 <li>IBM的DB2
                 </li>
@@ -87,7 +87,7 @@
           </el-card>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="开源技术栈"
+      <el-tab-pane label="开发技术栈"
                    name="third">
         <div class="content_tag">
           <el-tag type="success">SpringBoot</el-tag>
@@ -105,7 +105,6 @@
 					├── dbswitch-pgwriter  // PostgreSQL的二进制写入封装模块
 					├── dbswitch-dbwriter  // 数据库的通用批量Insert封装模块
 					├── dbswitch-core      // 数据库元数据抽取与建表结构语句转换模块
-					├── dbswitch-sql       // 基于calcite的DML语句转换与DDL拼接模块
 					├── dbswitch-dbcommon  // 数据库操作通用封装模块
 					├── dbswitch-dbchange  // 基于全量比对计算变更（变化量）数据模块
 					├── dbswitch-dbsynch   // 将dbchange模块计算的变更数据同步入库模块

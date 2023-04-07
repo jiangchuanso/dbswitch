@@ -11,12 +11,12 @@ package com.gitee.dbswitch.core.database.impl;
 
 import com.gitee.dbswitch.common.constant.Const;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.common.util.JDBCURL;
 import com.gitee.dbswitch.core.database.AbstractDatabase;
 import com.gitee.dbswitch.core.database.IDatabaseInterface;
 import com.gitee.dbswitch.core.model.ColumnDescription;
 import com.gitee.dbswitch.core.model.ColumnMetaData;
 import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.util.JdbcUrlUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,8 +25,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -55,11 +55,17 @@ public class DatabaseMysqlImpl extends AbstractDatabase implements IDatabaseInte
   @Override
   public List<String> querySchemaList(Connection connection) {
     try {
-      String mysqlJdbcUrl = connection.getMetaData().getURL();
-      Map<String, String> data = JdbcUrlUtils.findParamsByMySqlJdbcUrl(mysqlJdbcUrl);
-      return Collections.singletonList(data.get("schema"));
+      final Matcher matcher = JDBCURL
+          .getPattern("jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]")
+          .matcher(connection.getMetaData().getURL());
+      if (matcher.matches()) {
+        return Collections.singletonList(matcher.group("database"));
+      }
+      throw new RuntimeException("get database name from jdbc url failed!");
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    } catch (RuntimeException e) {
+      throw e;
     }
   }
 

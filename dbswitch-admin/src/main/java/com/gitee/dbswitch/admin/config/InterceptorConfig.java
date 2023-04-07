@@ -10,7 +10,7 @@
 package com.gitee.dbswitch.admin.config;
 
 import com.gitee.dbswitch.admin.common.annotation.TokenCheck;
-import com.gitee.dbswitch.admin.common.excption.DbswitchException;
+import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
 import com.gitee.dbswitch.admin.dao.SystemUserDAO;
 import com.gitee.dbswitch.admin.entity.SystemUserEntity;

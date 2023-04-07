@@ -10,7 +10,7 @@
 package com.gitee.dbswitch.admin.service;
 
 import com.gitee.dbswitch.admin.common.converter.ConverterFactory;
-import com.gitee.dbswitch.admin.common.excption.DbswitchException;
+import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
@@ -28,11 +28,12 @@ import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.type.SupportDbTypeEnum;
-import com.gitee.dbswitch.data.util.JsonUtils;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.data.config.DbswichProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.entity.TargetDataSourceProperties;
+import com.gitee.dbswitch.data.util.JsonUtils;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +59,9 @@ public class AssignmentService {
 
   @Resource
   private DatabaseConnectionDAO databaseConnectionDAO;
+
+  @Resource
+  private DriverLoadService driverLoadService;
 
   @Transactional(rollbackFor = Exception.class)
   public AssignmentInfoResponse createAssignment(AssigmentCreateRequest request) {
@@ -218,8 +222,11 @@ public class AssignmentService {
     DatabaseConnectionEntity sourceDatabaseConnectionEntity = databaseConnectionDAO.getById(
         assignmentConfigEntity.getSourceConnectionId()
     );
+    File driverVersionFile = driverLoadService.getVersionDriverFile(sourceDatabaseConnectionEntity.getType(),
+        sourceDatabaseConnectionEntity.getVersion());
     sourceDataSourceProperties.setUrl(sourceDatabaseConnectionEntity.getUrl());
     sourceDataSourceProperties.setDriverClassName(sourceDatabaseConnectionEntity.getDriver());
+    sourceDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
     sourceDataSourceProperties.setUsername(sourceDatabaseConnectionEntity.getUsername());
     sourceDataSourceProperties.setPassword(sourceDatabaseConnectionEntity.getPassword());
 
@@ -255,8 +262,11 @@ public class AssignmentService {
     TargetDataSourceProperties targetDataSourceProperties = new TargetDataSourceProperties();
     DatabaseConnectionEntity targetDatabaseConnectionEntity = databaseConnectionDAO
         .getById(assignmentConfigEntity.getTargetConnectionId());
+    File driverVersionFile = driverLoadService.getVersionDriverFile(targetDatabaseConnectionEntity.getType(),
+        targetDatabaseConnectionEntity.getVersion());
     targetDataSourceProperties.setUrl(targetDatabaseConnectionEntity.getUrl());
     targetDataSourceProperties.setDriverClassName(targetDatabaseConnectionEntity.getDriver());
+    targetDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
     targetDataSourceProperties.setUsername(targetDatabaseConnectionEntity.getUsername());
     targetDataSourceProperties.setPassword(targetDatabaseConnectionEntity.getPassword());
     targetDataSourceProperties.setTargetSchema(assignmentConfigEntity.getTargetSchema());

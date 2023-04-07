@@ -24,9 +24,23 @@ const constantRouter = new Router({
         },
         {
           path: '/connection',
-          name: '连接管理',
+          name: '连接配置',
           icon: "el-icon-s-order",
-          component: () => import('@/views/connection/list')
+          component: () => import('@/views/connection/index'),
+          children: [
+            {
+              path: '/connection/driver',
+              name: '驱动配置',
+              icon: "el-icon-help",
+              component: () => import('@/views/connection/driver'),
+            },
+            {
+              path: '/connection/list',
+              name: '连接管理',
+              icon: "el-icon-bank-card",
+              component: () => import('@/views/connection/list')
+            }
+          ]
         },
         {
           path: '/metadata',
@@ -64,7 +78,7 @@ const constantRouter = new Router({
             {
               path: '/log/access',
               name: '登录日志',
-              icon: "el-icon-eleme",
+              icon: "el-icon-place",
               component: () => import('@/views/log/access')
             },
             {

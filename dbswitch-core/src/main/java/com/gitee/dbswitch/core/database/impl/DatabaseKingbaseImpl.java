@@ -17,6 +17,7 @@ import com.gitee.dbswitch.core.database.constant.PostgresqlConst;
 import com.gitee.dbswitch.core.model.ColumnDescription;
 import com.gitee.dbswitch.core.model.ColumnMetaData;
 import com.gitee.dbswitch.core.model.TableDescription;
+import com.gitee.dbswitch.core.util.PostgresUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,10 +61,10 @@ public class DatabaseKingbaseImpl extends AbstractDatabase implements IDatabaseI
         }
       }
     } catch (SQLException e) {
-      throw new RuntimeException(e);
+      //throw new RuntimeException(e);
     }
 
-    return null;
+    return PostgresUtils.getTableDDL(connection, schemaName, tableName);
   }
 
   @Override
@@ -78,7 +79,7 @@ public class DatabaseKingbaseImpl extends AbstractDatabase implements IDatabaseI
         }
       }
     } catch (SQLException e) {
-      throw new RuntimeException(e);
+      // throw new RuntimeException(e);
     }
 
     return null;

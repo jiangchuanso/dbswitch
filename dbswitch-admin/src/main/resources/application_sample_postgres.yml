@@ -33,3 +33,7 @@ mybatis:
 mapper:
   wrap-keyword: "\"{0}\""
   enable-method-annotation: true
+
+dbswitch:
+  configuration:
+    drivers-base-path: ${APP_DRIVERS_PATH}

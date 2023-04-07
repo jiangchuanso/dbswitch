@@ -19,6 +19,7 @@ public class TargetDataSourceProperties {
   private String driverClassName;
   private String username;
   private String password;
+  private String driverPath;
   private Long connectionTimeout = TimeUnit.SECONDS.toMillis(60);
   private Long maxLifeTime = TimeUnit.MINUTES.toMillis(30);
 

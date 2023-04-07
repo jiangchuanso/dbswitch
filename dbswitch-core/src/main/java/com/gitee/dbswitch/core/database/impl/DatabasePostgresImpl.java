@@ -114,7 +114,7 @@ public class DatabasePostgresImpl extends AbstractDatabase implements IDatabaseI
         }
       }
     } catch (SQLException e) {
-      throw new RuntimeException(e);
+      // throw new RuntimeException(e);
     }
 
     return null;

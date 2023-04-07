@@ -51,25 +51,25 @@
             </el-table-column>
             <el-table-column property="jobId"
                              label="ID"
-                             width="60"></el-table-column>
+                             min-width="10%"></el-table-column>
             <el-table-column property="assignmentId"
                              label="任务ID"
-                             width="80"></el-table-column>
+                             min-width="15%"></el-table-column>
             <el-table-column property="scheduleMode"
                              label="调度方式"
-                             width="80"></el-table-column>
+                             min-width="15%"></el-table-column>
             <el-table-column property="startTime"
                              label="开始时间"
-                             width="160"></el-table-column>
+                             min-width="25%"></el-table-column>
             <el-table-column property="finishTime"
                              label="结束时间"
-                             width="160"></el-table-column>
+                             min-width="25%"></el-table-column>
             <el-table-column property="duration"
                              label="持续时长(s)"
-                             width="100"></el-table-column>
+                             min-width="20%"></el-table-column>
             <el-table-column property="jobStatus"
                              label="执行状态"
-                             width="100"></el-table-column>
+                            min-width="20%"></el-table-column>
           </el-table>
           <div class="page"
                align="right">

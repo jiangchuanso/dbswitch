@@ -48,7 +48,7 @@ public class JobLogbackService {
   private void doCleanHistoryLog() {
     try {
       jobLogbackDAO.deleteOldest(cleanJobLogDays);
-      log.error("Success to clean history job log for {} days", cleanJobLogDays);
+      log.info("Success to clean history job log for {} days", cleanJobLogDays);
     } catch (Throwable t) {
       log.error("Failed to clean history job log,", t);
     }
