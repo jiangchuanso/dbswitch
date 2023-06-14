@@ -34,27 +34,9 @@
             <template slot="empty">
               <span>记录为空，或者单击左侧任务列表记录来查看作业调度记录</span>
             </template>
-            <el-table-column type="expand">
-              <template slot-scope="props">
-                <el-form label-position="left"
-                         inline
-                         class="demo-table-expand">
-                  <el-form-item label="执行日志:">
-                    <el-button size="small"
-                               type="danger"
-                               @click="handleShowJobLogs(props.row.jobId)">
-                      查看
-                    </el-button>
-                  </el-form-item>
-                </el-form>
-              </template>
-            </el-table-column>
             <el-table-column property="jobId"
                              label="ID"
                              min-width="10%"></el-table-column>
-            <el-table-column property="assignmentId"
-                             label="任务ID"
-                             min-width="15%"></el-table-column>
             <el-table-column property="scheduleMode"
                              label="调度方式"
                              min-width="15%"></el-table-column>
@@ -66,10 +48,20 @@
                              min-width="25%"></el-table-column>
             <el-table-column property="duration"
                              label="持续时长(s)"
-                             min-width="20%"></el-table-column>
+                             min-width="15%"></el-table-column>
             <el-table-column property="jobStatus"
                              label="执行状态"
-                            min-width="20%"></el-table-column>
+                             min-width="15%"></el-table-column>
+            <el-table-column label="日志"
+                             min-width="15%">
+              <template slot-scope="props">
+                    <el-button size="small"
+                               type="danger"
+                               @click="handleShowJobLogs(props.row.jobId)">
+                      查看
+                    </el-button>
+              </template>
+            </el-table-column>
           </el-table>
           <div class="page"
                align="right">
@@ -88,31 +80,31 @@
                    :showClose="false"
                    :before-close="handleClose">
           <el-alert v-if="status===0"
-                    title="执行状态：未执行"
+                    title="未执行"
                     type="info"
                     center
                     show-icon>
           </el-alert>
           <el-alert v-if="status===1"
-                    title="执行状态：执行中"
+                    title="执行中"
                     type="success"
                     center
                     show-icon>
           </el-alert>
           <el-alert v-if="status===2"
-                    title="执行状态：执行失败"
+                    title="执行失败"
                     type="error"
                     center
                     show-icon>
           </el-alert>
           <el-alert v-if="status===3"
-                    title="执行状态：执行成功"
+                    title="执行成功"
                     type="success"
                     center
                     show-icon>
           </el-alert>
           <el-alert v-if="status===4"
-                    title="执行状态：手动取消"
+                    title="手动取消"
                     type="warning"
                     center
                     show-icon>
@@ -121,6 +113,7 @@
                     id="log_textarea_id"
                     class="log_textarea_style"
                     :rows="20"
+                    :spellcheck="false"
                     v-model="logContent">
           </el-input>
           <div slot="footer"
@@ -391,10 +384,4 @@ export default {
   width: calc(100% - 250px);
 }
 
-.log_textarea_style .el-textarea__inner {
-  padding: 5px 15px;
-  width: 100%;
-  color: #505664 !important;
-  background-color: #1d1b1f !important;
-}
 </style>

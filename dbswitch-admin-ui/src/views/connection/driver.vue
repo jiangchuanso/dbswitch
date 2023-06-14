@@ -142,15 +142,26 @@ export default {
   width: 100%;
   border-collapse: collapse;
 }
-.el-table__header {
-  width: 100% !important;
+
+.demo-table-expand {
+  font-size: 0;
 }
-.el-table__body {
-  width: 100% !important;
+
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
 }
-.el-table__cell {
-  white-space: pre-wrap;
+
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
 }
+
+.filter {
+  margin: 10px;
+}
+
 .container {
   display: flex;
   height: 100%;
@@ -161,7 +172,7 @@ export default {
 }
 
 .container .el-card {
-  width: 30%;
+  width: 50%;
   height: 100%;
   overflow: auto;
 }
@@ -195,6 +206,7 @@ export default {
 
 .container .contentBox {
   padding: 10px;
-  width: calc(100% - 150px);
+  width: calc(100% - 250px);
 }
+
 </style>
