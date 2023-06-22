@@ -6,7 +6,31 @@
 
 ## 二、环境
 
- **node** : >= v14.17.3
+ **node** : >= v14.15.4
+ 
+### 1、CentOS下安装Nodejs
+ 
+```
+# 下载nodejs
+wget https://nodejs.org/dist/v14.15.4/node-v14.15.4-linux-x64.tar.xz
+# 解压缩
+tar -xvf node-v14.15.4-linux-x64.tar.xz && mkdir -p /usr/local/nodejs && mv node-v14.15.4-linux-x64/* /usr/local/nodejs/
+# 建立node软链接
+ln -s /usr/local/nodejs/bin/node /usr/local/bin
+# 建立npm 软链接
+ln -s /usr/local/nodejs/bin/npm /usr/local/bin
+# 设置国内淘宝镜像源
+npm config set registry https://registry.npm.taobao.org
+# 查看设置信息
+npm config list
+# 验证是否安装成功
+node -v
+npm -v
+```
+
+### 2. Windows下安装Nodejs
+
+可参考[博文教程](https://zhuanlan.zhihu.com/p/572795586)
 
 ## 二、构建
 
