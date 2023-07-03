@@ -113,7 +113,21 @@ sh ./docker-maven-build.sh
 
 (1) 当编译打包命令执行完成后，会在dbswitch/target/目录下生成dbswitch-relase-x.x.x.tar.gz的打包文件，将文件拷贝到已安装JRE的部署机器上解压即可。
 
-(2) 基于docker-compose提供linux联网环境下的**一键安装**，安装命令见 [发行版链接地址](https://gitee.com/inrgihc/dbswitch/releases)
+(2) docker容器方式部署：
+
+假设已经部署好的MySQL数据库地址为192.168.31.57，端口为3306，账号为test，密码为123456
+```
+docker run -d --name dbswitch \
+ -e MYSQLDB_HOST=192.168.31.57 \
+ -e MYSQLDB_PORT=3306 \
+ -e MYSQLDB_USERNAME=test \
+ -e MYSQLDB_PASSWORD='123456' \
+ -v /tmp:/tmp \
+ -p 9088:9088 \
+ registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:latest
+```
+
+(3) 基于docker-compose提供linux联网环境下的**一键安装**，安装命令见 [发行版链接地址](https://gitee.com/inrgihc/dbswitch/releases)
 
 文档详见: [build-docker/install/README.md](build-docker/install) 
 
