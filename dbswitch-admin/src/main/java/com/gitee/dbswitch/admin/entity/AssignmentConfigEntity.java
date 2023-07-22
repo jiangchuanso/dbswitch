@@ -12,7 +12,7 @@ package com.gitee.dbswitch.admin.entity;
 import com.gitee.dbswitch.admin.handler.ListPatternHandler;
 import com.gitee.dbswitch.admin.handler.ListTypeHandler;
 import com.gitee.dbswitch.common.entity.PatternMapper;
-import com.gitee.dbswitch.common.type.DBTableType;
+import com.gitee.dbswitch.common.type.ProductTableType;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.Column;
@@ -45,7 +45,7 @@ public class AssignmentConfigEntity {
   private String sourceSchema;
 
   @Column(name = "table_type")
-  private DBTableType tableType;
+  private ProductTableType tableType;
 
   @Column(name = "source_tables")
   @ColumnType(typeHandler = ListTypeHandler.class)

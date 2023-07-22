@@ -8,9 +8,9 @@ import com.gitee.dbswitch.admin.model.request.PreviewColumnNameMapperRequest;
 import com.gitee.dbswitch.admin.model.request.PreviewTableNameMapperRequest;
 import com.gitee.dbswitch.admin.model.response.PreviewNameMapperResponse;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
-import com.gitee.dbswitch.core.model.ColumnDescription;
-import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
+import com.gitee.dbswitch.schema.ColumnDescription;
+import com.gitee.dbswitch.schema.TableDescription;
+import com.gitee.dbswitch.service.MetadataService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +85,7 @@ public class PatternMapperService {
     if (null == dbConn) {
       throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
-    IMetaDataByDatasourceService service = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService service = connectionService.getMetaDataCoreService(dbConn);
     try {
       List<ColumnDescription> tables = service.queryTableColumnMeta(request.getSchemaName(),
           request.getTableName());
@@ -121,7 +121,7 @@ public class PatternMapperService {
       throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
 
-    IMetaDataByDatasourceService service = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService service = connectionService.getMetaDataCoreService(dbConn);
     try {
       return service.queryTableList(request.getSchemaName()).stream().filter(td -> !td.isViewTable())
           .collect(Collectors.toList());

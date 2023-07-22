@@ -13,12 +13,14 @@ import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.experimental.UtilityClass;
 
 /**
  * JDBC的数据类型相关工具类
  *
  * @author tang
  */
+@UtilityClass
 public final class JdbcTypesUtils {
 
   private static final Map<Integer, String> TYPE_NAMES = new HashMap<>();
@@ -132,11 +134,5 @@ public final class JdbcTypesUtils {
   // REF
   // DATALINK
   // REF_CURSOR
-
-  /**
-   * 构造函数私有化
-   */
-  private JdbcTypesUtils() {
-  }
-
+  
 }

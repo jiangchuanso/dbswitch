@@ -1,0 +1,50 @@
+// Copyright tang.  All rights reserved.
+// https://gitee.com/inrgihc/dbswitch
+//
+// Use of this source code is governed by a BSD-style license
+//
+// Author: tang (inrgihc@126.com)
+// Date : 2020/1/2
+// Location: beijing , china
+/////////////////////////////////////////////////////////////
+package com.gitee.dbswitch.product.sqlserver;
+
+import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.ProductFeatures;
+import com.gitee.dbswitch.provider.AbstractFactoryProvider;
+import com.gitee.dbswitch.provider.meta.MetadataProvider;
+import com.gitee.dbswitch.provider.operate.TableOperateProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import javax.sql.DataSource;
+
+public class SqlserverFactoryProvider extends AbstractFactoryProvider {
+
+  public SqlserverFactoryProvider(DataSource dataSource) {
+    super(dataSource);
+  }
+
+  @Override
+  public ProductTypeEnum getProductType() {
+    return ProductTypeEnum.SQLSERVER;
+  }
+
+  public ProductFeatures getProductFeatures() {
+    return new SqlserverFeatures();
+  }
+
+  @Override
+  public MetadataProvider createMetadataQueryProvider() {
+    return new SqlserverMetadataQueryProvider(this);
+  }
+
+  @Override
+  public TableOperateProvider createTableOperateProvider() {
+    return new SqlserverTableOperateProvider(this);
+  }
+
+  @Override
+  public TableDataSynchronizer createTableDataSynchronizer() {
+    return new SqlserverTableSynchronizer(this);
+  }
+
+}

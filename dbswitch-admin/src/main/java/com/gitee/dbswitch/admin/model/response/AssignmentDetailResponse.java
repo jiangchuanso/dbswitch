@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gitee.dbswitch.admin.type.IncludeExcludeEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.common.entity.PatternMapper;
-import com.gitee.dbswitch.common.type.DBTableType;
+import com.gitee.dbswitch.common.type.ProductTableType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
@@ -70,7 +70,7 @@ public class AssignmentDetailResponse {
     private String sourceSchema;
 
     @ApiModelProperty("源端表类型")
-    private DBTableType tableType;
+    private ProductTableType tableType;
 
     @ApiModelProperty("表明配置方式")
     private IncludeExcludeEnum includeOrExclude;

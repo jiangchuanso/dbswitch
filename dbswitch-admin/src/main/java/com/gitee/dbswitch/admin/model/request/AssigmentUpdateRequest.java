@@ -17,7 +17,7 @@ import com.gitee.dbswitch.admin.type.IncludeExcludeEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.util.CronExprUtils;
 import com.gitee.dbswitch.common.entity.PatternMapper;
-import com.gitee.dbswitch.common.type.DBTableType;
+import com.gitee.dbswitch.common.type.ProductTableType;
 import java.util.List;
 import java.util.Objects;
 import lombok.Data;
@@ -40,7 +40,7 @@ public class AssigmentUpdateRequest {
 
     private Long sourceConnectionId;
     private String sourceSchema;
-    private DBTableType tableType;
+    private ProductTableType tableType;
     private IncludeExcludeEnum includeOrExclude;
     private List<String> sourceTables;
     private Long targetConnectionId;

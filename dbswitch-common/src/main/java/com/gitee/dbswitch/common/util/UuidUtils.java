@@ -10,10 +10,12 @@
 package com.gitee.dbswitch.common.util;
 
 import java.util.UUID;
+import lombok.experimental.UtilityClass;
 
 /**
  * UUID工具类
  */
+@UtilityClass
 public final class UuidUtils {
 
   public static String generateUuid() {

@@ -100,18 +100,27 @@
               <p>
                 dbswitch基于Springboot脚手架进行的后端模块开发，模块组成结构如下：
               <pre>
-				└── dbswitch
-					├── dbswitch-common    // dbswitch通用定义模块
-					├── dbswitch-pgwriter  // PostgreSQL的二进制写入封装模块
-					├── dbswitch-dbwriter  // 数据库的通用批量Insert封装模块
-					├── dbswitch-core      // 数据库元数据抽取与建表结构语句转换模块
-					├── dbswitch-dbcommon  // 数据库操作通用封装模块
-					├── dbswitch-dbchange  // 基于全量比对计算变更（变化量）数据模块
-					├── dbswitch-dbsynch   // 将dbchange模块计算的变更数据同步入库模块
-					├── dbswitch-data      // 工具入口模块，读取配置文件中的参数执行异构迁移同步
-					├── dbswitch-admin     // 在以上模块的基础上，采用Quartz提供可视化调度
-					├── dbswitch-admin-ui  // 基于Vue+ElementUI的前端交互页面
-					├── package-tool       // 基于maven-assembly-plugin插件的项目打包模块
+            └── dbswitch
+                ├── dbswitch-common               // dbswitch通用定义模块
+                ├── dbswitch-core                 // dbswitch迁移同步实现类
+                ├── dbswitch-product              // dbswitch数据库方言
+                    ├── dbswitch-product-mysql    //  -> mysql方言实现类
+                    ├── dbswitch-product-oracle   //  -> oracle方言实现类
+                    ├── dbswitch-product-sqlserver//  -> sqlserver方言实现类
+                    ├── dbswitch-product-postgres //  -> postgres方言实现类
+                    ├── dbswitch-product-dm       //  -> dm方言实现类
+                    ├── dbswitch-product-kingbase //  -> kingbase方言实现类
+                    ├── dbswitch-product-oscar    //  -> oscar方言实现类
+                    ├── dbswitch-product-gbase    //  -> gbase方言实现类
+                    ├── dbswitch-product-mariadb  //  -> mariadb方言实现类
+                    ├── dbswitch-product-db2      //  -> db2方言实现类
+                    ├── dbswitch-product-sybase   //  -> sybase方言实现类
+                    ├── dbswitch-product-hive     //  -> hive方言实现类
+                    ├── dbswitch-product-sqlite   //  -> sqlite方言实现类
+                ├── dbswitch-data                 // 工具入口模块，读取配置文件中的参数执行异构迁移同步
+                ├── dbswitch-admin                // 在以上模块的基础上引入Quartz的调度服务与接口
+                ├── dbswitch-admin-ui             // 基于Vue2的前段WEB交互页面
+                ├── dbswitch-dist                 // 基于maven-assembly-plugin插件的项目打包模块
                 </pre>
               </p>
               <ul>

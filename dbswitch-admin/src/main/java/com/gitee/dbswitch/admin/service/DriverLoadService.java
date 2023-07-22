@@ -29,6 +29,7 @@ public class DriverLoadService {
   public void loadDrivers() {
     try {
       doLoadDrivers();
+      log.info("Finish load jdbc drivers from local path: {}", dbswitchConfig.getDriversBasePath());
     } catch (Exception e) {
       log.error("load drivers failed:{}", e.getMessage(), e);
       throw e;

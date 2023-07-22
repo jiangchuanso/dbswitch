@@ -12,10 +12,12 @@ package com.gitee.dbswitch.common.util;
 import com.gitee.dbswitch.common.entity.PatternMapper;
 import java.util.Arrays;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
 /**
  * 基于正则的名称替换工具类
  */
+@UtilityClass
 public final class PatterNameUtils {
 
   /**

@@ -9,15 +9,14 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.service;
 
+import cn.hutool.core.stream.StreamUtil;
+import cn.hutool.core.text.StrPool;
+import cn.hutool.core.util.StrUtil;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.LoggingFunction;
 import com.gitee.dbswitch.common.entity.LoggingRunnable;
 import com.gitee.dbswitch.common.entity.LoggingSupplier;
 import com.gitee.dbswitch.common.entity.MdcKeyValue;
-import com.gitee.dbswitch.common.util.DbswitchStrUtils;
-import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
-import com.gitee.dbswitch.core.service.impl.MetaDataByDataSourceServiceImpl;
 import com.gitee.dbswitch.data.config.DbswichProperties;
 import com.gitee.dbswitch.data.domain.PerfStat;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
@@ -25,6 +24,9 @@ import com.gitee.dbswitch.data.handler.MigrationHandler;
 import com.gitee.dbswitch.data.util.BytesUnitUtils;
 import com.gitee.dbswitch.data.util.DataSourceUtils;
 import com.gitee.dbswitch.data.util.JsonUtils;
+import com.gitee.dbswitch.schema.TableDescription;
+import com.gitee.dbswitch.service.MetadataService;
+import com.gitee.dbswitch.service.DefaultMetadataService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,7 +128,7 @@ public class MigrationService {
     //log.info("Application properties configuration \n{}", properties);
 
     try (CloseableDataSource targetDataSource = DataSourceUtils.createTargetDataSource(properties.getTarget())) {
-      IMetaDataByDatasourceService tdsService = new MetaDataByDataSourceServiceImpl(targetDataSource);
+      MetadataService tdsService = new DefaultMetadataService(targetDataSource);
       Set<String> tablesAlreadyExist = tdsService.queryTableList(properties.getTarget().getTargetSchema())
           .stream().map(TableDescription::getTableName).collect(Collectors.toSet());
       int sourcePropertiesIndex = 0;
@@ -138,14 +140,17 @@ public class MigrationService {
           throw new RuntimeException("task is interrupted");
         }
         try (CloseableDataSource sourceDataSource = DataSourceUtils.createSourceDataSource(sourceProperties)) {
-          IMetaDataByDatasourceService
-              sourceMetaDataService = new MetaDataByDataSourceServiceImpl(sourceDataSource);
+          MetadataService
+              sourceMetaDataService = new DefaultMetadataService(sourceDataSource);
 
           // 判断处理的策略：是排除还是包含
-          List<String> includes = DbswitchStrUtils.stringToList(sourceProperties.getSourceIncludes());
+          List<String> includes =
+              StreamUtil.of(StrUtil.split(sourceProperties.getSourceIncludes(), StrPool.COMMA))
+                  .collect(Collectors.toList());
           log.info("Includes tables is :{}", JsonUtils.toJsonString(includes));
-          List<String> filters = DbswitchStrUtils
-              .stringToList(sourceProperties.getSourceExcludes());
+          List<String> filters =
+              StreamUtil.of(StrUtil.split(sourceProperties.getSourceExcludes(), StrPool.COMMA))
+                  .collect(Collectors.toList());
           log.info("Filter tables is :{}", JsonUtils.toJsonString(filters));
 
           boolean useExcludeTables = includes.isEmpty();
@@ -159,7 +164,9 @@ public class MigrationService {
 
           List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-          List<String> schemas = DbswitchStrUtils.stringToList(sourceProperties.getSourceSchema());
+          List<String> schemas =
+              StreamUtil.of(StrUtil.split(sourceProperties.getSourceSchema(), StrPool.COMMA))
+                  .collect(Collectors.toList());
           log.info("Source schema names is :{}", JsonUtils.toJsonString(schemas));
 
           AtomicInteger numberOfFailures = new AtomicInteger(0);
@@ -224,7 +231,7 @@ public class MigrationService {
         }
       }
       log.info("service run all success, total migrate table count={} ", totalTableCount);
-    } catch (RuntimeException e){
+    } catch (RuntimeException e) {
       log.error("service run failed:{}", e.getMessage(), e);
       throw e;
     } catch (Throwable t) {

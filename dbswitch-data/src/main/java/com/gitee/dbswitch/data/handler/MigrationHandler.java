@@ -9,29 +9,30 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.handler;
 
+import com.gitee.dbswitch.calculate.ChangeCalculatorService;
+import com.gitee.dbswitch.calculate.IDatabaseChangeCalculator;
+import com.gitee.dbswitch.calculate.IDatabaseRowHandler;
+import com.gitee.dbswitch.calculate.RecordChangeTypeEnum;
+import com.gitee.dbswitch.calculate.TaskParamEntity;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
+import com.gitee.dbswitch.common.entity.ResultSetWrapper;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.DatabaseAwareUtils;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
-import com.gitee.dbswitch.core.model.ColumnDescription;
-import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
-import com.gitee.dbswitch.core.service.impl.MetaDataByDataSourceServiceImpl;
 import com.gitee.dbswitch.data.config.DbswichProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.util.BytesUnitUtils;
-import com.gitee.dbswitch.dbchange.ChangeCalculatorService;
-import com.gitee.dbswitch.dbchange.IDatabaseChangeCalculator;
-import com.gitee.dbswitch.dbchange.IDatabaseRowHandler;
-import com.gitee.dbswitch.dbchange.RecordChangeTypeEnum;
-import com.gitee.dbswitch.dbchange.TaskParamEntity;
-import com.gitee.dbswitch.dbcommon.database.DatabaseOperatorFactory;
-import com.gitee.dbswitch.dbcommon.database.IDatabaseOperator;
-import com.gitee.dbswitch.dbcommon.domain.StatementResultSet;
-import com.gitee.dbswitch.dbsynch.DatabaseSynchronizeFactory;
-import com.gitee.dbswitch.dbsynch.IDatabaseSynchronize;
-import com.gitee.dbswitch.dbwriter.DatabaseWriterFactory;
-import com.gitee.dbswitch.dbwriter.IDatabaseWriter;
+import com.gitee.dbswitch.provider.ProductFactoryProvider;
+import com.gitee.dbswitch.provider.ProductProviderFactory;
+import com.gitee.dbswitch.provider.meta.MetadataProvider;
+import com.gitee.dbswitch.provider.operate.TableOperateProvider;
+import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
+import com.gitee.dbswitch.schema.ColumnDescription;
+import com.gitee.dbswitch.schema.TableDescription;
+import com.gitee.dbswitch.service.MetadataService;
+import com.gitee.dbswitch.service.DefaultMetadataService;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +74,7 @@ public class MigrationHandler implements Supplier<Long> {
   private List<ColumnDescription> sourceColumnDescriptions;
   private List<String> sourcePrimaryKeys;
 
-  private IMetaDataByDatasourceService sourceMetaDataService;
+  private MetadataService sourceMetaDataService;
 
   // 目的端
   private final CloseableDataSource targetDataSource;
@@ -136,9 +137,9 @@ public class MigrationHandler implements Supplier<Long> {
   public Long get() {
     log.info("Begin Migrate table for {}", tableNameMapString);
 
-    this.sourceProductType = DatabaseAwareUtils.getDatabaseTypeByDataSource(sourceDataSource);
-    this.targetProductType = DatabaseAwareUtils.getDatabaseTypeByDataSource(targetDataSource);
-    this.sourceMetaDataService = new MetaDataByDataSourceServiceImpl(sourceDataSource,
+    this.sourceProductType = DatabaseAwareUtils.getProductTypeByDataSource(sourceDataSource);
+    this.targetProductType = DatabaseAwareUtils.getProductTypeByDataSource(targetDataSource);
+    this.sourceMetaDataService = new DefaultMetadataService(sourceDataSource,
         sourceProductType);
 
     // 读取源表的表及字段元数据
@@ -198,8 +199,16 @@ public class MigrationHandler implements Supplier<Long> {
       log.info("task job is interrupted!");
       throw new RuntimeException("task is interrupted");
     }
-    IDatabaseWriter writer = DatabaseWriterFactory.createDatabaseWriter(
-        targetDataSource, properties.getTarget().getWriterEngineInsert());
+    ProductFactoryProvider sourceFactoryProvider = ProductProviderFactory
+        .newProvider(sourceProductType, sourceDataSource);
+    ProductFactoryProvider targetFactoryProvider = ProductProviderFactory
+        .newProvider(targetProductType, targetDataSource);
+    TableDataQueryProvider sourceQuerier = sourceFactoryProvider.createTableDataQueryProvider();
+    TableDataWriteProvider targetWriter = targetFactoryProvider.createTableDataWriteProvider(
+        properties.getTarget().getWriterEngineInsert());
+    MetadataProvider targetMetaProvider = targetFactoryProvider.createMetadataQueryProvider();
+    TableOperateProvider targetOperator = targetFactoryProvider.createTableOperateProvider();
+    TableDataSynchronizer targetSynchronizer = targetFactoryProvider.createTableDataSynchronizer();
 
     if (properties.getTarget().getTargetDrop()) {
       /*
@@ -209,7 +218,7 @@ public class MigrationHandler implements Supplier<Long> {
        */
 
       try {
-        DatabaseOperatorFactory.createDatabaseOperator(targetDataSource)
+        targetFactoryProvider.createTableOperateProvider()
             .dropTable(targetSchemaName, targetTableName);
         log.info("Target Table {}.{} is exits, drop it now !", targetSchemaName, targetTableName);
       } catch (Exception e) {
@@ -218,7 +227,7 @@ public class MigrationHandler implements Supplier<Long> {
 
       // 生成建表语句并创建
       List<String> sqlCreateTable = sourceMetaDataService.getDDLCreateTableSQL(
-          targetProductType,
+          targetMetaProvider,
           targetColumnDescriptions.stream()
               .filter(column -> StringUtils.hasLength(column.getFieldName()))
               .collect(Collectors.toList()),
@@ -246,7 +255,7 @@ public class MigrationHandler implements Supplier<Long> {
         throw new RuntimeException("task is interrupted");
       }
 
-      return doFullCoverSynchronize(writer);
+      return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
     } else {
       // 对于只想创建表的情况，不提供后续的变化量数据同步功能
       if (null != properties.getTarget().getOnlyCreate()
@@ -262,7 +271,7 @@ public class MigrationHandler implements Supplier<Long> {
       if (!targetExistTables.contains(targetTableName)) {
         // 当目标端不存在该表时，则生成建表语句并创建
         List<String> sqlCreateTable = sourceMetaDataService.getDDLCreateTableSQL(
-            targetProductType,
+            targetMetaProvider,
             targetColumnDescriptions.stream()
                 .filter(column -> StringUtils.hasLength(column.getFieldName()))
                 .collect(Collectors.toList()),
@@ -284,14 +293,14 @@ public class MigrationHandler implements Supplier<Long> {
           throw new RuntimeException("task is interrupted");
         }
 
-        return doFullCoverSynchronize(writer);
+        return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
       }
 
       // 判断是否具备变化量同步的条件：（1）两端表结构一致，且都有一样的主键字段；(2)MySQL使用Innodb引擎；
       if (properties.getTarget().getChangeDataSync()) {
         // 根据主键情况判断同步的方式：增量同步或覆盖同步
-        IMetaDataByDatasourceService metaDataByDatasourceService =
-            new MetaDataByDataSourceServiceImpl(targetDataSource, targetProductType);
+        MetadataService metaDataByDatasourceService =
+            new DefaultMetadataService(targetDataSource, targetProductType);
         List<String> dbTargetPks = metaDataByDatasourceService.queryTablePrimaryKeys(
             targetSchemaName, targetTableName);
 
@@ -301,15 +310,15 @@ public class MigrationHandler implements Supplier<Long> {
           if (targetProductType == ProductTypeEnum.MYSQL
               && !DatabaseAwareUtils.isMysqlInnodbStorageEngine(
               targetSchemaName, targetTableName, targetDataSource)) {
-            return doFullCoverSynchronize(writer);
+            return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
           } else {
-            return doIncreaseSynchronize(writer);
+            return doIncreaseSynchronize(targetSynchronizer);
           }
         } else {
-          return doFullCoverSynchronize(writer);
+          return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
         }
       } else {
-        return doFullCoverSynchronize(writer);
+        return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
       }
     }
   }
@@ -319,7 +328,8 @@ public class MigrationHandler implements Supplier<Long> {
    *
    * @param writer 目的端的写入器
    */
-  private Long doFullCoverSynchronize(IDatabaseWriter writer) {
+  private Long doFullCoverSynchronize(TableDataWriteProvider writer, TableOperateProvider operater,
+      TableDataQueryProvider sourceQuerier) {
     final int BATCH_SIZE = fetchSize;
 
     List<String> sourceFields = new ArrayList<>();
@@ -336,16 +346,12 @@ public class MigrationHandler implements Supplier<Long> {
     writer.prepareWrite(targetSchemaName, targetTableName, targetFields);
 
     // 清空目的端表的数据
-    IDatabaseOperator targetOperator = DatabaseOperatorFactory
-        .createDatabaseOperator(writer.getDataSource());
-    targetOperator.truncateTableData(targetSchemaName, targetTableName);
+    operater.truncateTableData(targetSchemaName, targetTableName);
 
     // 查询源端数据并写入目的端
-    IDatabaseOperator sourceOperator = DatabaseOperatorFactory
-        .createDatabaseOperator(sourceDataSource);
-    sourceOperator.setFetchSize(BATCH_SIZE);
+    sourceQuerier.setQueryFetchSize(BATCH_SIZE);
 
-    StatementResultSet srs = sourceOperator.queryTableData(
+    ResultSetWrapper srs = sourceQuerier.queryTableData(
         sourceSchemaName, sourceTableName, sourceFields
     );
 
@@ -353,7 +359,7 @@ public class MigrationHandler implements Supplier<Long> {
     long cacheBytes = 0;
     long totalCount = 0;
     long totalBytes = 0;
-    try (ResultSet rs = srs.getResultset()) {
+    try (ResultSet rs = srs.getResultSet()) {
       while (rs.next()) {
         if (interrupted) {
           log.info("task job is interrupted!");
@@ -407,9 +413,9 @@ public class MigrationHandler implements Supplier<Long> {
   /**
    * 变化量同步
    *
-   * @param writer 目的端的写入器
+   * @param synchronizer 目的端的同步器
    */
-  private Long doIncreaseSynchronize(IDatabaseWriter writer) {
+  private Long doIncreaseSynchronize(TableDataSynchronizer synchronizer) {
     final int BATCH_SIZE = fetchSize;
 
     List<String> sourceFields = new ArrayList<>();
@@ -426,7 +432,7 @@ public class MigrationHandler implements Supplier<Long> {
     }
 
     TaskParamEntity.TaskParamEntityBuilder taskBuilder = TaskParamEntity.builder();
-    taskBuilder.oldDataSource(writer.getDataSource());
+    taskBuilder.oldDataSource(this.sourceDataSource);
     taskBuilder.oldSchemaName(targetSchemaName);
     taskBuilder.oldTableName(targetTableName);
     taskBuilder.newDataSource(sourceDataSource);
@@ -437,8 +443,6 @@ public class MigrationHandler implements Supplier<Long> {
 
     TaskParamEntity param = taskBuilder.build();
 
-    IDatabaseSynchronize synchronizer = DatabaseSynchronizeFactory
-        .createDatabaseWriter(writer.getDataSource());
     synchronizer.prepare(targetSchemaName, targetTableName, targetFields, targetPrimaryKeys);
 
     IDatabaseChangeCalculator calculator = new ChangeCalculatorService();

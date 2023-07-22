@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.data.entity;
 
 import com.gitee.dbswitch.common.entity.PatternMapper;
-import com.gitee.dbswitch.common.type.DBTableType;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.Data;

@@ -27,12 +27,11 @@ import com.gitee.dbswitch.admin.model.response.DbConnectionNameResponse;
 import com.gitee.dbswitch.admin.type.SupportDbTypeEnum;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
-import com.gitee.dbswitch.common.util.JDBCURL;
-import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
-import com.gitee.dbswitch.core.service.impl.MetaDataByDataSourceServiceImpl;
+import com.gitee.dbswitch.common.util.JdbcUrlUtils;
+import com.gitee.dbswitch.service.MetadataService;
+import com.gitee.dbswitch.service.DefaultMetadataService;
 import com.gitee.dbswitch.data.util.DataSourceUtils;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,12 +51,12 @@ public class ConnectionService {
   @Resource
   private DatabaseConnectionDAO databaseConnectionDAO;
 
-  public IMetaDataByDatasourceService getMetaDataCoreService(DatabaseConnectionEntity dbConn) {
+  public MetadataService getMetaDataCoreService(DatabaseConnectionEntity dbConn) {
     String typeName = dbConn.getType().getName().toUpperCase();
     SupportDbTypeEnum supportDbType = SupportDbTypeEnum.valueOf(typeName);
     if (supportDbType.hasAddress()) {
       for (String pattern : supportDbType.getUrl()) {
-        final Matcher matcher = JDBCURL.getPattern(pattern).matcher(dbConn.getUrl());
+        final Matcher matcher = JdbcUrlUtils.getPattern(pattern).matcher(dbConn.getUrl());
         if (!matcher.matches()) {
           if (1 == supportDbType.getUrl().length) {
             throw new DbswitchException(ResultCode.ERROR_CANNOT_CONNECT_REMOTE, dbConn.getName());
@@ -72,7 +71,7 @@ public class ConnectionService {
           port = String.valueOf(supportDbType.getPort());
         }
 
-        if (!JDBCURL.reachable(host, port)) {
+        if (!JdbcUrlUtils.reachable(host, port)) {
           throw new DbswitchException(ResultCode.ERROR_CANNOT_CONNECT_REMOTE, dbConn.getName());
         }
       }
@@ -81,7 +80,7 @@ public class ConnectionService {
     String driverPath = driverVersionFile.getAbsolutePath();
     CloseableDataSource dataSource = DataSourceUtils.createCommonDataSource(dbConn.getUrl(), dbConn.getDriver(),
         driverPath, dbConn.getUsername(), dbConn.getPassword());
-    IMetaDataByDatasourceService metaDataService = new MetaDataByDataSourceServiceImpl(dataSource);
+    MetadataService metaDataService = new DefaultMetadataService(dataSource);
     return metaDataService;
   }
 
@@ -141,7 +140,7 @@ public class ConnectionService {
 
   public Result test(Long id) {
     DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       metaDataService.testQuerySQL(dbConn.getType().getSql());
     } finally {
@@ -152,7 +151,7 @@ public class ConnectionService {
 
   public Result<List<String>> getSchemas(Long id) {
     DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       List<String> schemas = metaDataService.querySchemaList();
       return Result.success(schemas);
@@ -163,7 +162,7 @@ public class ConnectionService {
 
   public Result<List<String>> getSchemaTables(Long id, String schema) {
     DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       List<String> tables = Optional.ofNullable(
           metaDataService.queryTableList(schema))
@@ -179,7 +178,7 @@ public class ConnectionService {
 
   public Result<List<String>> getSchemaViews(Long id, String schema) {
     DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       List<String> tables = Optional.ofNullable(
           metaDataService.queryTableList(schema))
@@ -264,7 +263,7 @@ public class ConnectionService {
 
     for (int i = 0; i < supportDbType.getUrl().length; ++i) {
       String pattern = supportDbType.getUrl()[i];
-      Matcher matcher = JDBCURL.getPattern(pattern).matcher(conn.getUrl());
+      Matcher matcher = JdbcUrlUtils.getPattern(pattern).matcher(conn.getUrl());
       if (!matcher.matches()) {
         if (i == supportDbType.getUrl().length - 1) {
           throw new DbswitchException(ResultCode.ERROR_INVALID_JDBC_URL, conn.getUrl());

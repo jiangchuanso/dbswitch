@@ -13,15 +13,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public final class HivePrepareUtils {
 
   private final static String HIVE_SQL_1 = "set hive.resultset.use.unique.column.names=false";
   private final static String HIVE_SQL_2 = "set hive.support.concurrency=true";
   private final static String HIVE_SQL_3 = "set hive.txn.manager = org.apache.hadoop.hive.ql.lockmgr.DbTxnManager";
-
-  private HivePrepareUtils() {
-  }
 
   public static void setResultSetColumnNameNotUnique(Connection connection)
       throws SQLException {

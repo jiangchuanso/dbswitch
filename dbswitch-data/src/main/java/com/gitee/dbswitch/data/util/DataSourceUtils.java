@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.util;
 
+import cn.hutool.core.util.ClassLoaderUtil;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.InvisibleDataSource;
 import com.gitee.dbswitch.data.domain.WrapCommonDataSource;
@@ -31,9 +32,11 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author tang
  */
 @Slf4j
+@UtilityClass
 public final class DataSourceUtils {
 
   public static final int MAX_THREAD_COUNT = 10;
@@ -76,7 +80,9 @@ public final class DataSourceUtils {
     ds.setConnectionTimeout(properties.getConnectionTimeout());
     ds.setIdleTimeout(MAX_TIMEOUT_MS);
 
-    URLClassLoader urlClassLoader = createURLClassLoader(properties.getDriverPath(), properties.getDriverClassName());
+    URLClassLoader urlClassLoader = createURLClassLoader(
+        properties.getDriverPath(),
+        properties.getDriverClassName());
     InvisibleDataSource dataSource = createInvisibleDataSource(
         urlClassLoader,
         properties.getUrl(),
@@ -122,7 +128,9 @@ public final class DataSourceUtils {
     ds.setConnectionTimeout(properties.getConnectionTimeout());
     ds.setIdleTimeout(MAX_TIMEOUT_MS);
 
-    URLClassLoader urlClassLoader = createURLClassLoader(properties.getDriverPath(), properties.getDriverClassName());
+    URLClassLoader urlClassLoader = createURLClassLoader(
+        properties.getDriverPath(),
+        properties.getDriverClassName());
     InvisibleDataSource dataSource = createInvisibleDataSource(
         urlClassLoader,
         properties.getUrl(),
@@ -147,7 +155,8 @@ public final class DataSourceUtils {
     return new WrapHikariDataSource(ds, urlClassLoader);
   }
 
-  public static CloseableDataSource createCommonDataSource(String jdbcUrl, String driverClass, String driverPath,
+  public static CloseableDataSource createCommonDataSource(String jdbcUrl,
+      String driverClass, String driverPath,
       String username, String password) {
     URLClassLoader urlClassLoader = createURLClassLoader(driverPath, driverClass);
     InvisibleDataSource dataSource = createInvisibleDataSource(
@@ -161,8 +170,9 @@ public final class DataSourceUtils {
     return new WrapCommonDataSource(dataSource, urlClassLoader);
   }
 
-  private static InvisibleDataSource createInvisibleDataSource(ClassLoader cl, String jdbcUrl, String driverClass,
-      String username, String password, Properties properties) {
+  private static InvisibleDataSource createInvisibleDataSource(ClassLoader cl,
+      String jdbcUrl, String driverClass, String username,
+      String password, Properties properties) {
     return new InvisibleDataSource(cl, jdbcUrl, driverClass, username, password, properties);
   }
 
@@ -177,16 +187,10 @@ public final class DataSourceUtils {
     if (filePaths.isEmpty()) {
       throw new RuntimeException("No jar file found from path:" + driverPath + "!");
     }
-    URL[] urls = filePaths.stream().map(path -> {
-      try {
-        return path.toUri().toURL();
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
-      }
-    }).toArray(URL[]::new);
+    URL[] urls = filePaths.stream().map(path -> convertPath2URL(path)).toArray(URL[]::new);
     ClassLoader parent = driverClass.contains("postgresql")
-        ? Thread.currentThread().getContextClassLoader()
-        : ClassLoader.getSystemClassLoader().getParent();
+        ? ClassLoaderUtil.getContextClassLoader()
+        : ClassLoaderUtil.getSystemClassLoader().getParent();
     URLClassLoader loader = new URLClassLoader(urls, parent);
     try {
       Class<?> clazz = loader.loadClass(driverClass);
@@ -198,19 +202,26 @@ public final class DataSourceUtils {
     }
   }
 
+  private static URL convertPath2URL(Path path) {
+    try {
+      return path.toUri().toURL();
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public static List<Path> findJarFilesFromDirectory(String path) {
     File file = new File(path);
     if (!file.exists()) {
       throw new RuntimeException("Path:" + path + " is not exists!");
     }
+    Predicate<Path> fileFilter = f -> {
+      String fileName = f.toFile().getName();
+      return fileName.endsWith(".jar") || fileName.endsWith(".JAR");
+    };
     try (Stream<Path> paths = Files.walk(Paths.get(path))) {
       return paths.filter(Files::isRegularFile)
-          .filter(
-              f -> {
-                String fileName = f.toFile().getName();
-                return fileName.endsWith(".jar") || fileName.endsWith(".JAR");
-              }
-          )
+          .filter(fileFilter)
           .collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -230,10 +241,6 @@ public final class DataSourceUtils {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private DataSourceUtils() {
-    throw new IllegalStateException("Illegal State");
   }
 
 }

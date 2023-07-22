@@ -1,0 +1,57 @@
+// Copyright tang.  All rights reserved.
+// https://gitee.com/inrgihc/dbswitch
+//
+// Use of this source code is governed by a BSD-style license
+//
+// Author: tang (inrgihc@126.com)
+// Date : 2020/1/2
+// Location: beijing , china
+/////////////////////////////////////////////////////////////
+package com.gitee.dbswitch.product.postgresql;
+
+import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.ProductFeatures;
+import com.gitee.dbswitch.provider.AbstractFactoryProvider;
+import com.gitee.dbswitch.provider.meta.MetadataProvider;
+import com.gitee.dbswitch.provider.operate.TableOperateProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
+import javax.sql.DataSource;
+
+public class PostgresFactoryProvider extends AbstractFactoryProvider {
+
+  public PostgresFactoryProvider(DataSource dataSource) {
+    super(dataSource);
+  }
+
+  @Override
+  public ProductTypeEnum getProductType() {
+    return ProductTypeEnum.POSTGRESQL;
+  }
+
+  public ProductFeatures getProductFeatures() {
+    return new PostgresFeatures();
+  }
+
+  @Override
+  public MetadataProvider createMetadataQueryProvider() {
+    return new PostgresMetadataQueryProvider(this);
+  }
+
+  @Override
+  public TableOperateProvider createTableOperateProvider() {
+    return new PostgresTableOperateProvider(this);
+  }
+
+  @Override
+  public TableDataWriteProvider createTableDataWriteProvider(boolean useInsert) {
+    return useInsert
+        ? new PostgresTableInsertWriterProvider(this)
+        : new PostgresTableCopyWriteProvider(this);
+  }
+
+  @Override
+  public TableDataSynchronizer createTableDataSynchronizer() {
+    return new PostgresTableSynchronizer(this);
+  }
+}

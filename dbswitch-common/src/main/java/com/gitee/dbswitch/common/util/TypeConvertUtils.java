@@ -6,15 +6,13 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@UtilityClass
 public final class TypeConvertUtils {
-
-  private TypeConvertUtils() {
-    throw new IllegalStateException("Utility class can not create instance!");
-  }
-
+  
   public static String castToString(final Object in) {
     if (in instanceof java.lang.Character) {
       return in.toString();

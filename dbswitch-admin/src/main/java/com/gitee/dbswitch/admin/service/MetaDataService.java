@@ -9,10 +9,10 @@ import com.gitee.dbswitch.admin.model.response.MetadataTableDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataTableInfoResponse;
 import com.gitee.dbswitch.admin.model.response.SchemaTableDataResponse;
 import com.gitee.dbswitch.admin.util.PageUtils;
-import com.gitee.dbswitch.core.model.SchemaTableData;
-import com.gitee.dbswitch.core.model.SchemaTableMeta;
-import com.gitee.dbswitch.core.model.TableDescription;
-import com.gitee.dbswitch.core.service.IMetaDataByDatasourceService;
+import com.gitee.dbswitch.schema.SchemaTableData;
+import com.gitee.dbswitch.schema.SchemaTableMeta;
+import com.gitee.dbswitch.schema.TableDescription;
+import com.gitee.dbswitch.service.MetadataService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class MetaDataService {
 
   public PageResult<MetadataSchemaDetailResponse> allSchemas(Long id, Integer page, Integer size) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
     try {
       List<String> schemas = metaDataService.querySchemaList();
       List<MetadataSchemaDetailResponse> responses = schemas.stream()
@@ -46,7 +46,7 @@ public class MetaDataService {
   public PageResult<MetadataTableInfoResponse> allTables(Long id, String schema, Integer page,
       Integer size) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
     try {
       List<TableDescription> tables = metaDataService.queryTableList(schema);
       List<MetadataTableInfoResponse> responses = tables.stream()
@@ -65,7 +65,7 @@ public class MetaDataService {
 
   public Result<MetadataTableDetailResponse> tableDetail(Long id, String schema, String table) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
     try {
       SchemaTableMeta tableMeta = metaDataService.queryTableMeta(schema, table);
       List<String> pks = tableMeta.getPrimaryKeys();
@@ -103,7 +103,7 @@ public class MetaDataService {
 
   public Result<SchemaTableDataResponse> tableData(Long id, String schema, String table) {
     DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    IMetaDataByDatasourceService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
     try {
       SchemaTableData data = metaDataService.queryTableData(schema, table, 10);
       return Result.success(SchemaTableDataResponse.builder()

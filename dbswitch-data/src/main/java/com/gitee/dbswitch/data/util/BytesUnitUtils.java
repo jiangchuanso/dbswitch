@@ -10,12 +10,14 @@
 package com.gitee.dbswitch.data.util;
 
 import java.text.DecimalFormat;
+import lombok.experimental.UtilityClass;
 
 /**
  * 字节单位转换
  *
  * @author tang
  */
+@UtilityClass
 public final class BytesUnitUtils {
 
   public static String bytesSizeToHuman(long size) {
@@ -45,7 +47,5 @@ public final class BytesUnitUtils {
 
     return resultSize;
   }
-
-  private BytesUnitUtils() {
-  }
+  
 }

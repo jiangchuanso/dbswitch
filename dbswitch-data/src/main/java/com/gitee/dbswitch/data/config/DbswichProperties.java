@@ -27,7 +27,7 @@ import org.springframework.context.annotation.PropertySource;
 @Data
 @ConfigurationProperties(prefix = "dbswitch", ignoreUnknownFields = false)
 @PropertySource(
-    value = {"classpath:config.properties", "classpath:config.yml"},
+    value = {"classpath:config.properties", "classpath:config.yml", "classpath:config.yaml"},
     ignoreResourceNotFound = true,
     factory = DbswitchPropertySourceFactory.class)
 public class DbswichProperties {

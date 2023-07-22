@@ -17,12 +17,14 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
+import lombok.experimental.UtilityClass;
 
 /**
  * 数据库类型识别工具类
  *
  * @author tang
  */
+@UtilityClass
 public final class DatabaseAwareUtils {
 
   private static final Map<String, ProductTypeEnum> productNameMap;
@@ -69,7 +71,7 @@ public final class DatabaseAwareUtils {
    * @param dataSource 数据源
    * @return 数据库产品名称字符串
    */
-  public static ProductTypeEnum getDatabaseTypeByDataSource(DataSource dataSource) {
+  public static ProductTypeEnum getProductTypeByDataSource(DataSource dataSource) {
     try (Connection connection = dataSource.getConnection()) {
       String productName = connection.getMetaData().getDatabaseProductName();
       String driverName = connection.getMetaData().getDriverName();
@@ -114,8 +116,5 @@ public final class DatabaseAwareUtils {
       throw new RuntimeException(se);
     }
   }
-
-  private DatabaseAwareUtils() {
-  }
-
+  
 }
