@@ -436,7 +436,7 @@ public class MigrationHandler implements Supplier<Long> {
     }
 
     TaskParamEntity.TaskParamEntityBuilder taskBuilder = TaskParamEntity.builder();
-    taskBuilder.oldDataSource(this.sourceDataSource);
+    taskBuilder.oldDataSource(targetDataSource);
     taskBuilder.oldSchemaName(targetSchemaName);
     taskBuilder.oldTableName(targetTableName);
     taskBuilder.newDataSource(sourceDataSource);
