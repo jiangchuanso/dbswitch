@@ -12,9 +12,5 @@ package com.gitee.dbswitch.product.hive;
 import com.gitee.dbswitch.features.ProductFeatures;
 
 public class HiveFeatures implements ProductFeatures {
-
-  public int convertFetchSize(int fetchSize) {
-    return Integer.MIN_VALUE;
-  }
-
+  
 }

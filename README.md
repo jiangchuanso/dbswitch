@@ -534,15 +534,21 @@ bin/startup.sh
 
 > 多个任务并发执行不易于分析任务错误原因；
 
-## 四、模块集成开发说明
+## 四、模块开发说明
 
-### 1、dbswitch安装到本地仓库
+### 1、集成支持新的关系型数据库产品
+
+参考教程： [接入自定义关系型数据库的开发说明文档](ADD_PRODUCT_DOC.md)
+
+### 2、集成dbswitch模块进行二次开发
+
+#### (1)、dbswitch安装到本地仓库
 
 ```
 cd dbswitch && mvn clean install
 ```
 
-### 2、pom.xml中引入dbswitch模块依赖
+#### (2)、pom.xml中引入dbswitch模块依赖
 
 ```
 <dependency>
@@ -552,7 +558,7 @@ cd dbswitch && mvn clean install
 </dependency>
 ```
 
-### 3、代码集成开发
+#### (3)、代码集成开发
 
 ```
 // 构建任务执行的线程池

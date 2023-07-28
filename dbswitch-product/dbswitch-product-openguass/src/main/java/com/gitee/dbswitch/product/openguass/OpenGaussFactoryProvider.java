@@ -28,6 +28,7 @@ public class OpenGaussFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new OpenGaussFeatures();
   }

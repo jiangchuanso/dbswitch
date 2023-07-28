@@ -51,7 +51,7 @@ public class DefaultTableDataQueryProvider
   public void setQueryFetchSize(int size) {
     if (size < Constants.MINIMUM_FETCH_SIZE) {
       throw new IllegalArgumentException(
-          "设置的批量处理行数的大小fetchSize不得小于" + Constants.MINIMUM_FETCH_SIZE);
+          "设置的批量处理行数的大小fetchSize=" + size + "不得小于" + Constants.MINIMUM_FETCH_SIZE);
     }
     this.fetchSize = size;
   }

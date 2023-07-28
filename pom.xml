@@ -19,6 +19,14 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
+  <developers>
+    <developer>
+      <name>tang</name>
+      <email>inrgihc@126.com</email>
+      <url>https://gitee.com/inrgihc/dbswitch</url>
+    </developer>
+  </developers>
+
   <modules>
     <module>dbswitch-common</module>
     <module>dbswitch-core</module>
