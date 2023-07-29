@@ -148,7 +148,7 @@ public enum ProductTypeEnum {
   private String[] url;
 
   public boolean hasDatabaseName() {
-    return !Arrays.asList(DM, SQLITE3).contains(this);
+    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A).contains(this);
   }
 
   public boolean hasFilePath() {

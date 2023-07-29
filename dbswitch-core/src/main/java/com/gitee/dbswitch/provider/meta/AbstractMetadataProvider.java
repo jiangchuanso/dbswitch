@@ -45,6 +45,10 @@ public abstract class AbstractMetadataProvider
     super(factoryProvider);
   }
 
+  public void setCatalogName(String catalogName) {
+    this.catalogName = catalogName;
+  }
+
   @Override
   public List<String> querySchemaList(Connection connection) {
     Set<String> ret = new LinkedHashSet<>();
@@ -103,10 +107,10 @@ public abstract class AbstractMetadataProvider
       while (rs.next()) {
         columns.add(rs.getString("COLUMN_NAME"));
       }
+      return new ArrayList<>(columns);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    return new ArrayList<>(columns);
   }
 
   @Override
@@ -127,10 +131,10 @@ public abstract class AbstractMetadataProvider
           }
         }
       }
+      return ret;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-    return ret;
   }
 
   @Override
@@ -189,10 +193,6 @@ public abstract class AbstractMetadataProvider
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  protected void beforeExecuteQuery() {
-
   }
 
   /**************************************

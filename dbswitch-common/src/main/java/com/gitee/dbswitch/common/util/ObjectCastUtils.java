@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -668,6 +669,93 @@ public final class ObjectCastUtils {
   }
 
   /**
+   * 将任意类型转换为java.time.LocalDateTime类型
+   *
+   * @param in 任意类型的对象实例
+   * @return java.sql.Timestamp类型
+   */
+  public static Timestamp castToTimestamp(final Object in) {
+    if (in instanceof java.sql.Timestamp) {
+      return (java.sql.Timestamp) in;
+    } else if (in instanceof java.sql.Date) {
+      java.sql.Date date = (java.sql.Date) in;
+      LocalDate localDate = date.toLocalDate();
+      LocalTime localTime = LocalTime.of(0, 0, 0);
+      LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+      return Timestamp.valueOf(localDateTime);
+    } else if (in instanceof java.sql.Time) {
+      java.sql.Time date = (java.sql.Time) in;
+      return new java.sql.Timestamp(date.getTime());
+    } else if (in instanceof java.util.Date) {
+      return new java.sql.Timestamp(((java.util.Date) in).getTime());
+    } else if (in instanceof java.util.Calendar) {
+      return new java.sql.Timestamp(((java.util.Calendar) in).getTime().getTime());
+    } else if (in instanceof LocalDate) {
+      LocalDate localDate = (LocalDate) in;
+      LocalTime localTime = LocalTime.of(0, 0, 0);
+      LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+      return Timestamp.valueOf(localDateTime);
+    } else if (in instanceof LocalTime) {
+      LocalDate localDate = LocalDate.MIN;
+      LocalTime localTime = (LocalTime) in;
+      LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+      return Timestamp.valueOf(localDateTime);
+    } else if (in instanceof LocalDateTime) {
+      return Timestamp.valueOf((LocalDateTime) in);
+    } else if (in instanceof java.time.OffsetDateTime) {
+      return Timestamp.valueOf(((java.time.OffsetDateTime) in).toLocalDateTime());
+    } else if (in.getClass().getName().equals("oracle.sql.TIMESTAMP")) {
+      Class<?> clz = in.getClass();
+      try {
+        Method m = clz.getMethod("timestampValue");
+        java.sql.Timestamp t = (java.sql.Timestamp) m.invoke(in);
+        LocalDateTime localDateTime = LocalDateTime
+            .ofInstant(t.toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } else if (in.getClass().getName().equals("microsoft.sql.DateTimeOffset")) {
+      Class<?> clz = in.getClass();
+      try {
+        Method m = clz.getMethod("getTimestamp");
+        java.sql.Timestamp t = (java.sql.Timestamp) m.invoke(in);
+        LocalDateTime localDateTime = LocalDateTime
+            .ofInstant(t.toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } else if (in instanceof String || in instanceof Character) {
+      try {
+        java.sql.Timestamp t = java.sql.Timestamp.valueOf(in.toString());
+        LocalDateTime localDateTime = LocalDateTime
+            .ofInstant(t.toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime);
+      } catch (IllegalArgumentException e) {
+        throw new RuntimeException(
+            String.format("无法将java.lang.String类型转换为java.sql.TimeStamp类型:%s", e.getMessage()));
+      }
+    } else if (in instanceof java.sql.Clob) {
+      try {
+        java.sql.Timestamp t = java.sql.Timestamp.valueOf(clob2Str((java.sql.Clob) in));
+        LocalDateTime localDateTime = LocalDateTime
+            .ofInstant(t.toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime);
+      } catch (NumberFormatException e) {
+        throw new RuntimeException(
+            String.format("无法将java.sql.Clob类型转换为java.sql.TimeStamp类型:%s", e.getMessage()));
+      }
+    } else if (in instanceof Number) {
+      java.sql.Timestamp t = new java.sql.Timestamp(((Number) in).longValue());
+      LocalDateTime localDateTime = LocalDateTime.ofInstant(t.toInstant(), ZoneId.systemDefault());
+      return Timestamp.valueOf(localDateTime);
+    }
+
+    return null;
+  }
+
+  /**
    * 将任意类型转换为Boolean类型
    *
    * @param in 任意类型的对象实例
@@ -859,7 +947,7 @@ public final class ObjectCastUtils {
       case Types.DATE:
         return convert(value, ObjectCastUtils::castToLocalDate);
       case Types.TIMESTAMP:
-        return convert(value, ObjectCastUtils::castToLocalDateTime);
+        return convert(value, ObjectCastUtils::castToTimestamp);
       case Types.BINARY:
       case Types.VARBINARY:
       case Types.BLOB:

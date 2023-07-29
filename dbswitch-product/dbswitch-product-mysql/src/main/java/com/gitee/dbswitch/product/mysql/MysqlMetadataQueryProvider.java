@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.product.mysql;
 
 import com.gitee.dbswitch.common.consts.Constants;
-import com.gitee.dbswitch.common.util.JdbcUrlUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,18 +43,14 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public List<String> querySchemaList(Connection connection) {
-    try {
-      final Matcher matcher = JdbcUrlUtils
-          .getPattern("jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]")
-          .matcher(connection.getMetaData().getURL());
-      if (matcher.matches()) {
-        return Collections.singletonList(matcher.group("database"));
+    List<String> result = new ArrayList<>();
+    try (ResultSet rs = connection.getMetaData().getCatalogs()) {
+      while (rs.next()) {
+        Optional.ofNullable(rs.getString(1)).ifPresent(result::add);
       }
-      throw new RuntimeException("get database name from jdbc url failed!");
+      return result.stream().distinct().collect(Collectors.toList());
     } catch (SQLException e) {
       throw new RuntimeException(e);
-    } catch (RuntimeException e) {
-      throw e;
     }
   }
 
@@ -85,6 +80,27 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public synchronized TableDescription queryTableMeta(Connection connection, String schemaName,
+      String tableName) {
+    setCatalogName(schemaName);
+    return super.queryTableMeta(connection, schemaName, tableName);
+  }
+
+  @Override
+  public synchronized List<String> queryTableColumnName(Connection connection, String schemaName,
+      String tableName) {
+    setCatalogName(schemaName);
+    return super.queryTableColumnName(connection, schemaName, tableName);
+  }
+
+  @Override
+  public synchronized List<String> queryTablePrimaryKeys(Connection connection, String schemaName,
+      String tableName) {
+    setCatalogName(schemaName);
+    return super.queryTablePrimaryKeys(connection, schemaName, tableName);
   }
 
   @Override
