@@ -19,7 +19,9 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import lombok.Getter;
 
+@Getter
 public class InvisibleDataSource implements DataSource {
 
   private final ClassLoader classLoader;

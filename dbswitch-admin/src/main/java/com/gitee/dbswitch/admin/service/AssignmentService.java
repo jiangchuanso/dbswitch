@@ -73,9 +73,6 @@ public class AssignmentService {
 
     Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
     DatabaseConnectionEntity entity = databaseConnectionDAO.getById(targetConnectionId);
-    if (ProductTypeEnum.HIVE == entity.getType()) {
-      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG, "不支持目的端数据源为Hive");
-    }
     if (ProductTypeEnum.SQLITE3 == entity.getType()) {
       if (ProductTypeEnum.isUnsupportedTargetSqlite(entity.getUrl())) {
         throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
@@ -111,9 +108,6 @@ public class AssignmentService {
 
     Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
     DatabaseConnectionEntity entity = databaseConnectionDAO.getById(targetConnectionId);
-    if (ProductTypeEnum.HIVE == entity.getType()) {
-      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG, "不支持目的端数据源为Hive");
-    }
     if (ProductTypeEnum.SQLITE3 == entity.getType()) {
       if (ProductTypeEnum.isUnsupportedTargetSqlite(entity.getUrl())) {
         throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,

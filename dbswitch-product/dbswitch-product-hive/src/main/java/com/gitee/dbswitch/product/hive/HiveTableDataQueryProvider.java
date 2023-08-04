@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.product.hive;
 
-import com.gitee.dbswitch.common.util.HivePrepareUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.query.DefaultTableDataQueryProvider;
 import java.sql.Connection;

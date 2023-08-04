@@ -14,7 +14,7 @@ package com.gitee.dbswitch.calculate;
  *
  * @author tang
  */
-public enum RecordChangeTypeEnum {
+public enum RowChangeTypeEnum {
   /**
    * 未变标识
    */
@@ -45,7 +45,7 @@ public enum RecordChangeTypeEnum {
    */
   private String status;
 
-  RecordChangeTypeEnum(int idx, String flag) {
+  RowChangeTypeEnum(int idx, String flag) {
     this.index = idx;
     this.status = flag;
   }

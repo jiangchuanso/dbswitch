@@ -31,9 +31,10 @@ public abstract class AbstractFactoryProvider implements ProductFactoryProvider 
   @Override
   public final ProductTypeEnum getProductType() {
     Product annotation = getClass().getAnnotation(Product.class);
-    if (Objects.isNull(annotation)) {
-      throw new RuntimeException("Should use Product annotation for class :" + getClass().getName());
-    }
+    ExamineUtils.checkState(
+        Objects.nonNull(annotation),
+        "Should use Product annotation for class : %s",
+        getClass().getName());
     return annotation.value();
   }
 

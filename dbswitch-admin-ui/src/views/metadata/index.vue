@@ -99,9 +99,35 @@
                 </el-table-column>
               </el-table>
             </el-tab-pane>
+            <el-tab-pane label="索引信息"
+                         name="third">
+              <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                        :data="tableMeta.indexes"
+                        size="small"
+                        border
+                        style="width: 100%">
+                <template slot="empty">
+                  <span>单击左侧展开"数据源导航树"来查看表的元数据记录</span>
+                </template>
+                <el-table-column prop="indexType"
+                                 min-width="20%"
+                                 label="索引类型">
+                </el-table-column>
+                <el-table-column prop="indexName"
+                                 min-width="20%"
+                                 label="索引名称">
+                </el-table-column>
+                <el-table-column prop="indexFields"
+                                 :formatter="formatIndexFields"
+                                 show-overflow-tooltip
+                                 min-width="60%"
+                                 label="索引字段">
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
             <el-tab-pane class="table-container-data-table"
                          label="取样数据"
-                         name="third">
+                         name="fourth">
               <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                         :data="sampleData.rows"
                         border>
@@ -156,6 +182,20 @@ export default {
     };
   },
   methods: {
+    formatIndexFields (row, column) {
+      let list = row.indexFields;
+      let fields = list.map(
+        item => {
+          if (item.ascOrder === null) {
+            return item.fieldName;
+          } else if (item.ascOrder) {
+            return item.fieldName + " ASC";
+          } else {
+            return item.fieldName + " DESC";
+          }
+        })
+      return fields.join(";");
+    },
     handleCheckChange (data, checked, indeterminate) {
       //console.log(data, checked, indeterminate);
     },
@@ -396,7 +436,9 @@ export default {
 .flex-between {
   display: flex;
 }
-.el-scrollbar .el-scrollbar__wrap {overflow-x: hidden;}
+.el-scrollbar .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
 .tree-container .el-tree {
   min-width: 350px;
   position: relative;

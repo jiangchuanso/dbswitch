@@ -462,7 +462,7 @@ public class ColumnMetaData {
         // java.sql.Types.DATALINK
         // java.sql.Types.REF_CURSOR
         valtype = ColumnMetaData.TYPE_STRING;
-        precision = desc.getScaleSize();
+        length = desc.getDisplaySize();
         break;
     }
 

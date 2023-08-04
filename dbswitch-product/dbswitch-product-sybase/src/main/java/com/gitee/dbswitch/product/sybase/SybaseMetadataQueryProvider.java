@@ -10,6 +10,7 @@
 package com.gitee.dbswitch.product.sybase;
 
 import com.gitee.dbswitch.common.consts.Constants;
+import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
@@ -21,13 +22,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
@@ -64,46 +66,97 @@ public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
     super(factoryProvider);
   }
 
-  private void setCatalogName(Connection connection) {
-    try {
-      this.catalogName = connection.getCatalog();
-    } catch (Exception e) {
+  @Override
+  public List<String> querySchemaList(Connection connection) {
+    try (ResultSet schemas = connection.getMetaData().getSchemas(connection.getCatalog(), null)) {
+      Set<String> ret = new LinkedHashSet<>();
+      while (schemas.next()) {
+        ret.add(schemas.getString("TABLE_SCHEM"));
+      }
+      return ret.stream().filter(s -> !excludesSchemaNames.contains(s)).collect(Collectors.toList());
+    } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public List<String> querySchemaList(Connection connection) {
-    setCatalogName(connection);
-    List<String> schemas = super.querySchemaList(connection);
-    return schemas.stream().filter(s -> !excludesSchemaNames.contains(s)).collect(Collectors.toList());
-  }
-
-  @Override
   public List<TableDescription> queryTableList(Connection connection, String schemaName) {
-    setCatalogName(connection);
-    return super.queryTableList(connection, schemaName);
+    List<TableDescription> ret = new ArrayList<>();
+    Set<String> uniqueSet = new LinkedHashSet<>();
+    String[] types = new String[]{"TABLE", "VIEW"};
+    try (ResultSet tables = connection.getMetaData()
+        .getTables(connection.getCatalog(), schemaName, "%", types)) {
+      while (tables.next()) {
+        String tableName = tables.getString("TABLE_NAME");
+        if (uniqueSet.contains(tableName)) {
+          continue;
+        } else {
+          uniqueSet.add(tableName);
+        }
+
+        TableDescription td = new TableDescription();
+        td.setSchemaName(schemaName);
+        td.setTableName(tableName);
+        td.setRemarks(tables.getString("REMARKS"));
+        td.setTableType(tables.getString("TABLE_TYPE").toUpperCase());
+        ret.add(td);
+      }
+      return ret;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public List<String> queryTableColumnName(Connection connection, String schemaName,
-      String tableName) {
-    setCatalogName(connection);
-    return super.queryTableColumnName(connection, schemaName, tableName);
+  public List<String> queryTableColumnName(Connection connection, String schemaName, String tableName) {
+    Set<String> columns = new LinkedHashSet<>();
+    try (ResultSet rs = connection.getMetaData()
+        .getColumns(connection.getCatalog(), schemaName, tableName, null)) {
+      while (rs.next()) {
+        columns.add(rs.getString("COLUMN_NAME"));
+      }
+      return new ArrayList<>(columns);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public List<String> queryTablePrimaryKeys(Connection connection, String schemaName,
       String tableName) {
-    setCatalogName(connection);
-    return super.queryTablePrimaryKeys(connection, schemaName, tableName);
+    Set<String> ret = new LinkedHashSet<>();
+    try (ResultSet primaryKeys = connection.getMetaData()
+        .getPrimaryKeys(connection.getCatalog(), schemaName, tableName)) {
+      while (primaryKeys.next()) {
+        ret.add(primaryKeys.getString("COLUMN_NAME"));
+      }
+      return new ArrayList<>(ret);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public List<ColumnDescription> queryTableColumnMeta(Connection connection, String schemaName,
       String tableName) {
-    setCatalogName(connection);
-    return super.queryTableColumnMeta(connection, schemaName, tableName);
+    String sql = this.getTableFieldsQuerySQL(schemaName, tableName);
+    List<ColumnDescription> ret = this.querySelectSqlColumnMeta(connection, sql);
+    // 补充一下注释信息
+    try (ResultSet columns = connection.getMetaData()
+        .getColumns(connection.getCatalog(), schemaName, tableName, null)) {
+      while (columns.next()) {
+        String columnName = columns.getString("COLUMN_NAME");
+        String remarks = columns.getString("REMARKS");
+        for (ColumnDescription cd : ret) {
+          if (columnName.equals(cd.getFieldName())) {
+            cd.setRemarks(remarks);
+          }
+        }
+      }
+      return ret;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -133,7 +186,6 @@ public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public List<ColumnDescription> querySelectSqlColumnMeta(Connection connection, String sql) {
-    setCatalogName(connection);
     String querySQL = String.format("SELECT TOP 1 * from (%s) tmp ", sql.replace(";", ""));
     return this.getSelectSqlColumnMeta(connection, querySQL);
   }
@@ -157,11 +209,6 @@ public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public String getQuotedSchemaTableCombination(String schemaName, String tableName) {
-    return String.format("  [%s].[%s] ", schemaName, tableName);
-  }
-
-  @Override
   public String getFieldDefinition(ColumnMetaData v, List<String> pks, boolean useAutoInc,
       boolean addCr, boolean withRemarks) {
     String fieldname = v.getName();
@@ -169,7 +216,7 @@ public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
     int precision = v.getPrecision();
     int type = v.getType();
 
-    String retval = " [" + fieldname + "]  ";
+    String retval = " " + ProductTypeEnum.SYBASE.quoteName(fieldname) + " ";
 
     switch (type) {
       case ColumnMetaData.TYPE_TIMESTAMP:
@@ -241,19 +288,6 @@ public class SybaseMetadataQueryProvider extends AbstractMetadataProvider {
     }
 
     return retval;
-  }
-
-  @Override
-  public String getPrimaryKeyAsString(List<String> pks) {
-    if (null != pks && !pks.isEmpty()) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("[");
-      sb.append(StringUtils.join(pks, "] , ["));
-      sb.append("]");
-      return sb.toString();
-    }
-
-    return "";
   }
 
   @Override

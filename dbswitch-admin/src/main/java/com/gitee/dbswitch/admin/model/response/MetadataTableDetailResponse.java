@@ -1,5 +1,6 @@
 package com.gitee.dbswitch.admin.model.response;
 
+import com.gitee.dbswitch.schema.IndexDescription;
 import io.swagger.annotations.ApiModel;
 import java.util.List;
 import lombok.Builder;
@@ -17,4 +18,5 @@ public class MetadataTableDetailResponse {
   private String createSql;
   private List<String> primaryKeys;
   private List<MetadataColumnDetailResponse> columns;
+  private List<IndexDescription> indexes;
 }

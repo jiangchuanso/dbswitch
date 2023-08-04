@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.schema;
 
-import com.gitee.dbswitch.common.type.ProductTableType;
+import com.gitee.dbswitch.common.type.ProductTableEnum;
 
 /**
  * 数据库表描述符信息定义(Table Description)
@@ -21,7 +21,7 @@ public class TableDescription {
   private String tableName;
   private String schemaName;
   private String remarks;
-  private ProductTableType tableType;
+  private ProductTableEnum tableType;
 
   public String getTableName() {
     return tableName;
@@ -52,10 +52,10 @@ public class TableDescription {
   }
 
   public void setTableType(String tableType) {
-    this.tableType = ProductTableType.valueOf(tableType.toUpperCase());
+    this.tableType = ProductTableEnum.valueOf(tableType.toUpperCase());
   }
 
   public boolean isViewTable() {
-    return ProductTableType.VIEW == tableType;
+    return ProductTableEnum.VIEW == tableType;
   }
 }

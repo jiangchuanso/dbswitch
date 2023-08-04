@@ -103,10 +103,6 @@ public final class DataSourceUtils {
    * @return HikariDataSource连接池
    */
   public static CloseableDataSource createTargetDataSource(TargetDataSourceProperties properties) {
-    if (properties.getUrl().trim().startsWith("jdbc:hive2://")) {
-      throw new UnsupportedOperationException("Unsupported hive as target datasource!!!");
-    }
-
     HikariDataSource ds = new HikariDataSource();
     ds.setPoolName("The_Target_DB_Connection");
     ds.setJdbcUrl(properties.getUrl());

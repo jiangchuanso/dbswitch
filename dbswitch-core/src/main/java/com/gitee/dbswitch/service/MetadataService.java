@@ -9,13 +9,14 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.service;
 
-import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
+import com.gitee.dbswitch.schema.IndexDescription;
 import com.gitee.dbswitch.schema.SchemaTableData;
 import com.gitee.dbswitch.schema.SchemaTableMeta;
 import com.gitee.dbswitch.schema.TableDescription;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 
 public interface MetadataService {
@@ -110,6 +111,15 @@ public interface MetadataService {
   List<String> queryTablePrimaryKeys(String schemaName, String tableName);
 
   /**
+   * 获取表的索引列表
+   *
+   * @param schemaName
+   * @param tableName
+   * @return
+   */
+  List<IndexDescription> queryTableIndexes(String schemaName, String tableName);
+
+  /**
    * 测试数据库SQL查询
    *
    * @param sql 待查询的SQL语句
@@ -138,15 +148,16 @@ public interface MetadataService {
   /**
    * 根据字段结构信息组装对应数据库的建表DDL语句
    *
-   * @param provider    目的数据库类型
-   * @param fieldNames  字段结构信息
-   * @param primaryKeys 主键字段信息
-   * @param schemaName  模式名称
-   * @param tableName   表名称
-   * @param autoIncr    是否允许主键自增
+   * @param provider      目的数据库类型
+   * @param fieldNames    字段结构信息
+   * @param primaryKeys   主键字段信息
+   * @param schemaName    模式名称
+   * @param tableName     表名称
+   * @param autoIncr      是否允许主键自增
+   * @param tblProperties 表的属性信息
    * @return 对应数据库的DDL建表语句
    */
   List<String> getDDLCreateTableSQL(MetadataProvider provider, List<ColumnDescription> fieldNames,
       List<String> primaryKeys, String schemaName, String tableName, String tableRemarks,
-      boolean autoIncr);
+      boolean autoIncr, Map<String, String> tblProperties);
 }

@@ -15,6 +15,7 @@ import com.gitee.dbswitch.provider.ProductProviderFactory;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
 import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
+import com.gitee.dbswitch.schema.IndexDescription;
 import com.gitee.dbswitch.schema.SchemaTableData;
 import com.gitee.dbswitch.schema.SchemaTableMeta;
 import com.gitee.dbswitch.schema.TableDescription;
@@ -23,6 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 
 /**
@@ -152,6 +154,15 @@ public class DefaultMetadataService implements MetadataService {
   }
 
   @Override
+  public List<IndexDescription> queryTableIndexes(String schemaName, String tableName) {
+    try (Connection connection = dataSource.getConnection()) {
+      return metaQueryProvider.queryTableIndexes(connection, schemaName, tableName);
+    } catch (SQLException se) {
+      throw new RuntimeException(se);
+    }
+  }
+
+  @Override
   public SchemaTableMeta queryTableMeta(String schemaName, String tableName) {
     SchemaTableMeta tableMeta = new SchemaTableMeta();
 
@@ -166,12 +177,15 @@ public class DefaultMetadataService implements MetadataService {
 
       List<String> pks;
       String createSql;
+      List<IndexDescription> indexes;
       if (tableDesc.isViewTable()) {
         pks = Collections.emptyList();
         createSql = metaQueryProvider.getViewDDL(connection, schemaName, tableName);
+        indexes = Collections.emptyList();
       } else {
         pks = metaQueryProvider.queryTablePrimaryKeys(connection, schemaName, tableName);
         createSql = metaQueryProvider.getTableDDL(connection, schemaName, tableName);
+        indexes = metaQueryProvider.queryTableIndexes(connection, schemaName, tableName);
       }
 
       tableMeta.setSchemaName(schemaName);
@@ -181,6 +195,7 @@ public class DefaultMetadataService implements MetadataService {
       tableMeta.setColumns(columns);
       tableMeta.setPrimaryKeys(pks);
       tableMeta.setCreateSql(createSql);
+      tableMeta.setIndexes(indexes);
 
       return tableMeta;
     } catch (SQLException se) {
@@ -209,9 +224,9 @@ public class DefaultMetadataService implements MetadataService {
   @Override
   public List<String> getDDLCreateTableSQL(MetadataProvider provider,
       List<ColumnDescription> fieldNames, List<String> primaryKeys, String schemaName,
-      String tableName, String tableRemarks, boolean autoIncr) {
+      String tableName, String tableRemarks, boolean autoIncr, Map<String, String> tblProperties) {
     return GenerateSqlUtils.getDDLCreateTableSQL(
-        provider, fieldNames, primaryKeys, schemaName, tableName, tableRemarks, autoIncr);
+        provider, fieldNames, primaryKeys, schemaName, tableName, tableRemarks, autoIncr, tblProperties);
   }
 
 }

@@ -16,6 +16,7 @@ public class SchemaTableMeta extends TableDescription {
   private List<String> primaryKeys;
   private String createSql;
   private List<ColumnDescription> columns;
+  private List<IndexDescription> indexes;
 
   public List<String> getPrimaryKeys() {
     return primaryKeys;
@@ -39,5 +40,13 @@ public class SchemaTableMeta extends TableDescription {
 
   public void setColumns(List<ColumnDescription> columns) {
     this.columns = columns;
+  }
+
+  public List<IndexDescription> getIndexes() {
+    return indexes;
+  }
+
+  public void setIndexes(List<IndexDescription> indexes) {
+    this.indexes = indexes;
   }
 }

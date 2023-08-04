@@ -9,29 +9,20 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.common.type;
 
-/**
- * 数据库表类型:视图表、物理表
- *
- * @author tang
- */
-public enum ProductTableType {
-  /**
-   * 物理表
-   */
-  TABLE(0),
+public enum TableIndexEnum {
 
-  /**
-   * 视图表
-   */
-  VIEW(1);
+  NORMAL("普通索引"),
+  UNIQUE("唯一索引"),
+  ;
 
-  private int index;
+  private String description;
 
-  ProductTableType(int idx) {
-    this.index = idx;
+  TableIndexEnum(String description) {
+    this.description = description;
   }
 
-  public int getIndex() {
-    return index;
+  public boolean isUnique() {
+    return UNIQUE == this;
   }
+
 }

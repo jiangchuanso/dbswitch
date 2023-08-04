@@ -14,7 +14,7 @@ package com.gitee.dbswitch.calculate;
  *
  * @author tang
  */
-public interface IDatabaseChangeCalculator {
+public interface RecordRowChangeCalculator {
 
   /**
    * 是否记录无变化的数据
@@ -64,5 +64,5 @@ public interface IDatabaseChangeCalculator {
    * @param task    任务描述实体对象
    * @param handler 计算结果回调处理器
    */
-  void executeCalculate(TaskParamEntity task, IDatabaseRowHandler handler);
+  void executeCalculate(TaskParamEntity task, RecordRowHandler handler);
 }

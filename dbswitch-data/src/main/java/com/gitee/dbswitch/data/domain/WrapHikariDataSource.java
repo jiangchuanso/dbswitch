@@ -10,6 +10,7 @@
 package com.gitee.dbswitch.data.domain;
 
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
+import com.gitee.dbswitch.common.entity.InvisibleDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Objects;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,6 +32,47 @@ public class WrapHikariDataSource implements CloseableDataSource {
   public WrapHikariDataSource(HikariDataSource hikariDataSource, URLClassLoader urlClassLoader) {
     this.hikariDataSource = Objects.requireNonNull(hikariDataSource);
     this.urlClassLoader = Objects.requireNonNull(urlClassLoader);
+  }
+
+  @Override
+  public String getJdbcUrl() {
+    DataSource dataSource = hikariDataSource.getDataSource();
+    if (null != dataSource && dataSource instanceof InvisibleDataSource) {
+      InvisibleDataSource invisibleDataSource = (InvisibleDataSource) dataSource;
+      return invisibleDataSource.getJdbcUrl();
+    }
+
+    return hikariDataSource.getJdbcUrl();
+  }
+
+  @Override
+  public String getDriverClass() {
+    DataSource dataSource = hikariDataSource.getDataSource();
+    if (null != dataSource && dataSource instanceof InvisibleDataSource) {
+      InvisibleDataSource invisibleDataSource = (InvisibleDataSource) dataSource;
+      return invisibleDataSource.getDriverClassName();
+    }
+    return hikariDataSource.getDriverClassName();
+  }
+
+  @Override
+  public String getUserName() {
+    DataSource dataSource = hikariDataSource.getDataSource();
+    if (null != dataSource && dataSource instanceof InvisibleDataSource) {
+      InvisibleDataSource invisibleDataSource = (InvisibleDataSource) dataSource;
+      return invisibleDataSource.getProperties().getProperty("user");
+    }
+    return hikariDataSource.getUsername();
+  }
+
+  @Override
+  public String getPassword() {
+    DataSource dataSource = hikariDataSource.getDataSource();
+    if (null != dataSource && dataSource instanceof InvisibleDataSource) {
+      InvisibleDataSource invisibleDataSource = (InvisibleDataSource) dataSource;
+      return invisibleDataSource.getProperties().getProperty("password");
+    }
+    return hikariDataSource.getPassword();
   }
 
   @Override

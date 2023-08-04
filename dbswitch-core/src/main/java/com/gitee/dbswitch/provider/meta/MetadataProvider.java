@@ -12,6 +12,7 @@ package com.gitee.dbswitch.provider.meta;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
+import com.gitee.dbswitch.schema.IndexDescription;
 import com.gitee.dbswitch.schema.TableDescription;
 import java.sql.Connection;
 import java.util.List;
@@ -116,6 +117,15 @@ public interface MetadataProvider {
    */
   List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName);
 
+  /**
+   * 获取指定模式表的索引列表
+   *
+   * @param connection JDBC连接
+   * @param schemaName 模式名称
+   * @param tableName  表名称
+   * @return 主键字段名称列表
+   */
+  List<IndexDescription> queryTableIndexes(Connection connection, String schemaName, String tableName);
 
   /**
    * 测试查询SQL语句的有效性

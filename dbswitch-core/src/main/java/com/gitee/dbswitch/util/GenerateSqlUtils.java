@@ -10,16 +10,21 @@
 package com.gitee.dbswitch.util;
 
 import com.gitee.dbswitch.common.consts.Constants;
-import com.gitee.dbswitch.common.type.ProductTableType;
+import com.gitee.dbswitch.common.type.ProductTableEnum;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.DDLFormatterUtils;
+import com.gitee.dbswitch.common.util.UuidUtils;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
 import com.gitee.dbswitch.schema.TableDescription;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -27,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author tang
  */
+@UtilityClass
 public final class GenerateSqlUtils {
 
   public static String getDDLCreateTableSQL(
@@ -44,7 +50,8 @@ public final class GenerateSqlUtils {
         tableName,
         false,
         null,
-        autoIncr);
+        autoIncr,
+        Collections.emptyMap());
   }
 
   public static String getDDLCreateTableSQL(
@@ -55,7 +62,8 @@ public final class GenerateSqlUtils {
       String tableName,
       boolean withRemarks,
       String tableRemarks,
-      boolean autoIncr) {
+      boolean autoIncr,
+      Map<String, String> tblProperties) {
     ProductTypeEnum type = provider.getProductType();
     StringBuilder sb = new StringBuilder();
     List<String> pks = fieldNames.stream()
@@ -64,7 +72,7 @@ public final class GenerateSqlUtils {
         .collect(Collectors.toList());
 
     sb.append(Constants.CREATE_TABLE);
-    // if(ifNotExist && type!=DatabaseType.ORACLE) {
+    // if(ifNotExist && !type.isLikeOracle()) {
     // sb.append( Const.IF_NOT_EXISTS );
     // }
     sb.append(provider.getQuotedSchemaTableCombination(schemaName, tableName));
@@ -81,17 +89,26 @@ public final class GenerateSqlUtils {
       sb.append(provider.getFieldDefinition(v, pks, autoIncr, false, withRemarks));
     }
 
-    if (!pks.isEmpty()) {
+    if (!pks.isEmpty() && !type.isLikeHive()) {
       String pk = provider.getPrimaryKeyAsString(pks);
       sb.append(", PRIMARY KEY (").append(pk).append(")");
     }
 
     sb.append(")");
-    if (ProductTypeEnum.MYSQL == type) {
+    if (type.isLikeMysql()) {
       sb.append("ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
       if (withRemarks && StringUtils.isNotBlank(tableRemarks)) {
         sb.append(String.format(" COMMENT='%s' ", tableRemarks.replace("'", "\\'")));
       }
+    } else if (type.isLikeHive() && null != tblProperties && !tblProperties.isEmpty()) {
+      List<String> kvProperties = new ArrayList<>();
+      tblProperties.forEach((k, v) -> kvProperties.add(String.format("\t\t'%s' = '%s'", k, v)));
+      sb.append(Constants.CR);
+      sb.append("STORED BY 'org.apache.hive.storage.jdbc.JdbcStorageHandler'");
+      sb.append(Constants.CR);
+      sb.append("TBLPROPERTIES (");
+      sb.append(kvProperties.stream().collect(Collectors.joining(",\n")));
+      sb.append(")");
     }
 
     return DDLFormatterUtils.format(sb.toString());
@@ -104,25 +121,33 @@ public final class GenerateSqlUtils {
       String schemaName,
       String tableName,
       String tableRemarks,
-      boolean autoIncr) {
-    String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
-        tableName, true, tableRemarks, autoIncr);
-    if (provider.getProductType().noCommentStatement()) {
+      boolean autoIncr,
+      Map<String, String> tblProperties) {
+    ProductTypeEnum productType = provider.getProductType();
+    if (productType.isLikeHive()) {
+      String tmpTableName = "tmp_" + UuidUtils.generateUuid();
+      String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
+          tmpTableName, true, tableRemarks, autoIncr, tblProperties);
+      String createAsTableSql = String.format("CREATE TABLE `%s`.`%s` STORED AS ORC AS (SELECT * FROM `%s`.`%s`)",
+          schemaName, tableName, schemaName, tmpTableName);
+      String dropTmpTableSql = String.format("DROP TABLE IF EXISTS `%s`.`%s`", schemaName, tmpTableName);
+      return Arrays.asList(createTableSql, createAsTableSql, dropTmpTableSql);
+    } else if (productType.noCommentStatement()) {
+      String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
+          tableName, true, tableRemarks, autoIncr, tblProperties);
       return Arrays.asList(createTableSql);
+    } else {
+      String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
+          tableName, true, tableRemarks, autoIncr, tblProperties);
+      TableDescription td = new TableDescription();
+      td.setSchemaName(schemaName);
+      td.setTableName(tableName);
+      td.setRemarks(tableRemarks);
+      td.setTableType(ProductTableEnum.TABLE.name());
+      List<String> results = provider.getTableColumnCommentDefinition(td, fieldNames);
+      results.add(0, createTableSql);
+      return results;
     }
-
-    TableDescription td = new TableDescription();
-    td.setSchemaName(schemaName);
-    td.setTableName(tableName);
-    td.setRemarks(tableRemarks);
-    td.setTableType(ProductTableType.TABLE.name());
-    List<String> results = provider.getTableColumnCommentDefinition(td, fieldNames);
-    results.add(0, createTableSql);
-    return results;
-  }
-
-  private GenerateSqlUtils() {
-    throw new IllegalStateException();
   }
 
 }

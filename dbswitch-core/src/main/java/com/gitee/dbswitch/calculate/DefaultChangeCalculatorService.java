@@ -11,6 +11,7 @@ package com.gitee.dbswitch.calculate;
 
 import com.gitee.dbswitch.common.consts.Constants;
 import com.gitee.dbswitch.common.entity.ResultSetWrapper;
+import com.gitee.dbswitch.common.util.ExamineUtils;
 import com.gitee.dbswitch.common.util.JdbcTypesUtils;
 import com.gitee.dbswitch.common.util.ObjectCastUtils;
 import com.gitee.dbswitch.provider.ProductProviderFactory;
@@ -25,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -35,7 +35,7 @@ import org.apache.commons.collections4.CollectionUtils;
  * @author tang
  */
 @Slf4j
-public final class ChangeCalculatorService implements IDatabaseChangeCalculator {
+public final class DefaultChangeCalculatorService implements RecordRowChangeCalculator {
 
   /**
    * 是否记录不变化的记录
@@ -52,11 +52,11 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
    */
   private int queryFetchSize;
 
-  public ChangeCalculatorService() {
+  public DefaultChangeCalculatorService() {
     this(false, true);
   }
 
-  public ChangeCalculatorService(boolean recordIdentical, boolean checkJdbcType) {
+  public DefaultChangeCalculatorService(boolean recordIdentical, boolean checkJdbcType) {
     this.recordIdentical = recordIdentical;
     this.checkJdbcType = checkJdbcType;
     this.queryFetchSize = Constants.DEFAULT_FETCH_SIZE;
@@ -89,11 +89,9 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
 
   @Override
   public void setFetchSize(int size) {
-    if (size < Constants.MINIMUM_FETCH_SIZE) {
-      throw new IllegalArgumentException(
-          "设置的批量处理行数的大小fetchSize不得小于" + Constants.MINIMUM_FETCH_SIZE);
-    }
-
+    ExamineUtils.check(size >= Constants.MINIMUM_FETCH_SIZE,
+        "设置的批量处理行数的大小fetchSize不得小于%d",
+        Constants.MINIMUM_FETCH_SIZE);
     this.queryFetchSize = size;
   }
 
@@ -108,8 +106,10 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
    * @param handler 计算结果回调处理器
    */
   @Override
-  public void executeCalculate(@NonNull TaskParamEntity task,
-      @NonNull IDatabaseRowHandler handler) {
+  public void executeCalculate(TaskParamEntity task, RecordRowHandler handler) {
+    ExamineUtils.checkNotNull(task, "task");
+    ExamineUtils.checkNotNull(handler, "handler");
+
     if (log.isDebugEnabled()) {
       log.debug("###### Begin execute calculate table CDC data now");
     }
@@ -118,10 +118,8 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
     boolean useOwnFieldsColumns = !CollectionUtils.isEmpty(task.getFieldColumns());
 
     // 检查新旧两张表的主键字段与比较字段
-    MetadataService
-        oldMd = new DefaultMetadataService(task.getOldDataSource());
-    MetadataService
-        newMd = new DefaultMetadataService(task.getNewDataSource());
+    MetadataService oldMd = new DefaultMetadataService(task.getOldDataSource());
+    MetadataService newMd = new DefaultMetadataService(task.getNewDataSource());
     List<String> fieldsPrimaryKeyOld = oldMd
         .queryTablePrimaryKeys(task.getOldSchemaName(), task.getOldTableName());
     List<String> fieldsAllColumnOld = oldMd
@@ -137,13 +135,14 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
         .map(s -> columnsMap.getOrDefault(s, s))
         .collect(Collectors.toList());
 
-    if (fieldsPrimaryKeyOld.isEmpty() || fieldsPrimaryKeyNew.isEmpty()) {
-      throw new RuntimeException("计算变化量的表中存在无主键的表");
-    }
-
-    if (!isListEqual(fieldsPrimaryKeyOld, fieldsMappedPrimaryKeyNew)) {
-      throw new RuntimeException("两个表的主键映射关系不匹配");
-    }
+    ExamineUtils.check(
+        !fieldsPrimaryKeyOld.isEmpty() && !fieldsPrimaryKeyNew.isEmpty(),
+        "计算变化量的表中存在无主键的表"
+    );
+    ExamineUtils.check(
+        isListEqual(fieldsPrimaryKeyOld, fieldsMappedPrimaryKeyNew),
+        "两个表的主键映射关系不匹配"
+    );
 
     if (useOwnFieldsColumns) {
       // 如果自己配置了字段列表，判断子集关系
@@ -284,7 +283,7 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
       }
 
       // 进入核心比较计算算法区域
-      RecordChangeTypeEnum flagField = null;
+      RowChangeTypeEnum flagField = null;
       Object[] outputRow;
       Object[] one = getRowData(rsold.getResultSet());
       Object[] two = getRowData(rsnew.getResultSet());
@@ -292,11 +291,11 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
         if (one == null && two == null) {
           break;
         } else if (one == null && two != null) {
-          flagField = RecordChangeTypeEnum.VALUE_INSERT;
+          flagField = RowChangeTypeEnum.VALUE_INSERT;
           outputRow = two;
           two = getRowData(rsnew.getResultSet());
         } else if (one != null && two == null) {
-          flagField = RecordChangeTypeEnum.VALUE_DELETED;
+          flagField = RowChangeTypeEnum.VALUE_DELETED;
           outputRow = one;
           one = getRowData(rsold.getResultSet());
         } else {
@@ -304,10 +303,10 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
           if (0 == compare) {
             int compareValues = this.compare(one, two, valNumbers, metaData);
             if (compareValues == 0) {
-              flagField = RecordChangeTypeEnum.VALUE_IDENTICAL;
+              flagField = RowChangeTypeEnum.VALUE_IDENTICAL;
               outputRow = one;
             } else {
-              flagField = RecordChangeTypeEnum.VALUE_CHANGED;
+              flagField = RowChangeTypeEnum.VALUE_CHANGED;
               outputRow = two;
             }
 
@@ -315,18 +314,18 @@ public final class ChangeCalculatorService implements IDatabaseChangeCalculator 
             two = getRowData(rsnew.getResultSet());
           } else {
             if (compare < 0) {
-              flagField = RecordChangeTypeEnum.VALUE_DELETED;
+              flagField = RowChangeTypeEnum.VALUE_DELETED;
               outputRow = one;
               one = getRowData(rsold.getResultSet());
             } else {
-              flagField = RecordChangeTypeEnum.VALUE_INSERT;
+              flagField = RowChangeTypeEnum.VALUE_INSERT;
               outputRow = two;
               two = getRowData(rsnew.getResultSet());
             }
           }
         }
 
-        if (!this.recordIdentical && RecordChangeTypeEnum.VALUE_IDENTICAL == flagField) {
+        if (!this.recordIdentical && RowChangeTypeEnum.VALUE_IDENTICAL == flagField) {
           continue;
         }
 

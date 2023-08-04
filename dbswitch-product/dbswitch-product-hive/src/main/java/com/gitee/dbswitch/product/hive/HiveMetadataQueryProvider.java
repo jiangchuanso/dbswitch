@@ -11,11 +11,11 @@ package com.gitee.dbswitch.product.hive;
 
 import com.gitee.dbswitch.common.consts.Constants;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
-import com.gitee.dbswitch.common.util.HivePrepareUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
+import com.gitee.dbswitch.schema.IndexDescription;
 import com.gitee.dbswitch.schema.TableDescription;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -66,8 +66,7 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public List<ColumnDescription> queryTableColumnMeta(Connection connection, String schemaName,
-      String tableName) {
+  public List<ColumnDescription> queryTableColumnMeta(Connection connection, String schemaName, String tableName) {
     String querySQL = this.getTableFieldsQuerySQL(schemaName, tableName);
     List<ColumnDescription> ret = new ArrayList<>();
     try (Statement st = connection.createStatement()) {
@@ -76,47 +75,10 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
         ResultSetMetaData m = rs.getMetaData();
         int columns = m.getColumnCount();
         for (int i = 1; i <= columns; i++) {
-          String name = m.getColumnLabel(i);
-          if (null == name) {
-            name = m.getColumnName(i);
-          }
-
-          ColumnDescription cd = new ColumnDescription();
-          cd.setFieldName(name);
-          cd.setLabelName(name);
-          cd.setFieldType(m.getColumnType(i));
-          if (0 != cd.getFieldType()) {
-            cd.setFieldTypeName(m.getColumnTypeName(i));
-            cd.setFiledTypeClassName(m.getColumnClassName(i));
-            cd.setDisplaySize(m.getColumnDisplaySize(i));
-            cd.setPrecisionSize(m.getPrecision(i));
-            cd.setScaleSize(m.getScale(i));
-            cd.setAutoIncrement(m.isAutoIncrement(i));
-            cd.setNullable(m.isNullable(i) != ResultSetMetaData.columnNoNulls);
-          } else {
-            // 处理视图中NULL as fieldName的情况
-            cd.setFieldTypeName("CHAR");
-            cd.setFiledTypeClassName(String.class.getName());
-            cd.setDisplaySize(1);
-            cd.setPrecisionSize(1);
-            cd.setScaleSize(0);
-            cd.setAutoIncrement(false);
-            cd.setNullable(true);
-          }
-
-          boolean signed = false;
-          try {
-            signed = m.isSigned(i);
-          } catch (Exception ignored) {
-            // This JDBC Driver doesn't support the isSigned method
-            // nothing more we can do here by catch the exception.
-          }
-          cd.setSigned(signed);
+          ColumnDescription cd = buildColumnDescription(m, i);
           cd.setProductType(ProductTypeEnum.HIVE);
-
           ret.add(cd);
         }
-
         return ret;
       }
     } catch (SQLException e) {
@@ -125,15 +87,20 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public List<String> queryTablePrimaryKeys(Connection connection, String schemaName,
-      String tableName) {
+  public List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName) {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public List<IndexDescription> queryTableIndexes(Connection connection, String schemaName, String tableName) {
     return Collections.emptyList();
   }
 
   @Override
   public List<ColumnDescription> querySelectSqlColumnMeta(Connection connection, String sql) {
     String querySQL = String.format(" %s LIMIT 1", sql.replace(";", ""));
-    return this.getSelectSqlColumnMeta(connection, querySQL);
+    return this.getSelectSqlColumnMeta(connection, querySQL,
+        conn -> HivePrepareUtils.setResultSetColumnNameNotUnique(connection));
   }
 
   @Override
@@ -147,11 +114,6 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public String getQuotedSchemaTableCombination(String schemaName, String tableName) {
-    return String.format("  `%s`.`%s` ", schemaName, tableName);
   }
 
   @Override
@@ -174,11 +136,9 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
         retval += "TINYINT";
         break;
       case ColumnMetaData.TYPE_NUMBER:
-        retval += "FLOAT";
+        retval += "DECIMAL(10,2)";
         break;
       case ColumnMetaData.TYPE_INTEGER:
-        retval += "DECIMAL";
-        break;
       case ColumnMetaData.TYPE_BIGNUMBER:
         retval += "BIGINT";
         break;

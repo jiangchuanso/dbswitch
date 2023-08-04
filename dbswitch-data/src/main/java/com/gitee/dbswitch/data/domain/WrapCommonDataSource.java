@@ -10,6 +10,7 @@
 package com.gitee.dbswitch.data.domain;
 
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
+import com.gitee.dbswitch.common.entity.InvisibleDataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLClassLoader;
@@ -18,18 +19,37 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Objects;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class WrapCommonDataSource implements CloseableDataSource {
 
-  private DataSource commonDataSource;
+  private InvisibleDataSource commonDataSource;
   private URLClassLoader urlClassLoader;
 
-  public WrapCommonDataSource(DataSource commonDataSource, URLClassLoader urlClassLoader) {
+  public WrapCommonDataSource(InvisibleDataSource commonDataSource, URLClassLoader urlClassLoader) {
     this.commonDataSource = Objects.requireNonNull(commonDataSource);
     this.urlClassLoader = Objects.requireNonNull(urlClassLoader);
+  }
+
+  @Override
+  public String getJdbcUrl() {
+    return commonDataSource.getJdbcUrl();
+  }
+
+  @Override
+  public String getDriverClass() {
+    return commonDataSource.getDriverClassName();
+  }
+
+  @Override
+  public String getUserName() {
+    return commonDataSource.getProperties().getProperty("user");
+  }
+
+  @Override
+  public String getPassword() {
+    return commonDataSource.getProperties().getProperty("password");
   }
 
   @Override

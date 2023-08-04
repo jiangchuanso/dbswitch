@@ -10,15 +10,17 @@
 package com.gitee.dbswitch.data.handler;
 
 import cn.hutool.core.io.unit.DataSizeUtil;
-import com.gitee.dbswitch.calculate.ChangeCalculatorService;
-import com.gitee.dbswitch.calculate.IDatabaseChangeCalculator;
-import com.gitee.dbswitch.calculate.IDatabaseRowHandler;
-import com.gitee.dbswitch.calculate.RecordChangeTypeEnum;
+import com.gitee.dbswitch.calculate.DefaultChangeCalculatorService;
+import com.gitee.dbswitch.calculate.RecordRowChangeCalculator;
+import com.gitee.dbswitch.calculate.RecordRowHandler;
+import com.gitee.dbswitch.calculate.RowChangeTypeEnum;
 import com.gitee.dbswitch.calculate.TaskParamEntity;
+import com.gitee.dbswitch.common.consts.Constants;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.ResultSetWrapper;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.DatabaseAwareUtils;
+import com.gitee.dbswitch.common.util.ExamineUtils;
 import com.gitee.dbswitch.common.util.JdbcTypesUtils;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
 import com.gitee.dbswitch.data.config.DbswichProperties;
@@ -37,6 +39,7 @@ import com.gitee.dbswitch.service.MetadataService;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -60,7 +63,7 @@ public class MigrationHandler implements Supplier<Long> {
 
   private final long MAX_CACHE_BYTES_SIZE = 128 * 1024 * 1024;
 
-  private int fetchSize = 100;
+  private int fetchSize = Constants.MINIMUM_FETCH_SIZE;
   private final DbswichProperties properties;
   private final SourceDataSourceProperties sourceProperties;
 
@@ -211,7 +214,7 @@ public class MigrationHandler implements Supplier<Long> {
     TableOperateProvider targetOperator = targetFactoryProvider.createTableOperateProvider();
     TableDataSynchronizer targetSynchronizer = targetFactoryProvider.createTableDataSynchronizer();
 
-    if (properties.getTarget().getTargetDrop()) {
+    if (properties.getTarget().getTargetDrop() || targetProductType.isLikeHive()) {
       /*
         如果配置了dbswitch.target.datasource-target-drop=true时，
         <p>
@@ -236,18 +239,23 @@ public class MigrationHandler implements Supplier<Long> {
           targetSchemaName,
           targetTableName,
           sourceTableRemarks,
-          properties.getTarget().getCreateTableAutoIncrement()
+          properties.getTarget().getCreateTableAutoIncrement(),
+          getTblProperties()
       );
 
       JdbcTemplate targetJdbcTemplate = new JdbcTemplate(targetDataSource);
       for (String sql : sqlCreateTable) {
-        targetJdbcTemplate.execute(sql);
         log.info("Execute SQL: \n{}", sql);
+        targetJdbcTemplate.execute(sql);
       }
 
       // 如果只想创建表，这里直接返回
       if (null != properties.getTarget().getOnlyCreate()
           && properties.getTarget().getOnlyCreate()) {
+        return 0L;
+      }
+
+      if (targetProductType.isLikeHive()) {
         return 0L;
       }
 
@@ -280,7 +288,8 @@ public class MigrationHandler implements Supplier<Long> {
             targetSchemaName,
             targetTableName,
             sourceTableRemarks,
-            properties.getTarget().getCreateTableAutoIncrement()
+            properties.getTarget().getCreateTableAutoIncrement(),
+            getTblProperties()
         );
 
         JdbcTemplate targetJdbcTemplate = new JdbcTemplate(targetDataSource);
@@ -449,7 +458,7 @@ public class MigrationHandler implements Supplier<Long> {
 
     synchronizer.prepare(targetSchemaName, targetTableName, targetFields, targetPrimaryKeys);
 
-    IDatabaseChangeCalculator calculator = new ChangeCalculatorService();
+    RecordRowChangeCalculator calculator = new DefaultChangeCalculatorService();
     calculator.setFetchSize(fetchSize);
     calculator.setRecordIdentical(false);
     calculator.setCheckJdbcType(false);
@@ -457,7 +466,7 @@ public class MigrationHandler implements Supplier<Long> {
     AtomicLong totalBytes = new AtomicLong(0);
 
     // 执行实际的变化同步过程
-    calculator.executeCalculate(param, new IDatabaseRowHandler() {
+    calculator.executeCalculate(param, new RecordRowHandler() {
 
       private long countInsert = 0;
       private long countUpdate = 0;
@@ -469,11 +478,11 @@ public class MigrationHandler implements Supplier<Long> {
       private final List<Object[]> cacheDelete = new LinkedList<>();
 
       @Override
-      public void handle(List<String> fields, Object[] record, int[] jdbcTypes, RecordChangeTypeEnum flag) {
-        if (flag == RecordChangeTypeEnum.VALUE_INSERT) {
+      public void handle(List<String> fields, Object[] record, int[] jdbcTypes, RowChangeTypeEnum flag) {
+        if (flag == RowChangeTypeEnum.VALUE_INSERT) {
           cacheInsert.add(record);
           countInsert++;
-        } else if (flag == RecordChangeTypeEnum.VALUE_CHANGED) {
+        } else if (flag == RowChangeTypeEnum.VALUE_CHANGED) {
           cacheUpdate.add(record);
           countUpdate++;
         } else {
@@ -561,6 +570,48 @@ public class MigrationHandler implements Supplier<Long> {
     });
 
     return totalBytes.get();
+  }
+
+  /**
+   * https://cwiki.apache.org/confluence/display/Hive/JDBC+Storage+Handler
+   *
+   * @return Map<String, String>
+   */
+  public Map<String, String> getTblProperties() {
+    Map<String, String> ret = new HashMap<>();
+    if (targetProductType.isLikeHive()) {
+      // hive.sql.database.type: MYSQL, POSTGRES, ORACLE, DERBY, DB2
+      final List<ProductTypeEnum> supportedProductTypes =
+          Arrays.asList(ProductTypeEnum.MYSQL, ProductTypeEnum.ORACLE,
+              ProductTypeEnum.DB2, ProductTypeEnum.POSTGRESQL);
+      ExamineUtils.check(supportedProductTypes.contains(sourceProductType),
+          "Unsupported data from %s to Hive", sourceProductType.name());
+
+      String fullTableName = sourceProductType.quoteSchemaTableName(sourceSchemaName, sourceTableName);
+      List<String> columnNames = sourceColumnDescriptions.stream().map(ColumnDescription::getFieldName)
+          .collect(Collectors.toList());
+      String querySql = String.format("SELECT %s FROM %s",
+          columnNames.stream()
+              .map(s -> sourceProductType.quoteName(s))
+              .collect(Collectors.joining(",")),
+          fullTableName);
+      String databaseType = sourceProductType.name().toUpperCase();
+      if (ProductTypeEnum.POSTGRESQL == sourceProductType) {
+        databaseType = "POSTGRES";
+      } else if (ProductTypeEnum.SQLSERVER == sourceProductType) {
+        databaseType = "MSSQL";
+      }
+      ret.put("hive.sql.database.type", databaseType);
+      ret.put("hive.sql.jdbc.driver", sourceDataSource.getDriverClass());
+      ret.put("hive.sql.jdbc.url", sourceDataSource.getJdbcUrl());
+      ret.put("hive.sql.dbcp.username", sourceDataSource.getUserName());
+      ret.put("hive.sql.dbcp.password", sourceDataSource.getPassword());
+      ret.put("hive.sql.query", querySql);
+      ret.put("hive.sql.jdbc.read-write", "read");
+      ret.put("hive.sql.jdbc.fetch.size", "2000");
+      ret.put("hive.sql.dbcp.maxActive", "1");
+    }
+    return ret;
   }
 
 }

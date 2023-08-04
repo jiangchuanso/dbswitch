@@ -95,6 +95,7 @@ public class MetaDataService {
           .createSql(tableMeta.getCreateSql())
           .primaryKeys(tableMeta.getPrimaryKeys())
           .columns(columnDetailResponses)
+          .indexes(tableMeta.getIndexes())
           .build());
     } finally {
       metaDataService.close();

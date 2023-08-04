@@ -7,12 +7,13 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.common.util;
+package com.gitee.dbswitch.product.hive;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -22,8 +23,8 @@ public final class HivePrepareUtils {
   private final static String HIVE_SQL_2 = "set hive.support.concurrency=true";
   private final static String HIVE_SQL_3 = "set hive.txn.manager = org.apache.hadoop.hive.ql.lockmgr.DbTxnManager";
 
-  public static void setResultSetColumnNameNotUnique(Connection connection)
-      throws SQLException {
+  @SneakyThrows
+  public static void setResultSetColumnNameNotUnique(Connection connection) {
     executeWithoutResultSet(connection, HIVE_SQL_1);
   }
 

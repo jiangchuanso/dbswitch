@@ -10,12 +10,12 @@
 package com.gitee.dbswitch.product.sqlite;
 
 import com.gitee.dbswitch.common.consts.Constants;
+import com.gitee.dbswitch.common.util.DDLFormatterUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
 import com.gitee.dbswitch.schema.TableDescription;
-import com.gitee.dbswitch.common.util.DDLFormatterUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,9 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 public class SqliteMetadataQueryProvider extends AbstractMetadataProvider {
 
   private static final String SHOW_CREATE_TABLE_SQL =
-      "SELECT DBMS_METADATA.GET_DDL('TABLE','%s','%s') FROM DUAL ";
+      "SELECT sql FROM \"sqlite_master\" where type='table' and tbl_name=? ";
   private static final String SHOW_CREATE_VIEW_SQL =
-      "SELECT DBMS_METADATA.GET_DDL('VIEW','%s','%s') FROM DUAL ";
+      "SELECT sql FROM \"sqlite_master\" where type='view' and tbl_name=? ";
 
   public SqliteMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
@@ -44,8 +44,7 @@ public class SqliteMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public String getTableDDL(Connection connection, String schemaName, String tableName) {
-    String sql = "SELECT sql FROM \"sqlite_master\" where type='table' and tbl_name=? ";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (PreparedStatement ps = connection.prepareStatement(SHOW_CREATE_TABLE_SQL)) {
       ps.setString(1, tableName);
       try (ResultSet rs = ps.executeQuery()) {
         if (rs != null && rs.next()) {
@@ -61,8 +60,7 @@ public class SqliteMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public String getViewDDL(Connection connection, String schemaName, String tableName) {
-    String sql = "SELECT sql FROM \"sqlite_master\" where type='view' and tbl_name=? ";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (PreparedStatement ps = connection.prepareStatement(SHOW_CREATE_VIEW_SQL)) {
       ps.setString(1, tableName);
       try (ResultSet rs = ps.executeQuery()) {
         if (rs != null && rs.next()) {

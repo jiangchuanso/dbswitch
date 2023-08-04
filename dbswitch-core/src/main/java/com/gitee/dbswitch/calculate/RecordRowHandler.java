@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author tang
  */
-public interface IDatabaseRowHandler {
+public interface RecordRowHandler {
 
   /**
    * 行数据处理
@@ -26,7 +26,7 @@ public interface IDatabaseRowHandler {
    * @param jdbcTypes jdbc类型
    * @param flag      数据变化状态
    */
-  void handle(List<String> fields, Object[] record, int[] jdbcTypes, RecordChangeTypeEnum flag);
+  void handle(List<String> fields, Object[] record, int[] jdbcTypes, RowChangeTypeEnum flag);
 
   /**
    * 计算结束通知

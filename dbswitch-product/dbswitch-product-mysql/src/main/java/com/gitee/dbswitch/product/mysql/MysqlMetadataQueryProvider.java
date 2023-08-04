@@ -14,6 +14,7 @@ import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
+import com.gitee.dbswitch.schema.IndexDescription;
 import com.gitee.dbswitch.schema.TableDescription;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,24 +84,56 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public synchronized TableDescription queryTableMeta(Connection connection, String schemaName,
-      String tableName) {
-    setCatalogName(schemaName);
-    return super.queryTableMeta(connection, schemaName, tableName);
+  public TableDescription queryTableMeta(Connection connection, String schemaName, String tableName) {
+    try (ResultSet tables = connection.getMetaData()
+        .getTables(schemaName, null, tableName, new String[]{"TABLE"})) {
+      while (tables.next()) {
+        TableDescription td = new TableDescription();
+        td.setSchemaName(schemaName);
+        td.setTableName(tableName);
+        td.setRemarks(tables.getString("REMARKS"));
+        td.setTableType(tables.getString("TABLE_TYPE").toUpperCase());
+        return td;
+      }
+      return null;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public synchronized List<String> queryTableColumnName(Connection connection, String schemaName,
-      String tableName) {
-    setCatalogName(schemaName);
-    return super.queryTableColumnName(connection, schemaName, tableName);
+  public List<String> queryTableColumnName(Connection connection, String schemaName, String tableName) {
+    List<String> columns = new ArrayList<>();
+    try (ResultSet rs = connection.getMetaData()
+        .getColumns(schemaName, null, tableName, null)) {
+      while (rs.next()) {
+        columns.add(rs.getString("COLUMN_NAME"));
+      }
+      return columns.stream().distinct().collect(Collectors.toList());
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
-  public synchronized List<String> queryTablePrimaryKeys(Connection connection, String schemaName,
+  public List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName) {
+    List<String> ret = new ArrayList<>();
+    try (ResultSet primaryKeys = connection.getMetaData()
+        .getPrimaryKeys(schemaName, null, tableName)) {
+      while (primaryKeys.next()) {
+        ret.add(primaryKeys.getString("COLUMN_NAME"));
+      }
+      return ret.stream().distinct().collect(Collectors.toList());
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public synchronized List<IndexDescription> queryTableIndexes(Connection connection, String schemaName,
       String tableName) {
     setCatalogName(schemaName);
-    return super.queryTablePrimaryKeys(connection, schemaName, tableName);
+    return super.queryTableIndexes(connection, schemaName, tableName);
   }
 
   @Override
@@ -274,8 +307,7 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
   }
 
   @Override
-  public List<String> getTableColumnCommentDefinition(TableDescription td,
-      List<ColumnDescription> cds) {
+  public List<String> getTableColumnCommentDefinition(TableDescription td, List<ColumnDescription> cds) {
     return Collections.emptyList();
   }
 
