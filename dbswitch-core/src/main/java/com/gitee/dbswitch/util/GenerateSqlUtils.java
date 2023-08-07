@@ -35,6 +35,8 @@ import org.apache.commons.lang3.StringUtils;
 @UtilityClass
 public final class GenerateSqlUtils {
 
+  private static final boolean HIVE_USE_CTAS = false;
+
   public static String getDDLCreateTableSQL(
       MetadataProvider provider,
       List<ColumnDescription> fieldNames,
@@ -100,15 +102,20 @@ public final class GenerateSqlUtils {
       if (withRemarks && StringUtils.isNotBlank(tableRemarks)) {
         sb.append(String.format(" COMMENT='%s' ", tableRemarks.replace("'", "\\'")));
       }
-    } else if (type.isLikeHive() && null != tblProperties && !tblProperties.isEmpty()) {
-      List<String> kvProperties = new ArrayList<>();
-      tblProperties.forEach((k, v) -> kvProperties.add(String.format("\t\t'%s' = '%s'", k, v)));
-      sb.append(Constants.CR);
-      sb.append("STORED BY 'org.apache.hive.storage.jdbc.JdbcStorageHandler'");
-      sb.append(Constants.CR);
-      sb.append("TBLPROPERTIES (");
-      sb.append(kvProperties.stream().collect(Collectors.joining(",\n")));
-      sb.append(")");
+    } else if (type.isLikeHive()) {
+      if (null != tblProperties && !tblProperties.isEmpty()) {
+        List<String> kvProperties = new ArrayList<>();
+        tblProperties.forEach((k, v) -> kvProperties.add(String.format("\t\t'%s' = '%s'", k, v)));
+        sb.append(Constants.CR);
+        sb.append("STORED BY 'org.apache.hive.storage.jdbc.JdbcStorageHandler'");
+        sb.append(Constants.CR);
+        sb.append("TBLPROPERTIES (");
+        sb.append(kvProperties.stream().collect(Collectors.joining(",\n")));
+        sb.append(")");
+      } else {
+        sb.append(Constants.CR);
+        sb.append("STORED AS ORC");
+      }
     }
 
     return DDLFormatterUtils.format(sb.toString());
@@ -125,13 +132,29 @@ public final class GenerateSqlUtils {
       Map<String, String> tblProperties) {
     ProductTypeEnum productType = provider.getProductType();
     if (productType.isLikeHive()) {
+      List<String> sqlLists = new ArrayList<>();
       String tmpTableName = "tmp_" + UuidUtils.generateUuid();
       String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
           tmpTableName, true, tableRemarks, autoIncr, tblProperties);
-      String createAsTableSql = String.format("CREATE TABLE `%s`.`%s` STORED AS ORC AS (SELECT * FROM `%s`.`%s`)",
-          schemaName, tableName, schemaName, tmpTableName);
+      sqlLists.add(createTableSql);
+      if (HIVE_USE_CTAS) {
+        String createAsTableSql = String.format("CREATE TABLE `%s`.`%s` STORED AS ORC AS (SELECT * FROM `%s`.`%s`)",
+            schemaName, tableName, schemaName, tmpTableName);
+        sqlLists.add(createAsTableSql);
+      } else {
+        String createAsTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
+            tableName, true, tableRemarks, autoIncr, null);
+        sqlLists.add(createAsTableSql);
+        String selectColumns = fieldNames.stream()
+            .map(s -> String.format("`%s`", s.getFieldName()))
+            .collect(Collectors.joining(","));
+        String insertIntoSql = String.format("INSERT INTO `%s`.`%s` SELECT %s FROM `%s`.`%s`",
+            schemaName, tableName, selectColumns, schemaName, tmpTableName);
+        sqlLists.add(insertIntoSql);
+      }
       String dropTmpTableSql = String.format("DROP TABLE IF EXISTS `%s`.`%s`", schemaName, tmpTableName);
-      return Arrays.asList(createTableSql, createAsTableSql, dropTmpTableSql);
+      sqlLists.add(dropTmpTableSql);
+      return sqlLists;
     } else if (productType.noCommentStatement()) {
       String createTableSql = getDDLCreateTableSQL(provider, fieldNames, primaryKeys, schemaName,
           tableName, true, tableRemarks, autoIncr, tblProperties);
