@@ -68,6 +68,9 @@ public class PatternMapperService {
         }
       }
     }
+    result.forEach(
+        r -> r.setTargetName(request.getTableNameCase().convert(r.getTargetName()))
+    );
     return Result.success(result);
   }
 
@@ -104,6 +107,9 @@ public class PatternMapperService {
         }
       }
 
+      result.forEach(
+          r -> r.setTargetName(request.getColumnNameCase().convert(r.getTargetName()))
+      );
       return Result.success(result);
     } finally {
       service.close();

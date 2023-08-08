@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gitee.dbswitch.admin.type.IncludeExcludeEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.common.entity.PatternMapper;
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import com.gitee.dbswitch.common.type.ProductTableEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -89,6 +90,12 @@ public class AssignmentDetailResponse {
 
     @ApiModelProperty("是否只建表")
     private Boolean targetOnlyCreate;
+
+    @ApiModelProperty("表名大小写配置")
+    private CaseConvertEnum tableNameCase;
+
+    @ApiModelProperty("列名大小写配置")
+    private CaseConvertEnum columnNameCase;
 
     @ApiModelProperty("表名映射关系")
     private List<PatternMapper> tableNameMapper;

@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
-import com.gitee.dbswitch.common.converter.ConverterFactory;
+import cn.hutool.core.io.FileUtil;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
@@ -25,6 +25,7 @@ import com.gitee.dbswitch.admin.model.response.DatabaseTypeDriverResponse;
 import com.gitee.dbswitch.admin.model.response.DbConnectionDetailResponse;
 import com.gitee.dbswitch.admin.model.response.DbConnectionNameResponse;
 import com.gitee.dbswitch.admin.util.PageUtils;
+import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.JdbcUrlUtils;
@@ -110,9 +111,7 @@ public class ConnectionService {
                         .driverClass(dbTypeEnum.getDriver())
                         .driverPath(v.getAbsolutePath())
                         .jarFiles(
-                            DataSourceUtils.findJarFilesFromDirectory(v.getAbsolutePath())
-                                .stream().map(f -> f.toFile().getName())
-                                .collect(Collectors.toList())
+                            FileUtil.listFileNames(v.getAbsolutePath())
                         )
                         .build()
                 )

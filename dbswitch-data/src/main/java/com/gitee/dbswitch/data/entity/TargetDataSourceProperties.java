@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.entity;
 
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import java.util.concurrent.TimeUnit;
 import lombok.Data;
 
@@ -24,6 +25,8 @@ public class TargetDataSourceProperties {
   private Long maxLifeTime = TimeUnit.MINUTES.toMillis(30);
 
   private String targetSchema = "";
+  private CaseConvertEnum tableNameCase = CaseConvertEnum.NONE;
+  private CaseConvertEnum columnNameCase = CaseConvertEnum.NONE;
   private Boolean targetDrop = Boolean.TRUE;
   private Boolean onlyCreate = Boolean.FALSE;
   private Boolean createTableAutoIncrement = Boolean.FALSE;

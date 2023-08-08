@@ -1,6 +1,7 @@
 package com.gitee.dbswitch.admin.model.request;
 
 import com.gitee.dbswitch.common.entity.PatternMapper;
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,5 @@ public class PreviewTableNameMapperRequest {
   private Boolean isInclude;
   private List<String> tableNames;
   private List<PatternMapper> nameMapper;
+  private CaseConvertEnum tableNameCase;
 }

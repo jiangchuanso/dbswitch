@@ -57,7 +57,7 @@
                         :disabled=false
                         v-model="updateform.cronExpression"
                         placeholder="点击选择或手动输入"
-                        @click="cronPopover=true" 
+                        @click="cronPopover=true"
                         size="small" />
             </el-popover>
           </el-col>
@@ -208,6 +208,44 @@
                        :value=20000></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="表名大小写转换"
+                      label-width="240px"
+                      prop="tableNameCase"
+                      style="width:45%">
+          <el-tooltip placement="top">
+            <div slot="content">
+              表名大小写转换说明：先使用下面的表名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="updateform.tableNameCase">
+            <el-option label='无转换'
+                       value='NONE'></el-option>
+            <el-option label='转大写'
+                       value='UPPER'></el-option>
+            <el-option label='转小写'
+                       value='LOWER'></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="列名大小写转换"
+                      label-width="240px"
+                      prop="columnNameCase"
+                      style="width:45%">
+          <el-tooltip placement="top">
+            <div slot="content">
+              列名大小写转换说明：先使用下面的列名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="updateform.columnNameCase">
+            <el-option label='无转换'
+                       value='NONE'></el-option>
+            <el-option label='转大写'
+                       value='UPPER'></el-option>
+            <el-option label='转小写'
+                       value='LOWER'></el-option>
+          </el-select>
+        </el-form-item>
       </div>
       <div v-show="active == 4">
         <div class="tip-content">
@@ -329,6 +367,28 @@
           <el-descriptions-item label="目地端schema">{{updateform.targetSchema}}</el-descriptions-item>
           <el-descriptions-item label="只创建表">{{updateform.targetOnlyCreate}}</el-descriptions-item>
           <el-descriptions-item label="数据处理批次量">{{updateform.batchSize}}</el-descriptions-item>
+          <el-descriptions-item label="表名大小写转换">
+            <span v-if="updateform.tableNameCase == 'NONE'">
+              无转换
+            </span>
+            <span v-if="updateform.tableNameCase == 'UPPER'">
+              转大写
+            </span>
+            <span v-if="updateform.tableNameCase == 'LOWER'">
+              转小写
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="列名大小写转换">
+            <span v-if="updateform.columnNameCase == 'NONE'">
+              无转换
+            </span>
+            <span v-if="updateform.columnNameCase == 'UPPER'">
+              转大写
+            </span>
+            <span v-if="updateform.columnNameCase == 'LOWER'">
+              转小写
+            </span>
+          </el-descriptions-item>
           <el-descriptions-item label="表名映射规则">
             <span v-show="!updateform.tableNameMapper || updateform.tableNameMapper.length==0">[映射关系为空]</span>
             <table v-if="updateform.tableNameMapper && updateform.tableNameMapper.length>0"
@@ -455,11 +515,13 @@ export default {
         cronExpression: "",
         sourceConnectionId: '请选择',
         sourceSchema: "",
-        tableType:"TABLE",
+        tableType: "TABLE",
         includeOrExclude: "",
         sourceTables: [],
         tableNameMapper: [],
         columnNameMapper: [],
+        tableNameCase: 'NONE',
+        columnNameCase: 'NONE',
         targetConnectionId: '请选择',
         targetDropTable: true,
         targetOnlyCreate: false,
@@ -618,6 +680,8 @@ export default {
             sourceTables: detail.configuration.sourceTables,
             tableNameMapper: detail.configuration.tableNameMapper,
             columnNameMapper: detail.configuration.columnNameMapper,
+            tableNameCase: detail.configuration.tableNameCase,
+            columnNameCase: detail.configuration.columnNameCase,
             targetConnectionId: detail.configuration.targetConnectionId,
             targetDropTable: detail.configuration.targetDropTable,
             targetOnlyCreate: detail.configuration.targetOnlyCreate,
@@ -754,6 +818,7 @@ export default {
           isInclude: this.updateform.includeOrExclude == 'INCLUDE',
           tableNames: this.updateform.sourceTables,
           nameMapper: this.updateform.tableNameMapper,
+          tableNameCase: this.updateform.tableNameCase
         })
       }).then(res => {
         if (0 === res.data.code) {
@@ -843,6 +908,7 @@ export default {
           isInclude: this.updateform.includeOrExclude == 'INCLUDE',
           tableName: this.preiveTableName,
           nameMapper: this.updateform.columnNameMapper,
+          columnNameCase: this.updateform.columnNameCase
         })
       }).then(res => {
         if (0 === res.data.code) {
@@ -880,6 +946,8 @@ export default {
                 targetSchema: this.updateform.targetSchema,
                 tableNameMapper: this.updateform.tableNameMapper,
                 columnNameMapper: this.updateform.columnNameMapper,
+                tableNameCase: this.updateform.tableNameCase,
+                columnNameCase: this.updateform.columnNameCase,
                 targetDropTable: true,
                 targetOnlyCreate: this.updateform.targetOnlyCreate,
                 batchSize: this.updateform.batchSize

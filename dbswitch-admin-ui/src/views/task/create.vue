@@ -208,6 +208,44 @@
                        :value=20000></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="表名大小写转换"
+                      label-width="240px"
+                      prop="tableNameCase"
+                      style="width:45%">
+          <el-tooltip placement="top">
+            <div slot="content">
+              表名大小写转换说明：先使用下面的表名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="createform.tableNameCase">
+            <el-option label='无转换'
+                       value='NONE'></el-option>
+            <el-option label='转大写'
+                       value='UPPER'></el-option>
+            <el-option label='转小写'
+                       value='LOWER'></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="列名大小写转换"
+                      label-width="240px"
+                      prop="columnNameCase"
+                      style="width:45%">
+          <el-tooltip placement="top">
+            <div slot="content">
+              列名大小写转换说明：先使用下面的列名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="createform.columnNameCase">
+            <el-option label='无转换'
+                       value='NONE'></el-option>
+            <el-option label='转大写'
+                       value='UPPER'></el-option>
+            <el-option label='转小写'
+                       value='LOWER'></el-option>
+          </el-select>
+        </el-form-item>
       </div>
       <div v-show="active == 4">
         <div class="tip-content">
@@ -329,6 +367,28 @@
           <el-descriptions-item label="目地端schema">{{createform.targetSchema}}</el-descriptions-item>
           <el-descriptions-item label="只创建表">{{createform.targetOnlyCreate}}</el-descriptions-item>
           <el-descriptions-item label="数据处理批次量">{{createform.batchSize}}</el-descriptions-item>
+          <el-descriptions-item label="表名大小写转换">
+            <span v-if="createform.tableNameCase == 'NONE'">
+              无转换
+            </span>
+            <span v-if="createform.tableNameCase == 'UPPER'">
+              转大写
+            </span>
+            <span v-if="createform.tableNameCase == 'LOWER'">
+              转小写
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="列名大小写转换">
+            <span v-if="createform.columnNameCase == 'NONE'">
+              无转换
+            </span>
+            <span v-if="createform.columnNameCase == 'UPPER'">
+              转大写
+            </span>
+            <span v-if="createform.columnNameCase == 'LOWER'">
+              转小写
+            </span>
+          </el-descriptions-item>
           <el-descriptions-item label="表名映射规则">
             <span v-show="createform.tableNameMapper.length==0">[映射关系为空]</span>
             <table v-if="createform.tableNameMapper.length>0"
@@ -454,6 +514,8 @@ export default {
         sourceTables: [],
         tableNameMapper: [],
         columnNameMapper: [],
+        tableNameCase: 'NONE',
+        columnNameCase: 'NONE',
         targetConnectionId: '请选择',
         targetDropTable: true,
         targetOnlyCreate: false,
@@ -701,6 +763,7 @@ export default {
           isInclude: this.createform.includeOrExclude == 'INCLUDE',
           tableNames: this.createform.sourceTables,
           nameMapper: this.createform.tableNameMapper,
+          tableNameCase: this.createform.tableNameCase
         })
       }).then(res => {
         if (0 === res.data.code) {
@@ -786,6 +849,7 @@ export default {
           isInclude: this.createform.includeOrExclude == 'INCLUDE',
           tableName: this.preiveTableName,
           nameMapper: this.createform.columnNameMapper,
+          columnNameCase: this.createform.columnNameCase
         })
       }).then(res => {
         if (0 === res.data.code) {
@@ -822,6 +886,8 @@ export default {
                 targetSchema: this.createform.targetSchema,
                 tableNameMapper: this.createform.tableNameMapper,
                 columnNameMapper: this.createform.columnNameMapper,
+                tableNameCase: this.createform.tableNameCase,
+                columnNameCase: this.createform.columnNameCase,
                 targetDropTable: true,
                 targetOnlyCreate: this.createform.targetOnlyCreate,
                 batchSize: this.createform.batchSize

@@ -18,6 +18,7 @@ import com.gitee.dbswitch.calculate.TaskParamEntity;
 import com.gitee.dbswitch.common.consts.Constants;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.ResultSetWrapper;
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.util.DatabaseAwareUtils;
 import com.gitee.dbswitch.common.util.ExamineUtils;
@@ -118,11 +119,26 @@ public class MigrationHandler implements Supplier<Long> {
       fetchSize = sourceProperties.getFetchSize();
     }
 
+    this.sourceProductType = DatabaseAwareUtils.getProductTypeByDataSource(sourceDataSource);
+    this.targetProductType = DatabaseAwareUtils.getProductTypeByDataSource(targetDataSource);
+
+    if (this.targetProductType.isLikeHive()) {
+      // !! hive does not support upper table name and column name
+      properties.getTarget().setTableNameCase(CaseConvertEnum.LOWER);
+      properties.getTarget().setColumnNameCase(CaseConvertEnum.LOWER);
+    }
+
     this.targetExistTables = targetExistTables;
     // 获取映射转换后新的表名
     this.targetSchemaName = properties.getTarget().getTargetSchema();
-    this.targetTableName = PatterNameUtils.getFinalName(td.getTableName(),
-        sourceProperties.getRegexTableMapper());
+    this.targetTableName = properties.getTarget()
+        .getTableNameCase()
+        .convert(
+            PatterNameUtils.getFinalName(
+                td.getTableName(),
+                sourceProperties.getRegexTableMapper()
+            )
+        );
 
     if (StringUtils.isEmpty(this.targetTableName)) {
       throw new RuntimeException("表名的映射规则配置有误，不能将[" + this.sourceTableName + "]映射为空");
@@ -141,10 +157,7 @@ public class MigrationHandler implements Supplier<Long> {
   public Long get() {
     log.info("Begin Migrate table for {}", tableNameMapString);
 
-    this.sourceProductType = DatabaseAwareUtils.getProductTypeByDataSource(sourceDataSource);
-    this.targetProductType = DatabaseAwareUtils.getProductTypeByDataSource(targetDataSource);
-    this.sourceMetaDataService = new DefaultMetadataService(sourceDataSource,
-        sourceProductType);
+    this.sourceMetaDataService = new DefaultMetadataService(sourceDataSource, sourceProductType);
 
     // 读取源表的表及字段元数据
     this.sourceTableRemarks = sourceMetaDataService
@@ -157,9 +170,12 @@ public class MigrationHandler implements Supplier<Long> {
     // 根据表的列名映射转换准备目标端表的字段信息
     this.targetColumnDescriptions = sourceColumnDescriptions.stream()
         .map(column -> {
-          String newName = PatterNameUtils.getFinalName(
-              column.getFieldName(),
-              sourceProperties.getRegexColumnMapper());
+          String newName = properties.getTarget().getColumnNameCase()
+              .convert(
+                  PatterNameUtils.getFinalName(
+                      column.getFieldName(),
+                      sourceProperties.getRegexColumnMapper())
+              );
           ColumnDescription description = column.copy();
           description.setFieldName(newName);
           description.setLabelName(newName);
@@ -167,7 +183,12 @@ public class MigrationHandler implements Supplier<Long> {
         }).collect(Collectors.toList());
     this.targetPrimaryKeys = sourcePrimaryKeys.stream()
         .map(name ->
-            PatterNameUtils.getFinalName(name, sourceProperties.getRegexColumnMapper())
+            properties.getTarget().getColumnNameCase()
+                .convert(
+                    PatterNameUtils.getFinalName(
+                        name,
+                        sourceProperties.getRegexColumnMapper())
+                )
         ).collect(Collectors.toList());
 
     // 打印表名与字段名的映射关系

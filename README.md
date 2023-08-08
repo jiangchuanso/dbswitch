@@ -185,6 +185,10 @@ dbswitch:
     # target database configuration parameters
     ## schema name for create/insert table data
     target-schema: public
+    ## table name to uppper case, option: UPPER,LOWER,NONE
+    table-name-case: UPPER
+    ## column name to uppper case, option: UPPER,LOWER,NONE
+    column-name-case: UPPER
     ## whether drop-create table when target table exist
     target-drop: true
     ## whether create table support auto increment for primary key field
@@ -216,6 +220,8 @@ dbswitch:
 | dbswitch.target.username | 目的端连接帐号名 | test | 无 |
 | dbswitch.target.password | 目的端连接帐号密码 | 123456 | 无 |
 | dbswitch.target.target-schema | 目的端的schema名称 | public | 目的端的schema名称只能有且只有一个 |
+| dbswitch.target.table-name-case | 表名大小写转换策略 | UPPER | 可选值为： UPPER,LOWER,NONE |
+| dbswitch.target.column-name-case | 列名大小写转换策略 | UPPER | 可选值为： UPPER,LOWER,NONE |
 | dbswitch.target.target-drop | 是否执行先drop表然后create表命令,当target.datasource-target.drop=true时有效 | true | 可选值为：true、false |
 | dbswitch.target.create-table-auto-increment | 是否执启用支持create表时主键自增 | true | 可选值为：true、false |
 | dbswitch.target.writer-engine-insert | 是否使用insert写入数据 | false | 可选值为：true为insert写入、false为copy写入，只针对目的端数据库为PostgreSQL/Greenplum的有效 |

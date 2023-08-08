@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS DBSWITCH_ASSIGNMENT_CONFIG (
   "source_tables"               text                  ,
   "excluded"                    boolean               not null default false,
   "target_connection_id"        int8                  not null,
+  "table_name_case"             varchar(32)           not null default 'NONE',
+  "column_name_case"            varchar(32)           not null default 'NONE',
   "target_schema"               varchar(200)          not null,
   "table_name_map"              text                  ,
   "column_name_map"             text                  ,
@@ -139,6 +141,8 @@ COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."source_tables" IS '来源端的tab
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."excluded" IS '是否排除(0:否 1:是)';
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."target_connection_id" IS '目的端连接ID';
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."target_schema" IS '目的端的schema(一个)';
+COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."table_name_case" IS '表名大小写转换策略';
+COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."column_name_case" IS '列名大小写转换策略';
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."table_name_map" IS '表名映射关系';
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."column_name_map" IS '字段名映射关系';
 COMMENT ON COLUMN DBSWITCH_ASSIGNMENT_CONFIG."target_drop_table" IS '同步前是否先删除目的表(0:否 1:是)';

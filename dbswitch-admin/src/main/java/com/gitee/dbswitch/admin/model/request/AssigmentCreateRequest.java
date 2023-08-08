@@ -17,6 +17,7 @@ import com.gitee.dbswitch.admin.type.IncludeExcludeEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.util.CronExprUtils;
 import com.gitee.dbswitch.common.entity.PatternMapper;
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import com.gitee.dbswitch.common.type.ProductTableEnum;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
 import java.util.List;
@@ -47,6 +48,8 @@ public class AssigmentCreateRequest {
     private List<String> sourceTables;
     private Long targetConnectionId;
     private String targetSchema;
+    private CaseConvertEnum tableNameCase;
+    private CaseConvertEnum columnNameCase;
     private List<PatternMapper> tableNameMapper;
     private List<PatternMapper> columnNameMapper;
     private Boolean targetDropTable;
@@ -84,6 +87,8 @@ public class AssigmentCreateRequest {
     );
     assignmentConfigEntity.setTargetConnectionId(this.getConfig().getTargetConnectionId());
     assignmentConfigEntity.setTargetSchema(this.getConfig().getTargetSchema());
+    assignmentConfigEntity.setTableNameCase(this.getConfig().getTableNameCase());
+    assignmentConfigEntity.setColumnNameCase(this.getConfig().getColumnNameCase());
     assignmentConfigEntity.setTableNameMap(this.getConfig().getTableNameMapper());
     assignmentConfigEntity.setColumnNameMap(this.getConfig().getColumnNameMapper());
     assignmentConfigEntity.setTargetDropTable(this.getConfig().getTargetDropTable());

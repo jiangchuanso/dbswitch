@@ -12,6 +12,7 @@ package com.gitee.dbswitch.admin.entity;
 import com.gitee.dbswitch.admin.handler.ListPatternHandler;
 import com.gitee.dbswitch.admin.handler.ListTypeHandler;
 import com.gitee.dbswitch.common.entity.PatternMapper;
+import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import com.gitee.dbswitch.common.type.ProductTableEnum;
 import java.sql.Timestamp;
 import java.util.List;
@@ -59,6 +60,12 @@ public class AssignmentConfigEntity {
 
   @Column(name = "target_schema")
   private String targetSchema;
+
+  @Column(name = "table_name_case")
+  private CaseConvertEnum tableNameCase;
+
+  @Column(name = "column_name_case")
+  private CaseConvertEnum columnNameCase;
 
   @Column(name = "table_name_map")
   @ColumnType(typeHandler = ListPatternHandler.class)

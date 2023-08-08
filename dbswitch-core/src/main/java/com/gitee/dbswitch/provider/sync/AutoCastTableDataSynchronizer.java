@@ -24,7 +24,8 @@ public class AutoCastTableDataSynchronizer extends DefaultTableDataSynchronizer 
   public long executeUpdate(List<Object[]> records) {
     records.forEach((Object[] row) -> {
       for (int i = 0; i < row.length; ++i) {
-        row[i] = ObjectCastUtils.castByJdbcType(updateArgsType[i], row[i]);
+        //row[i] = ObjectCastUtils.castByJdbcType(updateArgsType[i], row[i]);
+        row[i] = ObjectCastUtils.castByDetermine(row[i]);
       }
     });
     return super.executeUpdate(records);

@@ -274,6 +274,8 @@ public class AssignmentService {
     if (assignmentConfigEntity.getTargetOnlyCreate()) {
       targetDataSourceProperties.setOnlyCreate(Boolean.TRUE);
     }
+    targetDataSourceProperties.setTableNameCase(assignmentConfigEntity.getTableNameCase());
+    targetDataSourceProperties.setColumnNameCase(assignmentConfigEntity.getColumnNameCase());
 
     return targetDataSourceProperties;
   }
