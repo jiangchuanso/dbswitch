@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
-import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
@@ -28,6 +27,7 @@ import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.util.PageUtils;
+import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.data.config.DbswichProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
@@ -72,12 +72,18 @@ public class AssignmentService {
     assignmentConfigDAO.insert(assignmentConfigEntity);
 
     Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-    DatabaseConnectionEntity entity = databaseConnectionDAO.getById(targetConnectionId);
-    if (ProductTypeEnum.SQLITE3 == entity.getType()) {
-      if (ProductTypeEnum.isUnsupportedTargetSqlite(entity.getUrl())) {
+    DatabaseConnectionEntity targetEntity = databaseConnectionDAO.getById(targetConnectionId);
+    if (ProductTypeEnum.SQLITE3 == targetEntity.getType()) {
+      if (ProductTypeEnum.isUnsupportedTargetSqlite(targetEntity.getUrl())) {
         throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
             "不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
       }
+    }
+    Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+    DatabaseConnectionEntity sourceEntity = databaseConnectionDAO.getById(sourceConnectionId);
+    if (ProductTypeEnum.MONGODB == sourceEntity.getType()) {
+      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+          "不支持源端数据源为MongoDB数据库");
     }
 
     return ConverterFactory.getConverter(AssignmentInfoConverter.class)
@@ -113,6 +119,12 @@ public class AssignmentService {
         throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
             "不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
       }
+    }
+    Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+    DatabaseConnectionEntity sourceEntity = databaseConnectionDAO.getById(sourceConnectionId);
+    if (ProductTypeEnum.MONGODB == sourceEntity.getType()) {
+      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+          "不支持源端数据源为MongoDB数据库");
     }
   }
 

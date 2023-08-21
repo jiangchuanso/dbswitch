@@ -86,10 +86,14 @@ public final class DatabaseAwareUtils {
       }
 
       ProductTypeEnum type = productNameMap.get(productName);
-      if (null == type) {
-        throw new IllegalStateException("Unable to detect database type from data source instance");
+      if (null != type) {
+        return type;
       }
-      return type;
+      String url = connection.getMetaData().getURL();
+      if (null != url && url.contains("mongodb://")) {
+        return ProductTypeEnum.MONGODB;
+      }
+      throw new IllegalStateException("Unable to detect database type from data source instance");
     } catch (SQLException se) {
       throw new RuntimeException(se);
     }

@@ -5,7 +5,7 @@
   <parent>
     <artifactId>dbswitch-parent</artifactId>
     <groupId>com.gitee.dbswitch</groupId>
-    <version>1.8.1</version>
+    <version>1.8.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>dbswitch-product</artifactId>
@@ -26,6 +26,7 @@
     <module>dbswitch-product-hive</module>
     <module>dbswitch-product-gbase</module>
     <module>dbswitch-product-openguass</module>
+    <module>dbswitch-product-mongodb</module>
     <module>dbswitch-register-product</module>
   </modules>
 

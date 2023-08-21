@@ -63,6 +63,8 @@ public final class DataSourceUtils {
       parameters.put("remarksReporting", "true");
     } else if (properties.getDriverClassName().contains("db2")) {
       ds.setConnectionTestQuery("SELECT 1 FROM SYSIBM.SYSDUMMY1");
+    } else if (properties.getDriverClassName().contains("mongodb")) {
+      ds.setConnectionTestQuery("use admin;");
     } else {
       ds.setConnectionTestQuery("SELECT 1");
     }
@@ -103,6 +105,8 @@ public final class DataSourceUtils {
       ds.setConnectionTestQuery("SELECT 'Hello' from DUAL");
     } else if (properties.getDriverClassName().contains("db2")) {
       ds.setConnectionTestQuery("SELECT 1 FROM SYSIBM.SYSDUMMY1");
+    } else if (properties.getDriverClassName().contains("mongodb")) {
+      ds.setConnectionTestQuery("use admin;");
     } else {
       ds.setConnectionTestQuery("SELECT 1");
     }

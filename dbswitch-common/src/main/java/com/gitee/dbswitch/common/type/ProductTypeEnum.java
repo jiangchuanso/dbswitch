@@ -136,6 +136,14 @@ public enum ProductTypeEnum {
       "SELECT 1",
       "jdbc:opengauss://",
       new String[]{"jdbc:opengauss://{host}[:{port}]/[{database}][\\?{params}]"}),
+
+  /**
+   * MongoDB数据库类型
+   */
+  MONGODB(15, "\"", "mongoDB", "com.gitee.jdbc.mongodb.JdbcDriver", 27017,
+      "use admin;",
+      "jdbc:mongodb://",
+      new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"}),
   ;
 
   private int id;
@@ -221,6 +229,15 @@ public enum ProductTypeEnum {
    */
   public boolean isLikeHive() {
     return this == HIVE;
+  }
+
+  /**
+   * 是否为MongoDB数据库类型
+   *
+   * @return boolean
+   */
+  public boolean isMongodb() {
+    return this == MONGODB;
   }
 
   /**

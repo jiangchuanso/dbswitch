@@ -235,7 +235,16 @@ public class MigrationHandler implements Supplier<Long> {
     TableOperateProvider targetOperator = targetFactoryProvider.createTableOperateProvider();
     TableDataSynchronizer targetSynchronizer = targetFactoryProvider.createTableDataSynchronizer();
 
-    if (properties.getTarget().getTargetDrop() || targetProductType.isLikeHive()) {
+    if (targetProductType.isMongodb()) {
+      try {
+        targetFactoryProvider.createTableOperateProvider()
+            .dropTable(targetSchemaName, targetTableName);
+        log.info("Target Table {}.{} is exits, drop it now !", targetSchemaName, targetTableName);
+      } catch (Exception e) {
+        log.info("Target Table {}.{} is not exits, create it!", targetSchemaName, targetTableName);
+      }
+      return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+    } else if (properties.getTarget().getTargetDrop() || targetProductType.isLikeHive()) {
       /*
         如果配置了dbswitch.target.datasource-target-drop=true时，
         <p>

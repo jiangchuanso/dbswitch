@@ -45,6 +45,7 @@
         ├── dbswitch-product-sybase   //  -> sybase方言实现类
         ├── dbswitch-product-hive     //  -> hive方言实现类
         ├── dbswitch-product-sqlite   //  -> sqlite方言实现类
+        ├── dbswitch-product-mongodb  //  -> mongodb方言实现类
     ├── dbswitch-data                 // 工具入口模块，读取配置文件中的参数执行异构迁移同步
     ├── dbswitch-admin                // 在以上模块的基础上引入Quartz的调度服务与接口
     ├── dbswitch-admin-ui             // 基于Vue2的前段WEB交互页面
@@ -342,6 +343,13 @@ jdbc驱动名称：org.sqlite.JDBC
 > (c) 不支持内存及其他方式;本地文件方式可以作为源端和目的端，而远程服务器方式只能作为源端。
 >
 > (d) SQLite为单写多读方式，禁止人为方式造成多写导致锁表。
+
+**MongoDB数据库**
+
+```
+jdbc连接地址：jdbc:mongodb://172.17.2.12:27017/test?authSource=admin&authMechanism=SCRAM-SHA-1
+jdbc驱动名称：com.wisecoders.dbschema.mongodb.JdbcDriver
+```
 
 #### (2)、启动方法
 
