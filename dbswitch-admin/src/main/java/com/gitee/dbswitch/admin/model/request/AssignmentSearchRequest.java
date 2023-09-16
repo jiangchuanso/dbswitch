@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class DbConnectionSearchRequest {
+public class AssignmentSearchRequest {
 
   private String searchText;
   private Integer page;

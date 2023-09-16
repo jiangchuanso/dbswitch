@@ -48,19 +48,30 @@
                       label-width="240px"
                       style="width:65%"
                       v-if="updateform.scheduleMode=='SYSTEM_SCHEDULED'">
-          <el-col :span="10">
-            <el-popover v-model="cronPopover">
-              <vueCron @change="changeUpdateCronExpression"
-                       @close="cronPopover=false"
-                       i18n="cn" />
-              <el-input slot="reference"
-                        :disabled=false
-                        v-model="updateform.cronExpression"
-                        placeholder="点击选择或手动输入"
-                        @click="cronPopover=true"
-                        size="small" />
-            </el-popover>
-          </el-col>
+          <el-tooltip placement="top">
+            <div slot="content">
+              执行周期为CRON表达式，即可以选择以下内置的周期，也可以自行输入或粘贴合法的CRON表达式(最小间隔时间为2分钟)。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="updateform.cronExpression"
+                     filterable
+                     allow-create>
+            <el-option label="每5分钟执行1次"
+                       value="0 0/5 * * * ? *"></el-option>
+            <el-option label="每30分钟执行1次"
+                       value="0 0/30 * * * ? *"></el-option>
+            <el-option label="每1小时执行1次"
+                       value="0 0 0/1 * * ? *"></el-option>
+            <el-option label="每2小时执行1次"
+                       value="0 0 0/2 * * ? *"></el-option>
+            <el-option label="每8小时执行1次"
+                       value="0 0 0/8 * * ? *"></el-option>
+            <el-option label="每12小时执行1次"
+                       value="0 0 0/12 * * ? *"></el-option>
+            <el-option label="每日0时执行1次"
+                       value="0 0 0 1/1 * ? *"></el-option>
+          </el-select>
         </el-form-item>
       </div>
       <div v-show="active == 2">
@@ -84,6 +95,7 @@
                       prop="sourceSchema"
                       style="width:65%">
           <el-select v-model="updateform.sourceSchema"
+                     filterable
                      @change="selectUpdateChangedSourceSchema"
                      placeholder="请选择">
             <el-option v-for="(item,index) in sourceConnectionSchemas"
@@ -132,6 +144,7 @@
           </el-tooltip>
           <el-select placeholder="请选择表名"
                      multiple
+                     filterable
                      v-model="updateform.sourceTables">
             <el-option v-for="(item,index) in sourceSchemaTables"
                        :key="index"
@@ -186,6 +199,26 @@
                        :value=false></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label-width="240px"
+                      :required=true
+                      prop="targetDropTable"
+                      style="width:65%">
+          <span slot="label">
+            <span style="color: red"><strong>删除同名表</strong> </span>
+          </span>
+          <el-tooltip placement="top">
+            <div slot="content">
+              当目标端存在同名表时，如果配置为“是”，则会删除同步表后再进行创建。如果修改了表或字段的映射关系，请将配置为“是”，否则任务执行时会因映射关系不匹配而报错。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="updateform.targetDropTable">
+            <el-option label='是'
+                       :value=true></el-option>
+            <el-option label='否'
+                       :value=false></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="数据处理批次大小"
                       label-width="240px"
                       :required=true
@@ -210,6 +243,7 @@
         </el-form-item>
         <el-form-item label="表名大小写转换"
                       label-width="240px"
+                      :required=true
                       prop="tableNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
@@ -229,6 +263,7 @@
         </el-form-item>
         <el-form-item label="列名大小写转换"
                       label-width="240px"
+                      :required=true
                       prop="columnNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
@@ -366,6 +401,7 @@
           <el-descriptions-item label="目地端数据源">[{{updateform.targetConnectionId}}]{{targetConnection.name}}</el-descriptions-item>
           <el-descriptions-item label="目地端schema">{{updateform.targetSchema}}</el-descriptions-item>
           <el-descriptions-item label="只创建表">{{updateform.targetOnlyCreate}}</el-descriptions-item>
+          <el-descriptions-item label="删除同名表">{{updateform.targetDropTable}}</el-descriptions-item>
           <el-descriptions-item label="数据处理批次量">{{updateform.batchSize}}</el-descriptions-item>
           <el-descriptions-item label="表名大小写转换">
             <span v-if="updateform.tableNameCase == 'NONE'">
@@ -469,7 +505,7 @@
     </el-dialog>
 
     <el-dialog v-if="active == 4"
-               title="查看字段影射关系"
+               title="查看字段映射关系"
                :visible.sync="columnNameMapperDialogVisible"
                :showClose="false"
                :before-close="handleClose">
@@ -948,7 +984,7 @@ export default {
                 columnNameMapper: this.updateform.columnNameMapper,
                 tableNameCase: this.updateform.tableNameCase,
                 columnNameCase: this.updateform.columnNameCase,
-                targetDropTable: true,
+                targetDropTable: this.updateform.targetDropTable,
                 targetOnlyCreate: this.updateform.targetOnlyCreate,
                 batchSize: this.updateform.batchSize
               }

@@ -1,13 +1,24 @@
 <template>
   <div>
     <el-card>
-      <div align="right"
-           style="margin:10px 5px;"
-           width="95%">
-        <el-button type="primary"
-                   icon="el-icon-document-add"
-                   @click="createFormVisible=true">添加</el-button>
+      <div class="connection-list-top">
+        <div class="left-search-input-group">
+          <div class="left-search-input">
+            <el-input placeholder="请输入连接名称关键字搜索"
+                      v-model="keyword"
+                      @change="searchByKeyword"
+                      clearable=true
+                      style="width:300px">
+            </el-input>
+          </div>
+        </div>
+        <div class="right-add-button-group">
+          <el-button type="primary"
+                     icon="el-icon-document-add"
+                     @click="createFormVisible=true">添加</el-button>
+        </div>
       </div>
+
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                 :data="tableData"
                 size="small"
@@ -37,21 +48,42 @@
         <el-table-column label="操作"
                          min-width="30%">
           <template slot-scope="scope">
-            <el-button size="small"
-                       type="success"
-                       @click="handleMore(scope.$index, scope.row)">详情</el-button>
-            <el-button size="small"
-                       type="warning"
-                       @click="handleTest(scope.$index, scope.row)">测试</el-button>
-            <el-dropdown size="small"
-                         split-button
-                         type="primary">
-              更多
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="handleUpdate(scope.$index, scope.row)">修改</el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="handleDelete(scope.$index, scope.row)">删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+            <el-tooltip content="测试"
+                        placement="top"
+                        effect="dark">
+              <el-button size="small"
+                         type="danger"
+                         icon="el-icon-document-checked"
+                         @click="handleTest(scope.$index, scope.row)"
+                         circle></el-button>
+            </el-tooltip>
+            <el-tooltip content="详情"
+                        placement="top"
+                        effect="dark">
+              <el-button size="small"
+                         type="primary"
+                         icon="el-icon-document"
+                         @click="handleMore(scope.$index, scope.row)"
+                         circle></el-button>
+            </el-tooltip>
+            <el-tooltip content="编辑"
+                        placement="top"
+                        effect="dark">
+              <el-button size="small"
+                         type="warning"
+                         icon="el-icon-edit"
+                         @click="handleUpdate(scope.$index, scope.row)"
+                         circle></el-button>
+            </el-tooltip>
+            <el-tooltip content="删除"
+                        placement="top"
+                        effect="dark">
+              <el-button size="small"
+                         type="success"
+                         icon="el-icon-delete"
+                         @click="handleDelete(scope.$index, scope.row)"
+                         circle></el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -296,6 +328,7 @@ export default {
   data () {
     return {
       loading: true,
+      keyword: null,
       lists: [],
       currentPage: 1,
       pageSize: 10,
@@ -375,25 +408,34 @@ export default {
   methods: {
     loadData: function () {
       this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/connection/list/" + this.currentPage + "/" + this.pageSize
-      }).then(
-        res => {
-          if (0 === res.data.code) {
-            this.currentPage = res.data.pagination.page;
-            this.pageSize = res.data.pagination.size;
-            this.totalCount = res.data.pagination.total;
-            this.tableData = res.data.data;
-          } else {
-            alert("加载任务列表失败:" + res.data.message);
-          }
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
         },
+        url: "/dbswitch/admin/api/v1/connection/list",
+        data: JSON.stringify({
+          searchText: this.keyword,
+          page: this.currentPage,
+          size: this.pageSize
+        })
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.currentPage = res.data.pagination.page;
+          this.pageSize = res.data.pagination.size;
+          this.totalCount = res.data.pagination.total;
+          this.tableData = res.data.data;
+        } else {
+          alert("加载任务列表失败:" + res.data.message);
+        }
+      },
         function () {
-          console.log("failed");
+          console.log("load connection list failed");
         }
       );
     },
-
+    searchByKeyword: function () {
+      this.loadData();
+    },
     loadDatabaseTypes: function () {
       this.databaseType = [];
       this.$http({
@@ -597,5 +639,27 @@ export default {
   width: 100%;
   height: 100%;
   overflow: auto;
+}
+.connection-list-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-search-input-group {
+  width: calc(100% - 100px);
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+}
+.left-search-input {
+  width: 300px;
+  margin-right: auto;
+  margin: 10px 5px;
+}
+.right-add-button-group {
+  width: 100px;
+  margin-left: auto;
+  margin: 10px 5px;
 }
 </style>

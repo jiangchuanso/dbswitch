@@ -16,6 +16,7 @@ import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.config.SwaggerConfig;
 import com.gitee.dbswitch.admin.model.request.AssigmentCreateRequest;
 import com.gitee.dbswitch.admin.model.request.AssigmentUpdateRequest;
+import com.gitee.dbswitch.admin.model.request.AssignmentSearchRequest;
 import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
 import com.gitee.dbswitch.admin.service.AssignmentService;
@@ -70,11 +71,9 @@ public class AssignmentController {
 
   @TokenCheck
   @ApiOperation(value = "任务列表")
-  @GetMapping(value = "/list/{page}/{size}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public PageResult<AssignmentInfoResponse> listAssignment(
-      @PathVariable("page") Integer page,
-      @PathVariable("size") Integer size) {
-    return assignmentService.listAll(null, page, size);
+  @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  public PageResult<AssignmentInfoResponse> listAssignment(@RequestBody AssignmentSearchRequest request) {
+    return assignmentService.listAll(request);
   }
 
   @TokenCheck

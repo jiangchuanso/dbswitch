@@ -88,6 +88,7 @@ export default {
       }).then(res => {
         if (0 === res.data.code) {
           this.connectionTypes = res.data.data;
+          this.handleChooseClick('MYSQL',0);
         } else {
           if (res.data.message) {
             alert("初始化数据库类型信息失败:" + res.data.message);

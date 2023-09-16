@@ -23,6 +23,7 @@ import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.model.request.AssigmentCreateRequest;
 import com.gitee.dbswitch.admin.model.request.AssigmentUpdateRequest;
+import com.gitee.dbswitch.admin.model.request.AssignmentSearchRequest;
 import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
@@ -116,12 +117,12 @@ public class AssignmentService {
     }
   }
 
-  public PageResult<AssignmentInfoResponse> listAll(String searchText, Integer page, Integer size) {
+  public PageResult<AssignmentInfoResponse> listAll(AssignmentSearchRequest request) {
     Supplier<List<AssignmentInfoResponse>> method = () ->
         ConverterFactory.getConverter(AssignmentInfoConverter.class)
-            .convert(assignmentTaskDAO.listAll(searchText));
+            .convert(assignmentTaskDAO.listAll(request.getSearchText()));
 
-    return PageUtils.getPage(method, page, size);
+    return PageUtils.getPage(method, request.getPage(), request.getSize());
   }
 
   public Result<AssignmentDetailResponse> detailAssignment(Long id) {

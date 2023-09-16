@@ -32,7 +32,7 @@
                   基于JDBC的分批次读取源端数据库数据，并基于insert/copy方式将数据分批写入目的数据库。
                 </p>
                 <p>
-                  支持有主键表的 增量变更同步 （变化数据计算Change Data Calculate）功能。
+                  支持有主键表的"变化量"同步 （变化数据计算Change Data Calculate）功能。
                 </p>
               </ul>
             </div>
@@ -49,7 +49,7 @@
           <el-card class="box-card">
             <div class="text item">
               <p>
-                dbswitch提供异构关系数据库间的数据迁移同步，支持绝大多数关系型数据库，包括：
+                dbswitch提供异构关系数据库间的数据迁移同步，支持多种数据库，包括：
               </p>
               <ul>
                 <li>甲骨文的Oracle
@@ -75,12 +75,16 @@
                 <li>国产翰高数据库HighGo
                 </li>
                 <li>国产神通数据库Oscar
-                </li>  
+                </li>
                 <li>国产南大通用数据库GBase8a
-                </li>  
-                <li>Apache Hive(只支持为源端)
+                </li>
+                <li>Apache Hive(基于JdbcStorageHandler)
                 </li>
                 <li>SQLite3
+                </li>
+                <li>OpenGuass
+                </li>
+                <li>MongoDB
                 </li>
               </ul>
             </div>
@@ -113,10 +117,13 @@
                     ├── dbswitch-product-oscar    //  -> oscar方言实现类
                     ├── dbswitch-product-gbase    //  -> gbase方言实现类
                     ├── dbswitch-product-mariadb  //  -> mariadb方言实现类
+                    ├── dbswitch-product-openguass//  -> openguass方言实现类
                     ├── dbswitch-product-db2      //  -> db2方言实现类
                     ├── dbswitch-product-sybase   //  -> sybase方言实现类
                     ├── dbswitch-product-hive     //  -> hive方言实现类
                     ├── dbswitch-product-sqlite   //  -> sqlite方言实现类
+                    ├── dbswitch-product-openguass//  -> openguass方言实现类
+                    ├── dbswitch-product-mongodb  //  -> mongodb方言实现类
                 ├── dbswitch-data                 // 工具入口模块，读取配置文件中的参数执行异构迁移同步
                 ├── dbswitch-admin                // 在以上模块的基础上引入Quartz的调度服务与接口
                 ├── dbswitch-admin-ui             // 基于Vue2的前段WEB交互页面

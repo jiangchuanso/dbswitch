@@ -120,8 +120,7 @@ public class ConnectionService {
   }
 
   public PageResult<DbConnectionDetailResponse> getConnections(
-      DbConnectionSearchRequest request,
-      Integer page, Integer size) {
+      DbConnectionSearchRequest request) {
     Supplier<List<DbConnectionDetailResponse>> method = () -> {
       List<DatabaseConnectionEntity> databaseConnectionEntities = databaseConnectionDAO
           .listAll(request.getSearchText());
@@ -129,7 +128,7 @@ public class ConnectionService {
           .convert(databaseConnectionEntities);
     };
 
-    return PageUtils.getPage(method, page, size);
+    return PageUtils.getPage(method, request.getPage(), request.getSize());
   }
 
   public DbConnectionDetailResponse getDetailById(Long id) {

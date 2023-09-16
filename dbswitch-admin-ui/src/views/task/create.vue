@@ -44,23 +44,34 @@
                        value="SYSTEM_SCHEDULED"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Cron表达式"
+        <el-form-item label="执行周期"
                       label-width="240px"
                       style="width:65%"
                       v-if="createform.scheduleMode=='SYSTEM_SCHEDULED'">
-          <el-col :span="10">
-            <el-popover v-model="cronPopover">
-              <vueCron @change="changeCreateCronExpression"
-                       @close="cronPopover=false"
-                       i18n="cn" />
-              <el-input slot="reference"
-                        :disabled=false
-                        v-model="createform.cronExpression"
-                        placeholder="点击选择或手动输入"
-                        @click="cronPopover=true"
-                        size="small" />
-            </el-popover>
-          </el-col>
+          <el-tooltip placement="top">
+            <div slot="content">
+              执行周期为CRON表达式，即可以选择以下内置的周期，也可以自行输入或粘贴合法的CRON表达式(最小间隔时间为2分钟)。
+            </div>
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+          <el-select v-model="createform.cronExpression"
+                     filterable
+                     allow-create>
+            <el-option label="每5分钟执行1次"
+                       value="0 0/5 * * * ? *"></el-option>
+            <el-option label="每30分钟执行1次"
+                       value="0 0/30 * * * ? *"></el-option>
+            <el-option label="每1小时执行1次"
+                       value="0 0 0/1 * * ? *"></el-option>
+            <el-option label="每2小时执行1次"
+                       value="0 0 0/2 * * ? *"></el-option>
+            <el-option label="每8小时执行1次"
+                       value="0 0 0/8 * * ? *"></el-option>
+            <el-option label="每12小时执行1次"
+                       value="0 0 0/12 * * ? *"></el-option>
+            <el-option label="每日0时执行1次"
+                       value="0 0 0 1/1 * ? *"></el-option>
+          </el-select>
         </el-form-item>
       </div>
       <div v-show="active == 2">
@@ -84,6 +95,7 @@
                       prop="sourceSchema"
                       style="width:65%">
           <el-select v-model="createform.sourceSchema"
+                     filterable
                      @change="selectCreateChangedSourceSchema"
                      placeholder="请选择">
             <el-option v-for="(item,index) in sourceConnectionSchemas"
@@ -132,6 +144,7 @@
           </el-tooltip>
           <el-select placeholder="请选择表名"
                      multiple
+                     filterable
                      v-model="createform.sourceTables">
             <el-option v-for="(item,index) in sourceSchemaTables"
                        :key="index"
@@ -161,6 +174,7 @@
                       prop="targetSchema"
                       style="width:65%">
           <el-select v-model="createform.targetSchema"
+                     filterable
                      placeholder="请选择">
             <el-option v-for="(item,index) in targetConnectionSchemas"
                        :key="index"
@@ -210,6 +224,7 @@
         </el-form-item>
         <el-form-item label="表名大小写转换"
                       label-width="240px"
+                      :required=true
                       prop="tableNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
@@ -229,6 +244,7 @@
         </el-form-item>
         <el-form-item label="列名大小写转换"
                       label-width="240px"
+                      :required=true
                       prop="columnNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
@@ -464,7 +480,7 @@
     </el-dialog>
 
     <el-dialog v-if="active == 4"
-               title="查看字段影射关系"
+               title="查看字段映射关系"
                :visible.sync="columnNameMapperDialogVisible"
                :showClose="false"
                :before-close="handleClose">

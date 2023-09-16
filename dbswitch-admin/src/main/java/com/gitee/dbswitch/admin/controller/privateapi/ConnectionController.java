@@ -58,11 +58,9 @@ public class ConnectionController {
 
   @TokenCheck
   @ApiOperation(value = "连接列表")
-  @GetMapping(value = "/list/{page}/{size}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public PageResult<DbConnectionDetailResponse> getConnections(DbConnectionSearchRequest request,
-      @PathVariable(value = "page", required = false) Integer page,
-      @PathVariable(value = "size", required = false) Integer size) {
-    return connectionService.getConnections(request, page, size);
+  @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  public PageResult<DbConnectionDetailResponse> getConnections(@RequestBody DbConnectionSearchRequest request) {
+    return connectionService.getConnections(request);
   }
 
   @TokenCheck

@@ -91,6 +91,9 @@ public class AssignmentDetailResponse {
     @ApiModelProperty("是否只建表")
     private Boolean targetOnlyCreate;
 
+    @ApiModelProperty("是否删除同名表")
+    private Boolean targetDropTable;
+
     @ApiModelProperty("表名大小写配置")
     private CaseConvertEnum tableNameCase;
 

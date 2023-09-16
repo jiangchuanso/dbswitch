@@ -6,6 +6,12 @@
           <div slot="header"
                class="clearfix">
             <span>任务安排列表</span>
+            <el-input placeholder="请输入关键字搜索"
+                      v-model="keyword"
+                      clearable=true
+                      @change="changeSearchKeyword"
+                      style="width:200px">
+            </el-input>
           </div>
           <div class="navsBox">
             <ul>
@@ -55,11 +61,11 @@
             <el-table-column label="日志"
                              min-width="15%">
               <template slot-scope="props">
-                    <el-button size="small"
-                               type="danger"
-                               @click="handleShowJobLogs(props.row.jobId)">
-                      查看
-                    </el-button>
+                <el-button size="small"
+                           type="danger"
+                           @click="handleShowJobLogs(props.row.jobId)">
+                  查看
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -146,6 +152,7 @@ export default {
       totalCount: 0,
       currentTaskAssignmentPage: 1,
       currentTaskAssignmentPageSize: 10,
+      keyword: null,
       pageTaskAssignments: [],
       pageTaskAssignmentsTotalCount: 0,
       taskId: '请选择一个任务安排',
@@ -164,8 +171,16 @@ export default {
   methods: {
     loadPageTaskAssignments: function () {
       this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/assignment/list/" + this.currentTaskAssignmentPage + "/" + this.currentTaskAssignmentPageSize
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/dbswitch/admin/api/v1/assignment/list",
+        data: JSON.stringify({
+          searchText: this.keyword,
+          page: this.currentTaskAssignmentPage,
+          size: this.currentTaskAssignmentPageSize
+        })
       }).then(res => {
         if (0 === res.data.code) {
           this.pageTaskAssignments = res.data.data;
@@ -177,6 +192,9 @@ export default {
         }
       }
       );
+    },
+    changeSearchKeyword: function () {
+      this.loadPageTaskAssignments();
     },
     handleLoadPageTaskAssignments: function (currentPage) {
       this.currentTaskAssignmentPage = currentPage;
@@ -383,5 +401,4 @@ export default {
   padding: 10px;
   width: calc(100% - 250px);
 }
-
 </style>

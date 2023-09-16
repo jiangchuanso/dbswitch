@@ -1,14 +1,24 @@
 <template>
   <div>
     <el-card>
-      <div align="right"
-           style="margin:10px 5px;"
-           width="65%">
-        <el-button type="primary"
-                   icon="el-icon-document-add"
-                   size="small"
-                   @click="handleCreate">添加</el-button>
+      <div class="assignment-list-top">
+        <div class="left-search-input-group">
+          <div class="left-search-input">
+            <el-input placeholder="请输入任务名称关键字搜索"
+                      v-model="keyword"
+                      clearable=true
+                      @change="searchByKeyword"
+                      style="width:300px">
+            </el-input>
+          </div>
+        </div>
+        <div class="right-add-button-group">
+          <el-button type="primary"
+                     icon="el-icon-document-add"
+                     @click="handleCreate">添加</el-button>
+        </div>
       </div>
+
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                 :data="tableData"
                 size="small"
@@ -33,29 +43,38 @@
                          label="时间"
                          min-width="15%"></el-table-column>
         <el-table-column label="操作"
-                         min-width="40%">
+                         min-width="30%">
           <template slot-scope="scope">
             <el-button size="small"
-                       type="success"
+                       type="danger"
+                       icon="el-icon-timer"
                        v-if="scope.row.isPublished===false"
-                       @click="handlePublish(scope.$index, scope.row)"><i class="el-icon-timer el-icon--right"></i>发布</el-button>
+                       @click="handlePublish(scope.$index, scope.row)"
+                       circle>发布</el-button>
             <el-button size="small"
-                       type="warning"
+                       type="primary"
+                       icon="el-icon-delete-location"
                        v-if="scope.row.isPublished===true"
-                       @click="handleRetireTask(scope.$index, scope.row)"><i class="el-icon-delete-location el-icon--right"></i>下线</el-button>
+                       @click="handleRetireTask(scope.$index, scope.row)"
+                       circle>下线</el-button>
             <el-button size="small"
                        type="danger"
+                       icon="el-icon-video-play"
                        v-if="scope.row.isPublished===true"
-                       @click="handleRunTask(scope.$index, scope.row)"><i class="el-icon-video-play el-icon--right"></i>执行</el-button>
-            <el-dropdown size="small"
-                         split-button
-                         type="primary">
-              更多
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native.prevent="handleUpdate(scope.$index, scope.row)">修改</el-dropdown-item>
-                <el-dropdown-item @click.native.prevent="handleDelete(scope.$index, scope.row)">删除</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+                       @click="handleRunTask(scope.$index, scope.row)"
+                       circle>执行</el-button>
+            <el-button size="small"
+                       type="warning"
+                       icon="el-icon-edit"
+                       v-if="scope.row.isPublished===false"
+                       @click="handleUpdate(scope.$index, scope.row)"
+                       circle>修改</el-button>
+            <el-button size="small"
+                       type="success"
+                       icon="el-icon-delete"
+                       v-if="scope.row.isPublished===false"
+                       @click="handleDelete(scope.$index, scope.row)"
+                       circle>删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -82,29 +101,40 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalCount: 2,
+      keyword: null,
       tableData: [],
     };
   },
   methods: {
     loadData: function () {
       this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/assignment/list/" + this.currentPage + "/" + this.pageSize
-      }).then(
-        res => {
-          if (0 === res.data.code) {
-            this.currentPage = res.data.pagination.page;
-            this.pageSize = res.data.pagination.size;
-            this.totalCount = res.data.pagination.total;
-            this.tableData = res.data.data;
-          } else {
-            alert("加载任务列表失败:" + res.data.message);
-          }
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
         },
+        url: "/dbswitch/admin/api/v1/assignment/list",
+        data: JSON.stringify({
+          searchText: this.keyword,
+          page: this.currentPage,
+          size: this.pageSize
+        })
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.currentPage = res.data.pagination.page;
+          this.pageSize = res.data.pagination.size;
+          this.totalCount = res.data.pagination.total;
+          this.tableData = res.data.data;
+        } else {
+          alert("加载任务列表失败:" + res.data.message);
+        }
+      },
         function () {
-          console.log("failed");
+          console.log("load assignments list failed");
         }
       );
+    },
+    searchByKeyword: function () {
+      this.loadData();
     },
     boolFormatPublish (row, column) {
       if (row.isPublished === true) {
@@ -255,5 +285,28 @@ export default {
   border-color: #e4e7ed;
   color: #c0c4cc;
   cursor: pointer;
+}
+
+.assignment-list-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-search-input-group {
+  width: calc(100% - 100px);
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+}
+.left-search-input {
+  width: 300px;
+  margin-right: auto;
+  margin: 10px 5px;
+}
+.right-add-button-group {
+  width: 100px;
+  margin-left: auto;
+  margin: 10px 5px;
 }
 </style>
