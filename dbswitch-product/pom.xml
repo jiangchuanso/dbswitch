@@ -28,6 +28,7 @@
     <module>dbswitch-product-openguass</module>
     <module>dbswitch-product-mongodb</module>
     <module>dbswitch-register-product</module>
+    <module>dbswitch-product-clickhouse</module>
   </modules>
 
 </project>

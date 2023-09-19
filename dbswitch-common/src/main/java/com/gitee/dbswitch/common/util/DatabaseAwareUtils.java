@@ -49,6 +49,7 @@ public final class DatabaseAwareUtils {
     productNameMap.put("OSCAR", ProductTypeEnum.OSCAR);
     productNameMap.put("GBase", ProductTypeEnum.GBASE8A);
     productNameMap.put("Adaptive Server Enterprise", ProductTypeEnum.SYBASE);
+    productNameMap.put("ClickHouse", ProductTypeEnum.CLICKHOUSE);
 
     driverNameMap.put("MySQL Connector Java", ProductTypeEnum.MYSQL);
     driverNameMap.put("MariaDB Connector/J", ProductTypeEnum.MARIADB);
@@ -62,6 +63,7 @@ public final class DatabaseAwareUtils {
     driverNameMap.put("OSCAR JDBC DRIVER", ProductTypeEnum.OSCAR);
     driverNameMap.put("GBase JDBC Driver", ProductTypeEnum.GBASE8A);
     driverNameMap.put("jConnect (TM) for JDBC (TM)", ProductTypeEnum.SYBASE);
+    driverNameMap.put("ClickHouse JDBC Driver", ProductTypeEnum.CLICKHOUSE);
   }
 
   /**

@@ -118,6 +118,16 @@ public final class GenerateSqlUtils {
         sb.append(Constants.CR);
         sb.append("STORED AS ORC");
       }
+    } else if (type.isClickHouse()) {
+      sb.append("ENGINE=MergeTree");
+      if (CollectionUtils.isEmpty(pks)) {
+        sb.append(Constants.CR);
+        sb.append("ORDER BY tuple()");
+      }
+      if (withRemarks && StringUtils.isNotBlank(tableRemarks)) {
+        sb.append(Constants.CR);
+        sb.append(String.format("COMMENT='%s' ", tableRemarks.replace("'", "\\'")));
+      }
     }
 
     return DDLFormatterUtils.format(sb.toString());

@@ -85,6 +85,11 @@
     </dependency>
     <dependency>
       <groupId>com.gitee.dbswitch</groupId>
+      <artifactId>dbswitch-product-clickhouse</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.gitee.dbswitch</groupId>
       <artifactId>dbswitch-product-mongodb</artifactId>
       <version>${project.version}</version>
     </dependency>

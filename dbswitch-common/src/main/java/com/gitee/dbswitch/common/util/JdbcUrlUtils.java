@@ -318,6 +318,16 @@ public final class JdbcUrlUtils {
     } else {
       System.out.println("error for mongodb!");
     }
+
+    // 13、ClickHouse数据库
+    // jdbc:clickhouse://127.0.0.1:8123/default
+    final Matcher matcher12 = JdbcUrlUtils.getPattern("jdbc:clickhouse://{host}[:{port}]/[{database}][\\?{params}]")
+        .matcher("jdbc:clickhouse://127.0.0.1:8123/default");
+    if (matcher12.matches()) {
+      System.out.println("clickhouse database:" + matcher12.group("database"));
+    } else {
+      System.out.println("error for clickhouse!");
+    }
   }
 
 }

@@ -45,6 +45,7 @@
         ├── dbswitch-product-sybase   //  -> sybase方言实现类
         ├── dbswitch-product-hive     //  -> hive方言实现类
         ├── dbswitch-product-sqlite   //  -> sqlite方言实现类
+        ├── dbswitch-product-clickhouse//  -> clickhouse方言实现类
         ├── dbswitch-product-mongodb  //  -> mongodb方言实现类
     ├── dbswitch-data                 // 工具入口模块，读取配置文件中的参数执行异构迁移同步
     ├── dbswitch-admin                // 在以上模块的基础上引入Quartz的调度服务与接口
@@ -318,6 +319,13 @@ jdbc驱动名称：org.apache.hive.jdbc.HiveDriver
 ```
 jdbc连接地址：dbc:opengauss://172.17.2.10:5866/test
 jdbc驱动名称：org.opengauss.Driver
+```
+
+**ClickHouse数据库**
+
+```
+jdbc连接地址：jdbc:clickhouse://172.17.2.10:8123/default
+jdbc驱动名称：com.clickhouse.jdbc.ClickHouseDriver
 ```
 
 **SQLite数据库**

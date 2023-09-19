@@ -138,9 +138,17 @@ public enum ProductTypeEnum {
       new String[]{"jdbc:opengauss://{host}[:{port}]/[{database}][\\?{params}]"}),
 
   /**
+   * ClickHouse数据库类型
+   */
+  CLICKHOUSE(15, "`", "clickhouse", "com.clickhouse.jdbc.ClickHouseDriver", 8123,
+      "SELECT 1",
+      "jdbc:clickhouse://",
+      new String[]{"jdbc:clickhouse://{host}[:{port}]/[{database}][\\?{params}]"}),
+
+  /**
    * MongoDB数据库类型
    */
-  MONGODB(15, "\"", "mongoDB", "com.gitee.jdbc.mongodb.JdbcDriver", 27017,
+  MONGODB(16, "\"", "mongoDB", "com.gitee.jdbc.mongodb.JdbcDriver", 27017,
       "use admin;",
       "jdbc:mongodb://",
       new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"}),
@@ -238,6 +246,15 @@ public enum ProductTypeEnum {
    */
   public boolean isMongodb() {
     return this == MONGODB;
+  }
+
+  /**
+   * 是否为ClickHouse数据库类型
+   *
+   * @return boolean
+   */
+  public boolean isClickHouse() {
+    return this == CLICKHOUSE;
   }
 
   /**
