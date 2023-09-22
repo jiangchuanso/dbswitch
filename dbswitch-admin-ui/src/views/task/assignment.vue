@@ -46,13 +46,13 @@
                          min-width="30%">
           <template slot-scope="scope">
             <el-button size="small"
-                       type="danger"
+                       type="primary"
                        icon="el-icon-timer"
                        v-if="scope.row.isPublished===false"
                        @click="handlePublish(scope.$index, scope.row)"
                        circle>发布</el-button>
             <el-button size="small"
-                       type="primary"
+                       type="info"
                        icon="el-icon-delete-location"
                        v-if="scope.row.isPublished===true"
                        @click="handleRetireTask(scope.$index, scope.row)"
@@ -64,13 +64,19 @@
                        @click="handleRunTask(scope.$index, scope.row)"
                        circle>执行</el-button>
             <el-button size="small"
+                       type="success"
+                       icon="el-icon-document"
+                       v-if="scope.row.isPublished===true"
+                       @click="handleDetail(scope.$index, scope.row)"
+                       circle>详情</el-button>
+            <el-button size="small"
                        type="warning"
                        icon="el-icon-edit"
                        v-if="scope.row.isPublished===false"
                        @click="handleUpdate(scope.$index, scope.row)"
                        circle>修改</el-button>
             <el-button size="small"
-                       type="success"
+                       type="danger"
                        icon="el-icon-delete"
                        v-if="scope.row.isPublished===false"
                        @click="handleDelete(scope.$index, scope.row)"
@@ -152,6 +158,9 @@ export default {
     },
     handleCreate: function () {
       this.$router.push('/task/create')
+    },
+    handleDetail: function (index, row) {
+      this.$router.push({ path: '/task/detail', query: { id: row.id } })
     },
     handleUpdate: function (index, row) {
       this.$router.push({ path: '/task/update', query: { id: row.id } })

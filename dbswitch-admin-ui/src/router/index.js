@@ -112,6 +112,12 @@ const constantRouter = new Router({
           name: '修改任务',
           hidden: true,
           component: () => import('@/views/task/update')
+        },
+        {
+          path: '/task/detail',
+          name: '查看任务',
+          hidden: true,
+          component: () => import('@/views/task/detail')
         }
       ],
     },
