@@ -9,14 +9,13 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gitee.dbswitch.admin.entity.SystemLogEntity;
 import com.gitee.dbswitch.admin.mapper.SystemLogMapper;
 import com.gitee.dbswitch.admin.type.LogTypeEnum;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.entity.Example.Criteria;
 
 @Repository
 public class SystemLogDAO {
@@ -25,23 +24,18 @@ public class SystemLogDAO {
   private SystemLogMapper systemLogMapper;
 
   public void insert(SystemLogEntity systemLogEntity) {
-    systemLogMapper.insertSelective(systemLogEntity);
+    systemLogMapper.insert(systemLogEntity);
   }
 
   public List<SystemLogEntity> listAll(LogTypeEnum logType) {
-    Example example = new Example(SystemLogEntity.class);
-    Criteria criteria = example.createCriteria();
-
-    SystemLogEntity condition = new SystemLogEntity();
-    condition.setType(logType.getValue());
-
-    criteria.andEqualTo(condition);
-    example.orderBy("createTime").desc();
-    return systemLogMapper.selectByExample(example);
+    QueryWrapper<SystemLogEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(SystemLogEntity::getType, logType.getValue())
+        .orderByDesc(SystemLogEntity::getCreateTime);
+    return systemLogMapper.selectList(queryWrapper);
   }
 
   public SystemLogEntity getById(Long id) {
-    return systemLogMapper.selectByPrimaryKey(id);
+    return systemLogMapper.selectById(id);
   }
 
 }

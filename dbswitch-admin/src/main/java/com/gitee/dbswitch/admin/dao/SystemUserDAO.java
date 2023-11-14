@@ -9,13 +9,12 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gitee.dbswitch.admin.entity.SystemUserEntity;
 import com.gitee.dbswitch.admin.mapper.SystemUserMapper;
 import java.util.Objects;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.Sqls;
 
 @Repository
 public class SystemUserDAO {
@@ -24,25 +23,20 @@ public class SystemUserDAO {
   private SystemUserMapper systemUserMapper;
 
   public SystemUserEntity getById(Long id) {
-    return systemUserMapper.selectByPrimaryKey(id);
+    return systemUserMapper.selectById(id);
   }
 
   public SystemUserEntity findByUsername(String username) {
-    return systemUserMapper.selectOneByExample(
-        Example.builder(SystemUserEntity.class)
-            .where(
-                Sqls.custom()
-                    .andEqualTo("username", username)
-            )
-            .build()
-    );
+    QueryWrapper<SystemUserEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(SystemUserEntity::getUsername, username);
+    return systemUserMapper.selectOne(queryWrapper);
   }
 
   public void updateUserPassword(String username, String newPassword) {
     SystemUserEntity userEntity = findByUsername(username);
     if (Objects.nonNull(userEntity)) {
       userEntity.setPassword(newPassword);
-      systemUserMapper.updateByPrimaryKeySelective(userEntity);
+      systemUserMapper.updateById(userEntity);
     }
   }
 

@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface DatabaseConnectionMapper extends Mapper<DatabaseConnectionEntity> {
+public interface DatabaseConnectionMapper extends BaseMapper<DatabaseConnectionEntity> {
 
 }

@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.SystemUserEntity;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface SystemUserMapper extends Mapper<SystemUserEntity> {
+public interface SystemUserMapper extends BaseMapper<SystemUserEntity> {
 
 }

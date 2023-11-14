@@ -9,14 +9,14 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.mapper.DatabaseConnectionMapper;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.entity.Example.Criteria;
 
 @Repository
 public class DatabaseConnectionDAO {
@@ -25,39 +25,37 @@ public class DatabaseConnectionDAO {
   private DatabaseConnectionMapper databaseConnectionMapper;
 
   public void insert(DatabaseConnectionEntity databaseConnectionEntity) {
-    databaseConnectionMapper.insertSelective(databaseConnectionEntity);
+    databaseConnectionMapper.insert(databaseConnectionEntity);
   }
 
   public DatabaseConnectionEntity getById(Long id) {
-    return databaseConnectionMapper.selectByPrimaryKey(id);
+    return databaseConnectionMapper.selectById(id);
   }
 
   public DatabaseConnectionEntity getByName(String name) {
-    DatabaseConnectionEntity record = new DatabaseConnectionEntity();
-    record.setName(name);
-    return databaseConnectionMapper.selectOne(record);
+    QueryWrapper<DatabaseConnectionEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(DatabaseConnectionEntity::getName, name);
+    return databaseConnectionMapper.selectOne(queryWrapper);
   }
 
   public List<DatabaseConnectionEntity> listAll(String searchText) {
-    Example example = new Example(DatabaseConnectionEntity.class);
-    if (!StringUtils.isEmpty(searchText)) {
-      Criteria criteria = example.createCriteria();
-      criteria.andLike("name", "%" + searchText + "%");
-    }
-    example.orderBy("createTime").desc();
-    return databaseConnectionMapper.selectByExample(example);
+    return databaseConnectionMapper.selectList(
+        Wrappers.<DatabaseConnectionEntity>lambdaQuery()
+            .like(StringUtils.hasText(searchText), DatabaseConnectionEntity::getName, searchText)
+            .orderByDesc(DatabaseConnectionEntity::getCreateTime)
+    );
   }
 
   public void updateById(DatabaseConnectionEntity databaseConnectionEntity) {
-    databaseConnectionMapper.updateByPrimaryKeySelective(databaseConnectionEntity);
+    databaseConnectionMapper.updateById(databaseConnectionEntity);
   }
 
   public void deleteById(Long id) {
-    databaseConnectionMapper.deleteByPrimaryKey(id);
+    databaseConnectionMapper.deleteById(id);
   }
 
   public int getTotalCount() {
-    return databaseConnectionMapper.selectCount(null);
+    return databaseConnectionMapper.selectCount(null).intValue();
   }
 
 }

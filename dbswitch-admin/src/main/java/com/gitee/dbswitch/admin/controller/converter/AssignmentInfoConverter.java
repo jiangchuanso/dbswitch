@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.controller.converter;
 
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class AssignmentInfoConverter extends
     AbstractConverter<AssignmentTaskEntity, AssignmentInfoResponse> {

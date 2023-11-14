@@ -9,58 +9,57 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import java.sql.Timestamp;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import tk.mybatis.mapper.annotation.KeySql;
 
-@SuperBuilder
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_SYSTEM_LOG")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_SYSTEM_LOG")
 public class SystemLogEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "type")
+  @TableField("type")
   private Integer type;
 
-  @Column(name = "username")
+  @TableField("username")
   private String username;
 
-  @Column(name = "ip_address")
+  @TableField("ip_address")
   private String ipAddress;
 
-  @Column(name = "module_name")
+  @TableField("module_name")
   private String moduleName;
 
-  @Column(name = "content")
+  @TableField("content")
   private String content;
 
-  @Column(name = "url_path")
+  @TableField("url_path")
   private String urlPath;
 
-  @Column(name = "user_agent")
+  @TableField("user_agent")
   private String userAgent;
 
-  @Column(name = "failed")
+  @TableField("failed")
   private Boolean failed;
 
-  @Column(name = "exception")
+  @TableField("exception")
   private String exception;
 
-  @Column(name = "elapse_seconds")
+  @TableField("elapse_seconds")
   private Long elapseSeconds;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 }

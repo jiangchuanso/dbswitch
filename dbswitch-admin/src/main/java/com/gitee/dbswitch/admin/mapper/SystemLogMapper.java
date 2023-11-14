@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.SystemLogEntity;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface SystemLogMapper extends Mapper<SystemLogEntity> {
+public interface SystemLogMapper extends BaseMapper<SystemLogEntity> {
 
 }

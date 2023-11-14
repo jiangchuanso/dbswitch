@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.AssignmentJobEntity;
 import com.gitee.dbswitch.admin.model.ops.OpsTaskJobTrend;
 import java.util.List;
@@ -16,9 +17,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface AssignmentJobMapper extends Mapper<AssignmentJobEntity> {
+public interface AssignmentJobMapper extends BaseMapper<AssignmentJobEntity> {
 
   @Select("<script>"
       + "<if test='_databaseId == \"mysql\" '>"

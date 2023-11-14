@@ -9,12 +9,12 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.JobLogbackEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface JobLogbackMapper extends Mapper<JobLogbackEntity> {
+public interface JobLogbackMapper extends BaseMapper<JobLogbackEntity> {
 
   @Delete("<script>"
       + "<if test='_databaseId == \"mysql\" '>"

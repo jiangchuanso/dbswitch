@@ -9,53 +9,53 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import java.sql.Timestamp;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import tk.mybatis.mapper.annotation.KeySql;
+import org.apache.ibatis.type.EnumTypeHandler;
 
-@SuperBuilder
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_DATABASE_CONNECTION")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_DATABASE_CONNECTION")
 public class DatabaseConnectionEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "name")
+  @TableField("name")
   private String name;
 
-  @Column(name = "type")
+  @TableField(value = "type", typeHandler = EnumTypeHandler.class)
   private ProductTypeEnum type;
 
-  @Column(name = "version")
+  @TableField("version")
   private String version;
 
-  @Column(name = "driver")
+  @TableField("driver")
   private String driver;
 
-  @Column(name = "url")
+  @TableField("url")
   private String url;
 
-  @Column(name = "username")
+  @TableField("username")
   private String username;
 
-  @Column(name = "password")
+  @TableField("password")
   private String password;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 
-  @Column(name = "update_time", insertable = false, updatable = false)
+  @TableField(value = "update_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp updateTime;
 }

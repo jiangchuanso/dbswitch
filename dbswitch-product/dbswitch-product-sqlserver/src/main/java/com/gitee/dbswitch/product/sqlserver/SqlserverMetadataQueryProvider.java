@@ -312,7 +312,7 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
       results.add(String
           .format(
               "EXEC [sys].sp_addextendedproperty 'MS_Description', N'%s', 'schema', N'%s', 'table', N'%s' ",
-              td.getRemarks().replace("\"", "\\\""), td.getSchemaName(), td.getTableName()));
+              td.getRemarks().replace("'", ""), td.getSchemaName(), td.getTableName()));
     }
 
     for (ColumnDescription cd : cds) {
@@ -320,7 +320,7 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
         results.add(String
             .format(
                 "EXEC [sys].sp_addextendedproperty 'MS_Description', N'%s', 'schema', N'%s', 'table', N'%s', 'column', N'%s' ",
-                cd.getRemarks().replace("\"", "\\\""), td.getSchemaName(), td.getTableName(),
+                cd.getRemarks().replace("'", ""), td.getSchemaName(), td.getTableName(),
                 cd.getFieldName()));
       }
     }

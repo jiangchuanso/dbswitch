@@ -9,20 +9,15 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.controller.converter;
 
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.entity.SystemUserEntity;
 import com.gitee.dbswitch.admin.model.response.SystemUserDetailResponse;
-import java.util.Objects;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class SystemUserDetailConverter extends
     AbstractConverter<SystemUserEntity, SystemUserDetailResponse> {
 
   @Override
   public SystemUserDetailResponse convert(SystemUserEntity user) {
-    if (Objects.isNull(user)) {
-      return null;
-    }
-
     SystemUserDetailResponse response = new SystemUserDetailResponse();
     response.setId(user.getId());
     response.setUsername(user.getUsername());

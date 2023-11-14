@@ -9,53 +9,52 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import java.sql.Timestamp;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import tk.mybatis.mapper.annotation.KeySql;
 
-@SuperBuilder
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_SYSTEM_USER")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_SYSTEM_USER")
 public class SystemUserEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "username")
+  @TableField("username")
   private String username;
 
-  @Column(name = "password")
+  @TableField("password")
   private String password;
 
-  @Column(name = "salt")
+  @TableField("salt")
   private String salt;
 
-  @Column(name = "real_name")
+  @TableField("real_name")
   private String realName;
 
-  @Column(name = "email")
+  @TableField("email")
   private String email;
 
-  @Column(name = "address")
+  @TableField("address")
   private String address;
 
-  @Column(name = "locked")
+  @TableField("locked")
   private Boolean locked;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 
-  @Column(name = "update_time", insertable = false, updatable = false)
+  @TableField(value = "update_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp updateTime;
 
 }

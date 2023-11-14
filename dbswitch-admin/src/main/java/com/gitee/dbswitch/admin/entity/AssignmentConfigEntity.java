@@ -9,84 +9,81 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
-import com.gitee.dbswitch.admin.handler.ListPatternHandler;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.dbswitch.admin.handler.ListTypeHandler;
 import com.gitee.dbswitch.common.entity.PatternMapper;
 import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import com.gitee.dbswitch.common.type.ProductTableEnum;
 import java.sql.Timestamp;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.ColumnType;
-import tk.mybatis.mapper.annotation.KeySql;
+import org.apache.ibatis.type.EnumTypeHandler;
 
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_ASSIGNMENT_CONFIG")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_ASSIGNMENT_CONFIG")
 public class AssignmentConfigEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "assignment_id")
+  @TableField("assignment_id")
   private Long assignmentId;
 
-  @Column(name = "source_connection_id")
+  @TableField("source_connection_id")
   private Long sourceConnectionId;
 
-  @Column(name = "source_schema")
+  @TableField("source_schema")
   private String sourceSchema;
 
-  @Column(name = "table_type")
+  @TableField(value = "table_type", typeHandler = EnumTypeHandler.class)
   private ProductTableEnum tableType;
 
-  @Column(name = "source_tables")
-  @ColumnType(typeHandler = ListTypeHandler.class)
+  @TableField(value = "source_tables", typeHandler = ListTypeHandler.class)
   private List<String> sourceTables;
 
-  @Column(name = "excluded")
+  @TableField("excluded")
   private Boolean excluded;
 
-  @Column(name = "target_connection_id")
+  @TableField("target_connection_id")
   private Long targetConnectionId;
 
-  @Column(name = "target_schema")
+  @TableField("target_schema")
   private String targetSchema;
 
-  @Column(name = "table_name_case")
+  @TableField(value = "table_name_case", typeHandler = EnumTypeHandler.class)
   private CaseConvertEnum tableNameCase;
 
-  @Column(name = "column_name_case")
+  @TableField(value = "column_name_case", typeHandler = EnumTypeHandler.class)
   private CaseConvertEnum columnNameCase;
 
-  @Column(name = "table_name_map")
-  @ColumnType(typeHandler = ListPatternHandler.class)
+  @TableField(value = "table_name_map")
   private List<PatternMapper> tableNameMap;
 
-  @Column(name = "column_name_map")
-  @ColumnType(typeHandler = ListPatternHandler.class)
+  @TableField(value = "column_name_map")
   private List<PatternMapper> columnNameMap;
 
-  @Column(name = "target_drop_table")
+  @TableField("target_drop_table")
   private Boolean targetDropTable;
 
-  @Column(name = "target_only_create")
+  @TableField("target_only_create")
   private Boolean targetOnlyCreate;
 
-  @Column(name = "batch_size")
+  @TableField("batch_size")
   private Integer batchSize;
 
-  @Column(name = "first_flag")
+  @TableField("first_flag")
   private Boolean firstFlag;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 }

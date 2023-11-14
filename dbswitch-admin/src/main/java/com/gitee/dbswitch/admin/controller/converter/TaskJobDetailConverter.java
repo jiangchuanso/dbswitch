@@ -9,23 +9,17 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.controller.converter;
 
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.entity.AssignmentJobEntity;
 import com.gitee.dbswitch.admin.model.response.TaskJobDetailResponse;
 import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
-import java.util.Objects;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class TaskJobDetailConverter extends
     AbstractConverter<AssignmentJobEntity, TaskJobDetailResponse> {
 
   @Override
   public TaskJobDetailResponse convert(AssignmentJobEntity assignmentJobEntity) {
-    if (Objects.isNull(assignmentJobEntity)) {
-      return null;
-    }
-
-    //ScheduleService scheduleService = SpringUtil.getBean(ScheduleService.class);
     TaskJobDetailResponse response = new TaskJobDetailResponse();
     response.setJobId(assignmentJobEntity.getId());
     response.setAssignmentId(assignmentJobEntity.getAssignmentId());

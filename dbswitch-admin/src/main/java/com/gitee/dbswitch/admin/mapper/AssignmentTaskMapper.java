@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
-import tk.mybatis.mapper.common.Mapper;
 
-public interface AssignmentTaskMapper extends Mapper<AssignmentTaskEntity> {
+public interface AssignmentTaskMapper extends BaseMapper<AssignmentTaskEntity> {
 
 }

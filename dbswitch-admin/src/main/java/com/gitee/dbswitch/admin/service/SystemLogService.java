@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
-import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
@@ -19,6 +18,7 @@ import com.gitee.dbswitch.admin.entity.SystemLogEntity;
 import com.gitee.dbswitch.admin.model.response.SystemLogDetailResponse;
 import com.gitee.dbswitch.admin.type.LogTypeEnum;
 import com.gitee.dbswitch.admin.util.PageUtils;
+import com.gitee.dbswitch.common.converter.ConverterFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;

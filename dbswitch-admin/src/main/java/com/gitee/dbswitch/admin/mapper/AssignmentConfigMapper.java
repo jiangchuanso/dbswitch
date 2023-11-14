@@ -10,8 +10,8 @@
 package com.gitee.dbswitch.admin.mapper;
 
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
-import tk.mybatis.mapper.common.Mapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
-public interface AssignmentConfigMapper extends Mapper<AssignmentConfigEntity> {
+public interface AssignmentConfigMapper extends BaseMapper<AssignmentConfigEntity> {
 
 }

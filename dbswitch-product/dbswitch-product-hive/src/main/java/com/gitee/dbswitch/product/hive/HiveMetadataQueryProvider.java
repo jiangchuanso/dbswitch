@@ -154,7 +154,7 @@ public class HiveMetadataQueryProvider extends AbstractMetadataProvider {
     }
 
     if (withRemarks && StringUtils.isNotBlank(v.getRemarks())) {
-      retval += String.format(" COMMENT '%s' ", v.getRemarks().replace("'", "\\'"));
+      retval += String.format(" COMMENT '%s' ", v.getRemarks().replace("'", ""));
     }
 
     if (addCr) {

@@ -9,34 +9,33 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import java.sql.Timestamp;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import tk.mybatis.mapper.annotation.KeySql;
 
-@SuperBuilder
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_JOB_LOGBACK")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_JOB_LOGBACK")
 public class JobLogbackEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "uuid")
+  @TableField("uuid")
   private String uuid;
 
-  @Column(name = "content")
+  @TableField("content")
   private String content;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 }

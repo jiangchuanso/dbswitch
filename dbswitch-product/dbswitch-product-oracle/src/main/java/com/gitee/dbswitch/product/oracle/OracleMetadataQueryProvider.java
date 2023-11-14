@@ -225,7 +225,7 @@ public class OracleMetadataQueryProvider extends AbstractMetadataProvider {
       results.add(String
           .format("COMMENT ON TABLE \"%s\".\"%s\" IS '%s' ",
               td.getSchemaName(), td.getTableName(),
-              td.getRemarks().replace("\"", "\\\"")));
+              td.getRemarks().replace("'", "")));
     }
 
     for (ColumnDescription cd : cds) {
@@ -233,7 +233,7 @@ public class OracleMetadataQueryProvider extends AbstractMetadataProvider {
         results.add(String
             .format("COMMENT ON COLUMN \"%s\".\"%s\".\"%s\" IS '%s' ",
                 td.getSchemaName(), td.getTableName(), cd.getFieldName(),
-                cd.getRemarks().replace("\"", "\\\"")));
+                cd.getRemarks().replace("'", "")));
       }
     }
 

@@ -9,20 +9,15 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.controller.converter;
 
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.entity.SystemLogEntity;
 import com.gitee.dbswitch.admin.model.response.SystemLogDetailResponse;
-import java.util.Objects;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class SystemLogDetailConverter extends
     AbstractConverter<SystemLogEntity, SystemLogDetailResponse> {
 
   @Override
   public SystemLogDetailResponse convert(SystemLogEntity systemLogEntity) {
-    if (Objects.isNull(systemLogEntity)) {
-      return null;
-    }
-
     SystemLogDetailResponse response = new SystemLogDetailResponse();
     response.setId(systemLogEntity.getId());
     response.setUsername(systemLogEntity.getUsername());

@@ -9,12 +9,11 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
 import com.gitee.dbswitch.admin.mapper.AssignmentConfigMapper;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.Sqls;
 
 @Repository
 public class AssignmentConfigDAO {
@@ -23,28 +22,27 @@ public class AssignmentConfigDAO {
   private AssignmentConfigMapper assignmentConfigMapper;
 
   public void insert(AssignmentConfigEntity assignmentConfigEntity) {
-    assignmentConfigMapper.insertSelective(assignmentConfigEntity);
+    assignmentConfigMapper.insert(assignmentConfigEntity);
   }
 
   public AssignmentConfigEntity getById(Long id) {
-    return assignmentConfigMapper.selectByPrimaryKey(id);
+    return assignmentConfigMapper.selectById(id);
   }
 
-  public AssignmentConfigEntity getByAssignmentTaskId(Long assignmentId) {
-    AssignmentConfigEntity record = new AssignmentConfigEntity();
-    record.setAssignmentId(assignmentId);
-    return assignmentConfigMapper.selectOne(record);
+  public AssignmentConfigEntity getByAssignmentTaskId(Long taskId) {
+    QueryWrapper<AssignmentConfigEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AssignmentConfigEntity::getAssignmentId, taskId);
+    return assignmentConfigMapper.selectOne(queryWrapper);
   }
 
   public void updateSelective(AssignmentConfigEntity assignmentConfigEntity) {
-    assignmentConfigMapper.updateByPrimaryKeySelective(assignmentConfigEntity);
+    assignmentConfigMapper.updateById(assignmentConfigEntity);
   }
 
   public void deleteByAssignmentTaskId(Long taskId) {
-    Example example = Example.builder(AssignmentConfigEntity.class)
-        .andWhere(Sqls.custom().andEqualTo("assignmentId", taskId))
-        .build();
-    assignmentConfigMapper.deleteByExample(example);
+    QueryWrapper<AssignmentConfigEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AssignmentConfigEntity::getAssignmentId, taskId);
+    assignmentConfigMapper.delete(queryWrapper);
   }
 
 }

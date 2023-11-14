@@ -9,50 +9,51 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import java.sql.Timestamp;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tk.mybatis.mapper.annotation.KeySql;
 
-@NoArgsConstructor
 @Data
-@Entity
-@Table(name = "DBSWITCH_ASSIGNMENT_JOB")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("DBSWITCH_ASSIGNMENT_JOB")
 public class AssignmentJobEntity {
 
-  @Id
-  @KeySql(useGeneratedKeys = true)
-  @Column(name = "id", insertable = false, updatable = false)
+  @TableId(value = "id", type = IdType.AUTO)
   private Long id;
 
-  @Column(name = "assignment_id")
+  @TableField("assignment_id")
   private Long assignmentId;
 
-  @Column(name = "job_key")
+  @TableField("job_key")
   private String jobKey;
 
-  @Column(name = "schedule_mode")
+  @TableField("schedule_mode")
   private Integer scheduleMode;
 
-  @Column(name = "start_time")
+  @TableField("start_time")
   private Timestamp startTime;
 
-  @Column(name = "finish_time")
+  @TableField("finish_time")
   private Timestamp finishTime;
 
-  @Column(name = "status")
+  @TableField("status")
   private Integer status;
 
-  @Column(name = "error_log")
+  @TableField("error_log")
   private String errorLog;
 
-  @Column(name = "create_time", insertable = false, updatable = false)
+  @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 
-  @Column(name = "update_time", insertable = false, updatable = false)
+  @TableField(value = "update_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp updateTime;
 }

@@ -37,6 +37,8 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
   private static final String QUERY_TABLE_LIST_SQL =
       "SELECT `TABLE_SCHEMA`,`TABLE_NAME`,`TABLE_TYPE`,`TABLE_COMMENT` "
           + "FROM `information_schema`.`TABLES` where `TABLE_SCHEMA`= ? ";
+  private static final String QUERY_TABLE_COMMENT_SQL =
+      "SELECT TABLE_COMMENT from information_schema.`TABLES` where TABLE_SCHEMA = ? and TABLE_NAME = ?";
 
   public MysqlMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
@@ -85,17 +87,20 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public TableDescription queryTableMeta(Connection connection, String schemaName, String tableName) {
-    try (ResultSet tables = connection.getMetaData()
-        .getTables(schemaName, null, tableName, new String[]{"TABLE"})) {
-      while (tables.next()) {
-        TableDescription td = new TableDescription();
-        td.setSchemaName(schemaName);
-        td.setTableName(tableName);
-        td.setRemarks(tables.getString("REMARKS"));
-        td.setTableType(tables.getString("TABLE_TYPE").toUpperCase());
-        return td;
+    try (PreparedStatement ps = connection.prepareStatement(QUERY_TABLE_COMMENT_SQL)) {
+      ps.setString(1, schemaName);
+      ps.setString(2, tableName);
+      try (ResultSet rs = ps.executeQuery();) {
+        while (rs.next()) {
+          TableDescription td = new TableDescription();
+          td.setSchemaName(schemaName);
+          td.setTableName(tableName);
+          td.setRemarks(rs.getString(1));
+          td.setTableType("TABLE");
+          return td;
+        }
+        return null;
       }
-      return null;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -114,6 +119,32 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
       throw new RuntimeException(e);
     }
   }
+
+
+  @Override
+  public List<ColumnDescription> queryTableColumnMeta(Connection connection, String schemaName,
+      String tableName) {
+    String sql = this.getTableFieldsQuerySQL(schemaName, tableName);
+    List<ColumnDescription> ret = this.querySelectSqlColumnMeta(connection, sql);
+
+    // 补充一下注释信息
+    try (ResultSet columns = connection.getMetaData()
+        .getColumns(schemaName, null, tableName, null)) {
+      while (columns.next()) {
+        String columnName = columns.getString("COLUMN_NAME");
+        String remarks = columns.getString("REMARKS");
+        for (ColumnDescription cd : ret) {
+          if (columnName.equals(cd.getFieldName())) {
+            cd.setRemarks(remarks);
+          }
+        }
+      }
+      return ret;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 
   @Override
   public List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName) {

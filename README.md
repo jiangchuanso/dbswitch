@@ -419,7 +419,7 @@ spring:
     uri-encoding: UTF-8
     max-http-header-size: 8096
   mvc:
-    throw-exception-if-no-handler-found: true
+    throw-exception-if-no-handler-found: false
     static-path-pattern: /statics/**
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
@@ -441,10 +441,6 @@ mybatis:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-mapper:
-  wrap-keyword: "`{0}`"
-  enable-method-annotation: true
-  
 dbswitch:
   configuration:
     # 驱动JAR文件所在的目录位置

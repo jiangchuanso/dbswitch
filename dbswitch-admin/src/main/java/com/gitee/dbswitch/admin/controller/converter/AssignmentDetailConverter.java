@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.admin.controller.converter;
 
 import cn.hutool.extra.spring.SpringUtil;
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.dao.AssignmentConfigDAO;
 import com.gitee.dbswitch.admin.dao.DatabaseConnectionDAO;
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
@@ -18,17 +17,13 @@ import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.type.IncludeExcludeEnum;
-import java.util.Objects;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class AssignmentDetailConverter extends
     AbstractConverter<AssignmentTaskEntity, AssignmentDetailResponse> {
 
   @Override
   public AssignmentDetailResponse convert(AssignmentTaskEntity assignmentTaskEntity) {
-    if (Objects.isNull(assignmentTaskEntity)) {
-      return null;
-    }
-
     DatabaseConnectionDAO databaseConnectionDAO = SpringUtil.getBean(DatabaseConnectionDAO.class);
     AssignmentConfigDAO assignmentConfigDAO = SpringUtil.getBean(AssignmentConfigDAO.class);
     AssignmentConfigEntity taskConfig = assignmentConfigDAO.getByAssignmentTaskId(

@@ -9,20 +9,15 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.controller.converter;
 
-import com.gitee.dbswitch.common.converter.AbstractConverter;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.model.response.DbConnectionDetailResponse;
-import java.util.Objects;
+import com.gitee.dbswitch.common.converter.AbstractConverter;
 
 public class DbConnectionDetailConverter extends
     AbstractConverter<DatabaseConnectionEntity, DbConnectionDetailResponse> {
 
   @Override
   public DbConnectionDetailResponse convert(DatabaseConnectionEntity databaseConnectionEntity) {
-    if (Objects.isNull(databaseConnectionEntity)) {
-      return null;
-    }
-
     DbConnectionDetailResponse response = new DbConnectionDetailResponse();
     response.setId(databaseConnectionEntity.getId());
     response.setName(databaseConnectionEntity.getName());

@@ -9,13 +9,14 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@tk.mybatis.spring.annotation.MapperScan("com.gitee.dbswitch.admin.mapper")
+@MapperScan({"com.gitee.dbswitch.admin.mapper"})
 @SpringBootApplication
 public class AdminApplication {
 
