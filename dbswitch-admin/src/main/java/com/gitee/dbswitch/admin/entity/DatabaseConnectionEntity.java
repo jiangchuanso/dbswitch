@@ -26,7 +26,7 @@ import org.apache.ibatis.type.EnumTypeHandler;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("DBSWITCH_DATABASE_CONNECTION")
+@TableName(value = "DBSWITCH_DATABASE_CONNECTION", autoResultMap = true)
 public class DatabaseConnectionEntity {
 
   @TableId(value = "id", type = IdType.AUTO)

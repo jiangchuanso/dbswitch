@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.gitee.dbswitch.admin.handler.ListPatternHandler;
 import com.gitee.dbswitch.admin.handler.ListTypeHandler;
 import com.gitee.dbswitch.common.entity.PatternMapper;
 import com.gitee.dbswitch.common.type.CaseConvertEnum;
@@ -30,7 +31,7 @@ import org.apache.ibatis.type.EnumTypeHandler;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("DBSWITCH_ASSIGNMENT_CONFIG")
+@TableName(value = "DBSWITCH_ASSIGNMENT_CONFIG", autoResultMap = true)
 public class AssignmentConfigEntity {
 
   @TableId(value = "id", type = IdType.AUTO)
@@ -66,10 +67,10 @@ public class AssignmentConfigEntity {
   @TableField(value = "column_name_case", typeHandler = EnumTypeHandler.class)
   private CaseConvertEnum columnNameCase;
 
-  @TableField(value = "table_name_map")
+  @TableField(value = "table_name_map", typeHandler = ListPatternHandler.class)
   private List<PatternMapper> tableNameMap;
 
-  @TableField(value = "column_name_map")
+  @TableField(value = "column_name_map", typeHandler = ListPatternHandler.class)
   private List<PatternMapper> columnNameMap;
 
   @TableField("target_drop_table")

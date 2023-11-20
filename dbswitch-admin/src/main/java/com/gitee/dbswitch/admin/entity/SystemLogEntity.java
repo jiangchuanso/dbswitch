@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.JdbcType;
 
 @Data
 @Builder
@@ -54,7 +55,7 @@ public class SystemLogEntity {
   @TableField("failed")
   private Boolean failed;
 
-  @TableField("exception")
+  @TableField(value = "exception", jdbcType = JdbcType.LONGVARCHAR, insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
   private String exception;
 
   @TableField("elapse_seconds")

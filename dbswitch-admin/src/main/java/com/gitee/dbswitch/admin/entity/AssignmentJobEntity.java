@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.JdbcType;
 
 @Data
 @Builder
@@ -48,7 +49,7 @@ public class AssignmentJobEntity {
   @TableField("status")
   private Integer status;
 
-  @TableField("error_log")
+  @TableField(value = "error_log", jdbcType = JdbcType.LONGVARCHAR, insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
   private String errorLog;
 
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)

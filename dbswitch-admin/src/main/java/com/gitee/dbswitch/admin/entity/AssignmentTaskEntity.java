@@ -21,12 +21,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.type.EnumTypeHandler;
+import org.apache.ibatis.type.JdbcType;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("DBSWITCH_ASSIGNMENT_TASK")
+@TableName(value = "DBSWITCH_ASSIGNMENT_TASK", autoResultMap = true)
 public class AssignmentTaskEntity {
 
   @TableId(value = "id", type = IdType.AUTO)
@@ -35,13 +36,13 @@ public class AssignmentTaskEntity {
   @TableField("name")
   private String name;
 
-  @TableField("description")
+  @TableField(value = "description")
   private String description;
 
   @TableField(value = "schedule_mode", typeHandler = EnumTypeHandler.class)
   private ScheduleModeEnum scheduleMode;
 
-  @TableField("cron_expression")
+  @TableField(value = "cron_expression", jdbcType = JdbcType.LONGVARCHAR, insertStrategy = FieldStrategy.NOT_NULL, updateStrategy = FieldStrategy.NOT_NULL)
   private String cronExpression;
 
   @TableField("published")
