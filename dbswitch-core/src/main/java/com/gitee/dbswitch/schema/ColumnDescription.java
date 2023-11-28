@@ -31,6 +31,7 @@ public class ColumnDescription {
   private String remarks;
   private boolean signed = false;
   private ProductTypeEnum productType;
+  private String defaultValue;
 
   public String getFieldName() {
     if (null != this.fieldName) {
@@ -144,6 +145,14 @@ public class ColumnDescription {
     this.remarks = remarks;
   }
 
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
+
   public ColumnDescription copy() {
     ColumnDescription description = new ColumnDescription();
     description.setFieldName(fieldName);
@@ -159,6 +168,7 @@ public class ColumnDescription {
     description.setRemarks(remarks);
     description.setSigned(signed);
     description.setProductType(productType);
+    description.setDefaultValue(defaultValue);
     return description;
   }
 

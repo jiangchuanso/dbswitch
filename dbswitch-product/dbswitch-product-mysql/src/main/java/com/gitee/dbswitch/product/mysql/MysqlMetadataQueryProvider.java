@@ -19,6 +19,7 @@ import com.gitee.dbswitch.schema.TableDescription;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -133,9 +134,12 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
       while (columns.next()) {
         String columnName = columns.getString("COLUMN_NAME");
         String remarks = columns.getString("REMARKS");
+        String columnDefault = columns.getString("COLUMN_DEF");
         for (ColumnDescription cd : ret) {
           if (columnName.equals(cd.getFieldName())) {
             cd.setRemarks(remarks);
+            // 补充默认值信息
+            cd.setDefaultValue(columnDefault);
           }
         }
       }

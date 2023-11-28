@@ -155,6 +155,14 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
         break;
       case ColumnMetaData.TYPE_BOOLEAN:
         retval += "BOOLEAN";
+        if (v.isHaveDefault()) {
+          boolean b = Boolean.getBoolean(v.getDefaultValue());
+          if (b) {
+            retval += " DEFAULT true";
+          } else {
+            retval += " DEFAULT false";
+          }
+        }
         break;
       case ColumnMetaData.TYPE_NUMBER:
       case ColumnMetaData.TYPE_INTEGER:
@@ -189,6 +197,9 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
           } else {
             retval += "DOUBLE PRECISION";
           }
+          if (v.isHaveDefault()) {
+            retval += " DEFAULT " + Integer.valueOf(v.getDefaultValue());
+          }
         }
         break;
       case ColumnMetaData.TYPE_STRING:
@@ -200,6 +211,9 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
           } else {
             retval += "TEXT";
           }
+        }
+        if (v.isHaveDefault()) {
+          retval += " DEFAULT " + v.getDefaultValue();
         }
         break;
       case ColumnMetaData.TYPE_BINARY:

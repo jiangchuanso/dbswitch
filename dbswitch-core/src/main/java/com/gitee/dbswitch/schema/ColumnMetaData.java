@@ -94,6 +94,7 @@ public class ColumnMetaData {
   protected int precision;
   protected int type;
   protected String remarks;
+  protected String defaultValue;
 
   /**
    * Constructor function
@@ -142,6 +143,18 @@ public class ColumnMetaData {
 
   public void setRemarks(String remarks) {
     this.remarks = remarks;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
+
+  public boolean isHaveDefault() {
+    return defaultValue != null && !defaultValue.isEmpty();
   }
 
   /**
@@ -471,6 +484,7 @@ public class ColumnMetaData {
     this.precision = precision;
     this.type = valtype;
     this.remarks = desc.getRemarks();
+    this.defaultValue = desc.getDefaultValue();
   }
 
 }
