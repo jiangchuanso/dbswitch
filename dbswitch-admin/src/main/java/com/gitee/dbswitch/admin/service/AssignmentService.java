@@ -85,8 +85,12 @@ public class AssignmentService {
         .convert(assignmentTaskDAO.getById(assignment.getId()));
   }
 
-  @Transactional(rollbackFor = Exception.class)
   public void deleteAssignment(Long id) {
+    AssignmentTaskEntity taskEntity = assignmentTaskDAO.getById(id);
+    if (null != taskEntity && null != taskEntity.getPublished() && taskEntity.getPublished()) {
+      throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY,
+          "已经发布的任务需先下线后方可执行删除操作");
+    }
     assignmentTaskDAO.deleteById(id);
   }
 
@@ -194,7 +198,9 @@ public class AssignmentService {
       AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
       if (Objects.nonNull(assignmentTaskEntity.getPublished())
           && assignmentTaskEntity.getPublished()) {
-        scheduleService.cancelByJobKey(assignmentTaskEntity.getJobKey());
+        String jobKey = assignmentTaskEntity.getJobKey();
+        scheduleService.cancelByJobKey(jobKey);
+        scheduleService.cancelManualJob(id);
         assignmentTaskEntity.setPublished(Boolean.FALSE);
         assignmentTaskEntity.setContent("{}");
         assignmentTaskEntity.setJobKey("");

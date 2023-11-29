@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.AsyncTaskExecutor;
 
@@ -55,7 +56,7 @@ public class ExecuteJobTaskRunnable implements Runnable {
 
   private AsyncTaskExecutor migrationTaskExecutor;
 
-  private Long taskId;
+  @Getter private Long taskId;
 
   private Integer schedule;
 

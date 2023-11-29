@@ -18,6 +18,7 @@ import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.common.event.TaskEventHub;
 import com.gitee.dbswitch.common.util.UuidUtils;
+import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Objects;
@@ -111,13 +112,22 @@ public class ScheduleService {
     AssignmentTaskEntity task = assignmentTaskDAO.getById(taskId);
     if (ScheduleModeEnum.MANUAL == scheduleMode) {
       manualRunEvenHub.notify(evenName, taskId, jobKeyName);
-      //scheduleOnce(jobBuilder.storeDurably(false).build(), triggerKey);
     } else {
       scheduleCron(jobBuilder.storeDurably(true).build(), triggerKey, task.getCronExpression());
-    }
 
-    task.setJobKey(jobKeyName);
-    assignmentTaskDAO.updateById(task);
+      task.setJobKey(jobKeyName);
+      assignmentTaskDAO.updateById(task);
+    }
+  }
+
+  public void cancelManualJob(Long taskId) {
+    Sets.newHashSet(taskRunnableMap.values()).forEach(
+        runnable -> {
+          if (taskId == runnable.getTaskId()) {
+            runnable.interrupt();
+          }
+        }
+    );
   }
 
   public void cancelByJobKey(String jobKeyName) {
@@ -164,24 +174,6 @@ public class ScheduleService {
       assignmentJobDAO.updateSelective(assignmentJobEntity);
     }
   }
-
-//  private void scheduleOnce(JobDetail jobDetail, TriggerKey triggerKey) {
-//    Scheduler scheduler = schedulerFactoryBean.getScheduler();
-//    Trigger simpleTrigger = TriggerBuilder.newTrigger()
-//        .startAt(new Date())
-//        .withIdentity(triggerKey)
-//        .withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0))
-//        .build();
-//
-//    try {
-//      scheduler.scheduleJob(jobDetail, simpleTrigger);
-//    } catch (SchedulerException e) {
-//      log.error("Quartz schedule task by manual failed, taskId: {}.",
-//          jobDetail.getJobDataMap().get(JobExecutorService.TASK_ID), e);
-//      throw new RuntimeException(e);
-//    }
-//
-//  }
 
   private void scheduleCron(JobDetail jobDetail, TriggerKey triggerKey, String cronExpression) {
     Scheduler scheduler = schedulerFactoryBean.getScheduler();

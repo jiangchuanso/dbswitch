@@ -1,5 +1,10 @@
 # 异构数据库数据与结构同步工具
 
+![](https://gitee.com/inrgihc/dbswitch/badge/star.svg)
+![](https://gitee.com/inrgihc/dbswitch/badge/fork.svg?theme=gvp)
+
+![dbswitch](https://gitee.com/dromara/dbswitch/raw/master/dbswitch-admin-ui/src/assets/logo.png#pic_center)
+
 ## 一、工具介绍
 
 ### 1、功能描述

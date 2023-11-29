@@ -124,7 +124,7 @@ public class SqliteMetadataQueryProvider extends AbstractMetadataProvider {
         if (null != pks && !pks.isEmpty() && pks.contains(fieldname)) {
           // 关键字 AUTOINCREMENT 只能⽤于整型（INTEGER）字段。
           if (useAutoInc) {
-            retval += "INTEGER PRIMARY KEY AUTOINCREMENT";
+            retval += "INTEGER AUTOINCREMENT";
           } else {
             retval += "BIGINT ";
           }

@@ -1,5 +1,6 @@
 package com.gitee.dbswitch.common.util;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -829,6 +830,8 @@ public final class ObjectCastUtils {
       return in.toString();
     } else if (in instanceof java.sql.Clob) {
       return clob2Str((java.sql.Clob) in);
+    } else if (in instanceof java.sql.Blob) {
+      return Base64.encode(blob2Bytes((java.sql.Blob) in));
     } else if (in instanceof java.lang.Number) {
       return in.toString();
     } else if (in instanceof java.sql.RowId) {

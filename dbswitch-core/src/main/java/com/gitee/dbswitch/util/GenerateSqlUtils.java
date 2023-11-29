@@ -100,7 +100,7 @@ public final class GenerateSqlUtils {
 
     sb.append(")");
     if (type.isLikeMysql()) {
-      sb.append("ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+      sb.append("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin");
       if (withRemarks && StringUtils.isNotBlank(tableRemarks)) {
         sb.append(String.format(" COMMENT='%s' ", tableRemarks.replace("'", "\\'")));
       }
