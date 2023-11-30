@@ -209,11 +209,11 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
           if (null != pks && !pks.isEmpty() && pks.contains(fieldname)) {
             retval += "VARCHAR(" + length + ")";
           } else {
-            retval += "TEXT";
+            retval += "VARCHAR(" + length + ")";
           }
         }
         if (v.isHaveDefault()) {
-          retval += " DEFAULT " + v.getDefaultValue();
+          retval += " DEFAULT " + "'" + v.getDefaultValue() + "'";
         }
         break;
       case ColumnMetaData.TYPE_BINARY:
