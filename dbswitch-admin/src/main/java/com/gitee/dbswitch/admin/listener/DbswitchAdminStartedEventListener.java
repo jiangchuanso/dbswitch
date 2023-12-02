@@ -12,7 +12,11 @@ public class DbswitchAdminStartedEventListener implements ApplicationListener<Ap
 
   private static final String[] LOGGER_CLASS_NAME = {
       "com.gitee.dbswitch.data.service.MigrationService",
-      "com.gitee.dbswitch.data.handler.MigrationHandler"
+      "com.gitee.dbswitch.data.service.DefaultReaderRobot",
+      "com.gitee.dbswitch.data.handler.ReaderTaskThread",
+      "com.gitee.dbswitch.data.service.DefaultWriterRobot",
+      "com.gitee.dbswitch.data.handler.WriterTaskThread",
+      "com.gitee.dbswitch.common.util.MachineInfoUtils"
   };
 
   @Override

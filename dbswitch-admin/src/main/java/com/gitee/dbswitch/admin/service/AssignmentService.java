@@ -30,13 +30,12 @@ import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
-import com.gitee.dbswitch.data.config.DbswichProperties;
+import com.gitee.dbswitch.data.config.DbswichPropertiesConfiguration;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.entity.TargetDataSourceProperties;
 import com.gitee.dbswitch.data.util.JsonUtils;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -154,10 +153,8 @@ public class AssignmentService {
       AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
       AssignmentConfigEntity assignmentConfigEntity = assignmentConfigDAO.getByAssignmentTaskId(id);
 
-      DbswichProperties properties = new DbswichProperties();
-      SourceDataSourceProperties srcConfig = this.getSourceDataSourceProperties(
-          assignmentConfigEntity);
-      properties.setSource(Collections.singletonList(srcConfig));
+      DbswichPropertiesConfiguration properties = new DbswichPropertiesConfiguration();
+      properties.setSource(this.getSourceDataSourceProperties(assignmentConfigEntity));
       properties.setTarget(this.getTargetDataSourceProperties(assignmentConfigEntity));
 
       assignmentTaskEntity.setPublished(Boolean.TRUE);

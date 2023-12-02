@@ -10,12 +10,6 @@
 package com.gitee.dbswitch.common.event;
 
 public interface TaskEventListener extends java.util.EventListener {
-
-  /**
-   * The event callback
-   *
-   * @param event object
-   * @return event result
-   */
+  
   Object event(ListenedEvent event);
 }

@@ -7,21 +7,20 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.product.openguass;
+package com.gitee.dbswitch.product.oracle;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 
-public class OpenGaussTableOperateProvider extends DefaultTableOperateProvider {
+public class OracleTableManageProvider extends DefaultTableManageProvider {
 
-  public OpenGaussTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public OracleTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 
   @Override
   public void dropTable(String schemaName, String tableName) {
-    String sql = String.format("DROP TABLE \"%s\".\"%s\" CASCADE ",
-        schemaName, tableName);
+    String sql = String.format("DROP TABLE \"%s\".\"%s\" CASCADE CONSTRAINTS", schemaName, tableName);
     this.executeSql(sql);
   }
 

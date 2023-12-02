@@ -13,6 +13,8 @@ import java.util.Objects;
 
 /**
  * 基于正则表达式的批评替换实体定义
+ *
+ * @author tang
  */
 public class PatternMapper {
 

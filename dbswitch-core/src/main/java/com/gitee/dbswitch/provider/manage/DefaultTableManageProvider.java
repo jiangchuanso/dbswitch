@@ -7,7 +7,7 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.provider.operate;
+package com.gitee.dbswitch.provider.manage;
 
 import com.gitee.dbswitch.provider.AbstractCommonProvider;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
@@ -17,11 +17,11 @@ import java.sql.Statement;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DefaultTableOperateProvider
+public class DefaultTableManageProvider
     extends AbstractCommonProvider
-    implements TableOperateProvider {
+    implements TableManageProvider {
 
-  public DefaultTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public DefaultTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 

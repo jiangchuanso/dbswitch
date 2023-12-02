@@ -7,29 +7,30 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.product.mongodb;
+package com.gitee.dbswitch.product.postgresql;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
+import lombok.extern.slf4j.Slf4j;
 
-public class MongodbTableOperateProvider extends DefaultTableOperateProvider {
+@Slf4j
+public class PostgresTableManageProvider extends DefaultTableManageProvider {
 
-  public MongodbTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public PostgresTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 
   @Override
   public void truncateTableData(String schemaName, String tableName) {
-    cleanup(schemaName, tableName);
+    String sql = String.format("TRUNCATE TABLE \"%s\".\"%s\" RESTART IDENTITY ",
+        schemaName, tableName);
+    this.executeSql(sql);
   }
 
   @Override
   public void dropTable(String schemaName, String tableName) {
-    cleanup(schemaName, tableName);
-  }
-
-  private void cleanup(String schemaName, String tableName) {
-    String sql = String.format("%s.getCollection('%s').drop();", schemaName, tableName);
+    String sql = String.format("DROP TABLE \"%s\".\"%s\" CASCADE ",
+        schemaName, tableName);
     this.executeSql(sql);
   }
 }

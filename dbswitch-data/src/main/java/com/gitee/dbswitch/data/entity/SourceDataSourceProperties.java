@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.Data;
 
+/**
+ * 源端参数配置
+ *
+ * @author tang
+ */
 @Data
 public class SourceDataSourceProperties {
 

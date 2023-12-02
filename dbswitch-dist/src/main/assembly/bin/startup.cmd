@@ -18,6 +18,7 @@ set APP_HOME=%cd%
 
 set APP_BIN_PATH=%APP_HOME%\bin
 set APP_LIB_PATH=%APP_HOME%\lib
+set APP_EXT_PATH=%APP_HOME%\ext
 set APP_CONF_PATH=%APP_HOME%\conf
 set APP_DRIVERS_PATH=%APP_HOME%\drivers
 
@@ -32,15 +33,15 @@ echo OS=%OS%
 echo.
 echo APP_HOME=%APP_HOME%
 echo APP_MAINCLASS=%APP_MAINCLASS%
-echo CLASSPATH=%APP_CONF_PATH%;%APP_LIB_PATH%\*
+echo CLASSPATH=%APP_CONF_PATH%;%APP_LIB_PATH%\*;%APP_EXT_PATH%\*
 echo CURRENT_DATE=%date% %time%:~0,8%
 echo ********************************************************
 
 ::执行java
 echo Starting %APP_MAINCLASS% ...
-echo java -classpath %APP_CONF_PATH%;%APP_LIB_PATH%\* %JAVA_OPTS% %APP_MAINCLASS%
+echo java -classpath %APP_CONF_PATH%;%APP_LIB_PATH%\*;%APP_EXT_PATH%\* %JAVA_OPTS% %APP_MAINCLASS%
 echo .
-java -classpath %APP_CONF_PATH%;%APP_LIB_PATH%\* %JAVA_OPTS% %APP_MAINCLASS%
+java -classpath %APP_CONF_PATH%;%APP_LIB_PATH%\*;%APP_EXT_PATH%\* %JAVA_OPTS% %APP_MAINCLASS%
 
 :exit
 pause

@@ -10,11 +10,11 @@
 package com.gitee.dbswitch.product.sqlite;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizeProvider;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-public class SqliteTableSynchronizer extends AutoCastTableDataSynchronizer {
+public class SqliteTableSynchronizer extends AutoCastTableDataSynchronizeProvider {
 
   public SqliteTableSynchronizer(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);

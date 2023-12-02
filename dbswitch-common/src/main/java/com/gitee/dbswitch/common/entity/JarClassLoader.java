@@ -19,6 +19,11 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * 数据库驱动jar的ClassLoader
+ *
+ * @author tang
+ */
 public class JarClassLoader extends URLClassLoader {
 
   public JarClassLoader(String path, ClassLoader parent) {
@@ -42,7 +47,7 @@ public class JarClassLoader extends URLClassLoader {
     for (String path : dirs) {
       urls.addAll(doGetURLs(path));
     }
-    if(urls.isEmpty()){
+    if (urls.isEmpty()) {
       throw new RuntimeException("No jar file found from path :" + paths + "!");
     }
     return urls.toArray(new URL[0]);

@@ -24,19 +24,26 @@ import com.gitee.dbswitch.common.util.DatabaseAwareUtils;
 import com.gitee.dbswitch.common.util.ExamineUtils;
 import com.gitee.dbswitch.common.util.JdbcTypesUtils;
 import com.gitee.dbswitch.common.util.PatterNameUtils;
-import com.gitee.dbswitch.data.config.DbswichProperties;
+import com.gitee.dbswitch.core.exchange.BatchElement;
+import com.gitee.dbswitch.core.exchange.MemChannel;
+import com.gitee.dbswitch.core.task.TaskProcessor;
+import com.gitee.dbswitch.data.config.DbswichPropertiesConfiguration;
+import com.gitee.dbswitch.data.domain.ReaderTaskParam;
+import com.gitee.dbswitch.data.domain.ReaderTaskResult;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.ProductProviderFactory;
+import com.gitee.dbswitch.provider.manage.TableManageProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
-import com.gitee.dbswitch.provider.operate.TableOperateProvider;
 import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
-import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
+import com.gitee.dbswitch.provider.transform.RecordTransformProvider;
 import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.TableDescription;
 import com.gitee.dbswitch.service.DefaultMetadataService;
 import com.gitee.dbswitch.service.MetadataService;
+import com.google.common.collect.Lists;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
@@ -47,39 +54,38 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
 /**
- * 在一个线程内的单表迁移处理逻辑
+ * 数据读取线程体（一个表的读）
  *
  * @author tang
  */
 @Slf4j
-public class MigrationHandler implements Supplier<Long> {
+public class ReaderTaskThread extends TaskProcessor<ReaderTaskResult> {
 
   private final long MAX_CACHE_BYTES_SIZE = 128 * 1024 * 1024;
 
-  private int fetchSize = Constants.MINIMUM_FETCH_SIZE;
-  private final DbswichProperties properties;
+  private final DbswichPropertiesConfiguration properties;
   private final SourceDataSourceProperties sourceProperties;
-
-  private volatile boolean interrupted = false;
+  private int fetchSize = Constants.MINIMUM_FETCH_SIZE;
+  private TableDescription tableDescription;
+  private MemChannel memChannel;
 
   // 来源端
   private final CloseableDataSource sourceDataSource;
+  private MetadataService sourceMetaDataService;
   private ProductTypeEnum sourceProductType;
   private String sourceSchemaName;
   private String sourceTableName;
   private String sourceTableRemarks;
   private List<ColumnDescription> sourceColumnDescriptions;
   private List<String> sourcePrimaryKeys;
-
-  private MetadataService sourceMetaDataService;
 
   // 目的端
   private final CloseableDataSource targetDataSource;
@@ -93,28 +99,23 @@ public class MigrationHandler implements Supplier<Long> {
   // 日志输出字符串使用
   private String tableNameMapString;
 
-  public static MigrationHandler createInstance(TableDescription td,
-      DbswichProperties properties,
-      Integer sourcePropertiesIndex,
-      CloseableDataSource sds,
-      CloseableDataSource tds,
-      Set<String> targetExistTables) {
-    return new MigrationHandler(td, properties, sourcePropertiesIndex, sds, tds, targetExistTables);
+  private CountDownLatch robotCountDownLatch;
+
+  public ReaderTaskThread(ReaderTaskParam taskParam) {
+    this.sourceDataSource = taskParam.getSourceDataSource();
+    this.targetDataSource = taskParam.getTargetDataSource();
+    this.tableDescription = taskParam.getTableDescription();
+    this.memChannel = taskParam.getMemChannel();
+    this.properties = taskParam.getConfiguration();
+    this.sourceProperties = this.properties.getSource();
+    this.sourceSchemaName = this.sourceProperties.getSourceSchema();
+    this.sourceTableName = this.tableDescription.getTableName();
+    this.targetExistTables = taskParam.getTargetExistTables();
+    this.robotCountDownLatch = taskParam.getCountDownLatch();
   }
 
-  private MigrationHandler(TableDescription td,
-      DbswichProperties properties,
-      Integer sourcePropertiesIndex,
-      CloseableDataSource sds,
-      CloseableDataSource tds,
-      Set<String> targetExistTables) {
-    this.sourceSchemaName = td.getSchemaName();
-    this.sourceTableName = td.getTableName();
-    this.properties = properties;
-    this.sourceProperties = properties.getSource().get(sourcePropertiesIndex);
-    this.sourceDataSource = sds;
-    this.targetDataSource = tds;
-
+  @Override
+  protected void beforeProcess() {
     if (sourceProperties.getFetchSize() >= fetchSize) {
       fetchSize = sourceProperties.getFetchSize();
     }
@@ -123,19 +124,18 @@ public class MigrationHandler implements Supplier<Long> {
     this.targetProductType = DatabaseAwareUtils.getProductTypeByDataSource(targetDataSource);
 
     if (this.targetProductType.isLikeHive()) {
-      // !! hive does not support upper table name and column name
+      // !! hive does not support upper table name and upper column name
       properties.getTarget().setTableNameCase(CaseConvertEnum.LOWER);
       properties.getTarget().setColumnNameCase(CaseConvertEnum.LOWER);
     }
 
-    this.targetExistTables = targetExistTables;
     // 获取映射转换后新的表名
     this.targetSchemaName = properties.getTarget().getTargetSchema();
     this.targetTableName = properties.getTarget()
         .getTableNameCase()
         .convert(
             PatterNameUtils.getFinalName(
-                td.getTableName(),
+                tableDescription.getTableName(),
                 sourceProperties.getRegexTableMapper()
             )
         );
@@ -145,16 +145,12 @@ public class MigrationHandler implements Supplier<Long> {
     }
 
     this.tableNameMapString = String.format("%s.%s --> %s.%s",
-        td.getSchemaName(), td.getTableName(),
+        tableDescription.getSchemaName(), tableDescription.getTableName(),
         targetSchemaName, targetTableName);
   }
 
-  public void interrupt() {
-    this.interrupted = true;
-  }
-
   @Override
-  public Long get() {
+  protected ReaderTaskResult doProcess() {
     log.info("Begin Migrate table for {}", tableNameMapString);
 
     this.sourceMetaDataService = new DefaultMetadataService(sourceDataSource, sourceProductType);
@@ -162,10 +158,13 @@ public class MigrationHandler implements Supplier<Long> {
     // 读取源表的表及字段元数据
     this.sourceTableRemarks = sourceMetaDataService
         .getTableRemark(sourceSchemaName, sourceTableName);
+    checkInterrupt();
     this.sourceColumnDescriptions = sourceMetaDataService
         .queryTableColumnMeta(sourceSchemaName, sourceTableName);
+    checkInterrupt();
     this.sourcePrimaryKeys = sourceMetaDataService
         .queryTablePrimaryKeys(sourceSchemaName, sourceTableName);
+    checkInterrupt();
 
     // 根据表的列名映射转换准备目标端表的字段信息
     this.targetColumnDescriptions = sourceColumnDescriptions.stream()
@@ -220,20 +219,20 @@ public class MigrationHandler implements Supplier<Long> {
     if (mapChecker.keySet().size() != valueSet.size()) {
       throw new RuntimeException("字段映射配置有误，禁止将多个字段映射到一个同名字段!");
     }
-    if (interrupted) {
-      log.info("task job is interrupted!");
-      throw new RuntimeException("task is interrupted");
-    }
+
+    checkInterrupt();
+
     ProductFactoryProvider sourceFactoryProvider = ProductProviderFactory
         .newProvider(sourceProductType, sourceDataSource);
     ProductFactoryProvider targetFactoryProvider = ProductProviderFactory
         .newProvider(targetProductType, targetDataSource);
     TableDataQueryProvider sourceQuerier = sourceFactoryProvider.createTableDataQueryProvider();
+    RecordTransformProvider transformProvider = sourceFactoryProvider.createRecordTransformProvider();
     TableDataWriteProvider targetWriter = targetFactoryProvider.createTableDataWriteProvider(
         properties.getTarget().getWriterEngineInsert());
     MetadataProvider targetMetaProvider = targetFactoryProvider.createMetadataQueryProvider();
-    TableOperateProvider targetOperator = targetFactoryProvider.createTableOperateProvider();
-    TableDataSynchronizer targetSynchronizer = targetFactoryProvider.createTableDataSynchronizer();
+    TableManageProvider targetTableManager = targetFactoryProvider.createTableManageProvider();
+    TableDataSynchronizeProvider targetSynchronizer = targetFactoryProvider.createTableDataSynchronizeProvider();
 
     if (sourceProductType.isMongodb()) {
       properties.getTarget().setTargetDrop(true);
@@ -241,13 +240,13 @@ public class MigrationHandler implements Supplier<Long> {
 
     if (targetProductType.isMongodb()) {
       try {
-        targetFactoryProvider.createTableOperateProvider()
+        targetFactoryProvider.createTableManageProvider()
             .dropTable(targetSchemaName, targetTableName);
         log.info("Target Table {}.{} is exits, drop it now !", targetSchemaName, targetTableName);
       } catch (Exception e) {
         log.info("Target Table {}.{} is not exits, create it!", targetSchemaName, targetTableName);
       }
-      return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+      return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
     } else if (properties.getTarget().getTargetDrop() || targetProductType.isLikeHive()) {
       /*
         如果配置了dbswitch.target.datasource-target-drop=true时，
@@ -256,7 +255,7 @@ public class MigrationHandler implements Supplier<Long> {
        */
 
       try {
-        targetFactoryProvider.createTableOperateProvider()
+        targetFactoryProvider.createTableManageProvider()
             .dropTable(targetSchemaName, targetTableName);
         log.info("Target Table {}.{} is exits, drop it now !", targetSchemaName, targetTableName);
       } catch (Exception e) {
@@ -279,6 +278,7 @@ public class MigrationHandler implements Supplier<Long> {
 
       JdbcTemplate targetJdbcTemplate = new JdbcTemplate(targetDataSource);
       for (String sql : sqlCreateTable) {
+        checkInterrupt();
         log.info("Execute SQL: \n{}", sql);
         targetJdbcTemplate.execute(sql);
       }
@@ -286,30 +286,29 @@ public class MigrationHandler implements Supplier<Long> {
       // 如果只想创建表，这里直接返回
       if (null != properties.getTarget().getOnlyCreate()
           && properties.getTarget().getOnlyCreate()) {
-        return 0L;
+        return ReaderTaskResult.builder()
+            .tableNameMapString(tableNameMapString)
+            .successCount(1).build().paddingPerf();
       }
 
       if (targetProductType.isLikeHive()) {
-        return 0L;
+        return ReaderTaskResult.builder()
+            .tableNameMapString(tableNameMapString)
+            .successCount(1).build().paddingPerf();
       }
 
-      if (interrupted) {
-        log.info("task job is interrupted!");
-        throw new RuntimeException("task is interrupted");
-      }
-
-      return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+      checkInterrupt();
+      return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
     } else {
       // 对于只想创建表的情况，不提供后续的变化量数据同步功能
       if (null != properties.getTarget().getOnlyCreate()
           && properties.getTarget().getOnlyCreate()) {
-        return 0L;
+        return ReaderTaskResult.builder()
+            .tableNameMapString(tableNameMapString)
+            .successCount(1).build().paddingPerf();
       }
 
-      if (interrupted) {
-        log.info("task job is interrupted!");
-        throw new RuntimeException("task is interrupted");
-      }
+      checkInterrupt();
 
       if (!targetExistTables.contains(targetTableName)) {
         // 当目标端不存在该表时，则生成建表语句并创建
@@ -332,12 +331,8 @@ public class MigrationHandler implements Supplier<Long> {
           log.info("Execute SQL: \n{}", sql);
         }
 
-        if (interrupted) {
-          log.info("task job is interrupted!");
-          throw new RuntimeException("task is interrupted");
-        }
-
-        return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+        checkInterrupt();
+        return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
       }
 
       // 判断是否具备变化量同步的条件：（1）两端表结构一致，且都有一样的主键字段；(2)MySQL使用Innodb引擎；
@@ -354,15 +349,15 @@ public class MigrationHandler implements Supplier<Long> {
           if (targetProductType == ProductTypeEnum.MYSQL
               && !DatabaseAwareUtils.isMysqlInnodbStorageEngine(
               targetSchemaName, targetTableName, targetDataSource)) {
-            return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+            return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
           } else {
-            return doIncreaseSynchronize(targetSynchronizer);
+            return doIncreaseSynchronize(targetSynchronizer, transformProvider);
           }
         } else {
-          return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+          return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
         }
       } else {
-        return doFullCoverSynchronize(targetWriter, targetOperator, sourceQuerier);
+        return doFullCoverSynchronize(targetWriter, targetTableManager, sourceQuerier, transformProvider);
       }
     }
   }
@@ -370,10 +365,14 @@ public class MigrationHandler implements Supplier<Long> {
   /**
    * 执行覆盖同步
    *
-   * @param writer 目的端的写入器
+   * @param tableWriter
+   * @param tableManager
+   * @param sourceQuerier
+   * @param transformer
+   * @return ReaderTaskResult
    */
-  private Long doFullCoverSynchronize(TableDataWriteProvider writer, TableOperateProvider operater,
-      TableDataQueryProvider sourceQuerier) {
+  private ReaderTaskResult doFullCoverSynchronize(TableDataWriteProvider tableWriter, TableManageProvider tableManager,
+      TableDataQueryProvider sourceQuerier, RecordTransformProvider transformer) {
     final int BATCH_SIZE = fetchSize;
 
     List<String> sourceFields = new ArrayList<>();
@@ -387,10 +386,10 @@ public class MigrationHandler implements Supplier<Long> {
       }
     }
     // 准备目的端的数据写入操作
-    writer.prepareWrite(targetSchemaName, targetTableName, targetFields);
+    tableWriter.prepareWrite(targetSchemaName, targetTableName, targetFields);
 
     // 清空目的端表的数据
-    operater.truncateTableData(targetSchemaName, targetTableName);
+    tableManager.truncateTableData(targetSchemaName, targetTableName);
 
     // 查询源端数据并写入目的端
     sourceQuerier.setQueryFetchSize(BATCH_SIZE);
@@ -406,10 +405,7 @@ public class MigrationHandler implements Supplier<Long> {
     try (ResultSet rs = srs.getResultSet()) {
       ResultSetMetaData metaData = rs.getMetaData();
       while (rs.next()) {
-        if (interrupted) {
-          log.info("task job is interrupted!");
-          throw new RuntimeException("task is interrupted");
-        }
+        checkInterrupt();
         Object[] record = new Object[sourceFields.size()];
         long bytes = 0;
         for (int i = 1; i <= sourceFields.size(); ++i) {
@@ -424,14 +420,25 @@ public class MigrationHandler implements Supplier<Long> {
           }
         }
 
-        cache.add(record);
+        cache.add(transformer.doTransform(sourceSchemaName, sourceTableName, sourceFields, record));
         cacheBytes += bytes;
         ++totalCount;
 
         if (cache.size() >= BATCH_SIZE || cacheBytes >= MAX_CACHE_BYTES_SIZE) {
-          long ret = writer.write(targetFields, cache);
-          log.info("[FullCoverSync] handle table [{}] data count: {}, the batch bytes sie: {}",
-              tableNameMapString, ret, DataSizeUtil.format(cacheBytes));
+          final long finalCacheBytes = cacheBytes;
+          this.memChannel.add(
+              BatchElement.builder()
+                  .tableNameMapString(tableNameMapString)
+                  .handler((arg1, arg2) -> {
+                    long ret = tableWriter.write(arg1, arg2);
+                    log.info("[FullCoverSync] handle table [{}] data count: {}, the batch bytes sie: {}",
+                        tableNameMapString, ret, DataSizeUtil.format(finalCacheBytes));
+                    return ret;
+                  })
+                  .arg1(Lists.newArrayList(targetFields))
+                  .arg2(Lists.newArrayList(cache))
+                  .build()
+          );
           cache.clear();
           totalBytes += cacheBytes;
           cacheBytes = 0;
@@ -439,9 +446,20 @@ public class MigrationHandler implements Supplier<Long> {
       }
 
       if (cache.size() > 0) {
-        long ret = writer.write(targetFields, cache);
-        log.info("[FullCoverSync] handle table [{}] data count: {}, last batch bytes sie: {}",
-            tableNameMapString, ret, DataSizeUtil.format(cacheBytes));
+        final long finalCacheBytes = cacheBytes;
+        this.memChannel.add(
+            BatchElement.builder()
+                .tableNameMapString(tableNameMapString)
+                .handler((arg1, arg2) -> {
+                  long ret = tableWriter.write(arg1, arg2);
+                  log.info("[FullCoverSync] handle table [{}] data count: {}, the batch bytes sie: {}",
+                      tableNameMapString, ret, DataSizeUtil.format(finalCacheBytes));
+                  return ret;
+                })
+                .arg1(Lists.newArrayList(targetFields))
+                .arg2(Lists.newArrayList(cache))
+                .build()
+        );
         cache.clear();
         totalBytes += cacheBytes;
       }
@@ -449,20 +467,34 @@ public class MigrationHandler implements Supplier<Long> {
       log.info("[FullCoverSync] handle table [{}] total data count:{}, total bytes={}",
           tableNameMapString, totalCount, DataSizeUtil.format(totalBytes));
     } catch (Exception e) {
+      if (e instanceof RuntimeException) {
+        throw (RuntimeException) e;
+      }
       throw new RuntimeException(e);
     } finally {
       srs.close();
     }
 
-    return totalBytes;
+    return ReaderTaskResult
+        .builder()
+        .tableNameMapString(tableNameMapString)
+        .successCount(1)
+        .failureCount(0)
+        .totalBytes(totalBytes)
+        .recordCount(totalCount)
+        .build()
+        .paddingPerf();
   }
 
   /**
    * 变化量同步
    *
-   * @param synchronizer 目的端的同步器
+   * @param synchronizer
+   * @param transformer
+   * @return ReaderTaskResult
    */
-  private Long doIncreaseSynchronize(TableDataSynchronizer synchronizer) {
+  private ReaderTaskResult doIncreaseSynchronize(TableDataSynchronizeProvider synchronizer,
+      RecordTransformProvider transformer) {
     final int BATCH_SIZE = fetchSize;
 
     List<String> sourceFields = new ArrayList<>();
@@ -487,6 +519,7 @@ public class MigrationHandler implements Supplier<Long> {
     taskBuilder.newTableName(sourceTableName);
     taskBuilder.fieldColumns(sourceFields);
     taskBuilder.columnsMap(columnNameMaps);
+    taskBuilder.transformer(transformer);
 
     TaskParamEntity param = taskBuilder.build();
 
@@ -498,6 +531,7 @@ public class MigrationHandler implements Supplier<Long> {
     calculator.setCheckJdbcType(false);
 
     AtomicLong totalBytes = new AtomicLong(0);
+    AtomicLong totalCount = new AtomicLong(0);
 
     // 执行实际的变化同步过程
     calculator.executeCalculate(param, new RecordRowHandler() {
@@ -531,6 +565,7 @@ public class MigrationHandler implements Supplier<Long> {
         }
         cacheBytes += bytes;
         totalBytes.addAndGet(bytes);
+        totalCount.addAndGet(1);
         countTotal++;
         checkFull(fields);
       }
@@ -541,10 +576,7 @@ public class MigrationHandler implements Supplier<Long> {
        * @param fields 同步的字段列表
        */
       private void checkFull(List<String> fields) {
-        if (interrupted) {
-          log.info("task job is interrupted!");
-          throw new RuntimeException("task is interrupted");
-        }
+        checkInterrupt();
         if (cacheInsert.size() >= BATCH_SIZE || cacheUpdate.size() >= BATCH_SIZE
             || cacheDelete.size() >= BATCH_SIZE || cacheBytes >= MAX_CACHE_BYTES_SIZE) {
           if (cacheDelete.size() > 0) {
@@ -584,26 +616,64 @@ public class MigrationHandler implements Supplier<Long> {
       }
 
       private void doInsert(List<String> fields) {
-        long ret = synchronizer.executeInsert(cacheInsert);
-        log.info("[IncreaseSync] Handle table [{}] data Insert count: {}", tableNameMapString, ret);
+        ReaderTaskThread.this.memChannel.add(
+            BatchElement.builder()
+                .tableNameMapString(tableNameMapString)
+                .handler((arg1, arg2) -> {
+                  long ret = synchronizer.executeInsert(arg2);
+                  log.info("[IncreaseSync] Handle table [{}] data Insert count: {}", tableNameMapString, ret);
+                  return ret;
+                })
+                .arg1(fields)
+                .arg2(Lists.newArrayList(cacheInsert))
+                .build()
+        );
         cacheInsert.clear();
       }
 
       private void doUpdate(List<String> fields) {
-        long ret = synchronizer.executeUpdate(cacheUpdate);
-        log.info("[IncreaseSync] Handle table [{}] data Update count: {}", tableNameMapString, ret);
+        ReaderTaskThread.this.memChannel.add(
+            BatchElement.builder()
+                .tableNameMapString(tableNameMapString)
+                .handler((arg1, arg2) -> {
+                  long ret = synchronizer.executeUpdate(arg2);
+                  log.info("[IncreaseSync] Handle table [{}] data Update count: {}", tableNameMapString, ret);
+                  return ret;
+                })
+                .arg1(fields)
+                .arg2(Lists.newArrayList(cacheUpdate))
+                .build()
+        );
         cacheUpdate.clear();
       }
 
       private void doDelete(List<String> fields) {
-        long ret = synchronizer.executeDelete(cacheDelete);
-        log.info("[IncreaseSync] Handle table [{}] data Delete count: {}", tableNameMapString, ret);
+        ReaderTaskThread.this.memChannel.add(
+            BatchElement.builder()
+                .tableNameMapString(tableNameMapString)
+                .handler((arg1, arg2) -> {
+                  long ret = synchronizer.executeDelete(arg2);
+                  log.info("[IncreaseSync] Handle table [{}] data Delete count: {}", tableNameMapString, ret);
+                  return ret;
+                })
+                .arg1(fields)
+                .arg2(Lists.newArrayList(cacheDelete))
+                .build()
+        );
         cacheDelete.clear();
       }
 
     });
 
-    return totalBytes.get();
+    return ReaderTaskResult
+        .builder()
+        .tableNameMapString(tableNameMapString)
+        .successCount(1)
+        .failureCount(0)
+        .recordCount(totalCount.get())
+        .totalBytes(totalBytes.get())
+        .build()
+        .paddingPerf();
   }
 
   /**
@@ -648,4 +718,22 @@ public class MigrationHandler implements Supplier<Long> {
     return ret;
   }
 
+  @Override
+  protected ReaderTaskResult exceptProcess(Throwable t) {
+    log.error("Error migration for table: {}.{}, error message: {}",
+        tableDescription.getSchemaName(), tableDescription.getTableName(), t.getMessage());
+    return ReaderTaskResult.builder()
+        .successCount(0)
+        .failureCount(1)
+        .recordCount(0)
+        .totalBytes(0)
+        .throwable(t)
+        .build()
+        .paddingPerf();
+  }
+
+  @Override
+  protected void afterProcess() {
+    robotCountDownLatch.countDown();
+  }
 }

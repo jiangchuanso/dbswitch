@@ -21,12 +21,13 @@ import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.logback.LogbackAppenderRegister;
 import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.common.entity.MdcKeyValue;
-import com.gitee.dbswitch.data.config.DbswichProperties;
+import com.gitee.dbswitch.data.config.DbswichPropertiesConfiguration;
 import com.gitee.dbswitch.data.service.MigrationService;
 import com.gitee.dbswitch.data.util.JsonUtils;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,9 +55,12 @@ public class ExecuteJobTaskRunnable implements Runnable {
 
   private AssignmentJobDAO assignmentJobDAO;
 
-  private AsyncTaskExecutor migrationTaskExecutor;
+  private AsyncTaskExecutor readerTaskExecutor;
 
-  @Getter private Long taskId;
+  private AsyncTaskExecutor writerTaskExecutor;
+
+  @Getter
+  private Long taskId;
 
   private Integer schedule;
 
@@ -66,8 +70,10 @@ public class ExecuteJobTaskRunnable implements Runnable {
     this.assignmentTaskDAO = SpringUtil.getBean(AssignmentTaskDAO.class);
     this.assignmentConfigDAO = SpringUtil.getBean(AssignmentConfigDAO.class);
     this.assignmentJobDAO = SpringUtil.getBean(AssignmentJobDAO.class);
-    this.migrationTaskExecutor = SpringUtil.getBean(
-        ExecutorConfig.TASK_EXECUTOR_BEAN_NAME, AsyncTaskExecutor.class);
+    this.readerTaskExecutor = SpringUtil.getBean(
+        ExecutorConfig.TASK_READ_EXECUTOR_BEAN_NAME, AsyncTaskExecutor.class);
+    this.writerTaskExecutor = SpringUtil.getBean(
+        ExecutorConfig.TASK_WRITE_EXECUTOR_BEAN_NAME, AsyncTaskExecutor.class);
     this.taskId = taskId;
     this.schedule = schedule;
     this.keyName = keyName;
@@ -110,8 +116,8 @@ public class ExecuteJobTaskRunnable implements Runnable {
             task.getContent());
 
         try {
-          DbswichProperties properties = JsonUtils.toBeanObject(
-              task.getContent(), DbswichProperties.class);
+          DbswichPropertiesConfiguration properties = JsonUtils.toBeanObject(
+              task.getContent(), DbswichPropertiesConfiguration.class);
           if (!assignmentConfigEntity.getFirstFlag()) {
             if (!assignmentConfigEntity.getTargetOnlyCreate()) {
               properties.getTarget().setTargetDrop(false);
@@ -123,7 +129,7 @@ public class ExecuteJobTaskRunnable implements Runnable {
             properties.getTarget().setTargetDrop(true);
           }
 
-          migrationService = new MigrationService(properties, migrationTaskExecutor);
+          migrationService = new MigrationService(properties, readerTaskExecutor, writerTaskExecutor);
           if (interrupted) {
             log.info("Quartz task id:{} interrupted when prepare stage", taskId);
             return;
@@ -147,11 +153,19 @@ public class ExecuteJobTaskRunnable implements Runnable {
         } catch (Throwable e) {
           assignmentJobEntity.setStatus(JobStatusEnum.FAIL.getValue());
           assignmentJobEntity.setErrorLog(ExceptionUtil.stacktraceToString(e));
-          log.info("Execute Assignment Failed [taskId={},jobId={}],Task Name: {}",
-              task.getId(), assignmentJobEntity.getId(), task.getName(), e);
+          log.info("Execute Assignment Failed [taskId={},jobId={}],Task Name: {}, Message: {}",
+              task.getId(), assignmentJobEntity.getId(), task.getName(), e.getMessage());
         } finally {
-          assignmentJobEntity.setFinishTime(new Timestamp(System.currentTimeMillis()));
-          assignmentJobDAO.updateSelective(assignmentJobEntity);
+          AssignmentJobEntity latestJobEntity = assignmentJobDAO.getById(assignmentJobEntity.getId());
+          if (Objects.nonNull(latestJobEntity)) {
+            // 注意，这里有可能用户手动取消任务后，直接删除了任务和这个作业，导致查询不到了
+            latestJobEntity.setFinishTime(new Timestamp(System.currentTimeMillis()));
+            latestJobEntity.setErrorLog(assignmentJobEntity.getErrorLog());
+            if (JobStatusEnum.CANCEL.getValue() != latestJobEntity.getStatus()) {
+              latestJobEntity.setStatus(assignmentJobEntity.getStatus().intValue());
+            }
+            assignmentJobDAO.updateSelective(latestJobEntity);
+          }
         }
       } finally {
         lock.unlock();

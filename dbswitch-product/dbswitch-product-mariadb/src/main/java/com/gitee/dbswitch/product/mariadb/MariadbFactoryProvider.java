@@ -15,8 +15,8 @@ import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.product.mysql.MysqlMetadataQueryProvider;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
-import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizer;
-import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizeProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
 import com.gitee.dbswitch.provider.write.AutoCastTableDataWriteProvider;
 import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
 import javax.sql.DataSource;
@@ -43,8 +43,8 @@ public class MariadbFactoryProvider extends AbstractFactoryProvider {
   }
 
   @Override
-  public TableDataSynchronizer createTableDataSynchronizer() {
-    return new AutoCastTableDataSynchronizer(this);
+  public TableDataSynchronizeProvider createTableDataSynchronizeProvider() {
+    return new AutoCastTableDataSynchronizeProvider(this);
   }
 
 }

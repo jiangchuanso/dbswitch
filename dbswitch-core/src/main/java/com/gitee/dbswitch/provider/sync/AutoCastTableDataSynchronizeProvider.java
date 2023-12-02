@@ -4,9 +4,9 @@ import com.gitee.dbswitch.common.util.ObjectCastUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import java.util.List;
 
-public class AutoCastTableDataSynchronizer extends DefaultTableDataSynchronizer {
+public class AutoCastTableDataSynchronizeProvider extends DefaultTableDataSynchronizeProvider {
 
-  public AutoCastTableDataSynchronizer(ProductFactoryProvider factoryProvider) {
+  public AutoCastTableDataSynchronizeProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 

@@ -19,7 +19,7 @@ import javax.sql.DataSource;
  * @author tang
  */
 
-public interface TableDataSynchronizer {
+public interface TableDataSynchronizeProvider {
 
   /**
    * 获取数据库类型

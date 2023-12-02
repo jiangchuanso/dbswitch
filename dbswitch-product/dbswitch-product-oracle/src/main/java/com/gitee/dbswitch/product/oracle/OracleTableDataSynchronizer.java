@@ -10,12 +10,12 @@
 package com.gitee.dbswitch.product.oracle;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizeProvider;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OracleTableDataSynchronizer extends DefaultTableDataSynchronizer {
+public class OracleTableDataSynchronizer extends DefaultTableDataSynchronizeProvider {
 
   public OracleTableDataSynchronizer(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);

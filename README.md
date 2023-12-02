@@ -33,29 +33,29 @@
 
 ```
 └── dbswitch
-    ├── dbswitch-common               // dbswitch通用定义模块
-    ├── dbswitch-core                 // dbswitch迁移同步实现类
-    ├── dbswitch-product              // dbswitch数据库方言
-        ├── dbswitch-product-mysql    //  -> mysql方言实现类
-        ├── dbswitch-product-oracle   //  -> oracle方言实现类
-        ├── dbswitch-product-sqlserver//  -> sqlserver方言实现类
-        ├── dbswitch-product-postgres //  -> postgres方言实现类
-        ├── dbswitch-product-dm       //  -> dm方言实现类
-        ├── dbswitch-product-kingbase //  -> kingbase方言实现类
-        ├── dbswitch-product-oscar    //  -> oscar方言实现类
-        ├── dbswitch-product-gbase    //  -> gbase方言实现类
-        ├── dbswitch-product-mariadb  //  -> mariadb方言实现类
-        ├── dbswitch-product-openguass//  -> openguass方言实现类
-        ├── dbswitch-product-db2      //  -> db2方言实现类
-        ├── dbswitch-product-sybase   //  -> sybase方言实现类
-        ├── dbswitch-product-hive     //  -> hive方言实现类
-        ├── dbswitch-product-sqlite   //  -> sqlite方言实现类
-        ├── dbswitch-product-clickhouse//  -> clickhouse方言实现类
-        ├── dbswitch-product-mongodb  //  -> mongodb方言实现类
-    ├── dbswitch-data                 // 工具入口模块，读取配置文件中的参数执行异构迁移同步
-    ├── dbswitch-admin                // 在以上模块的基础上引入Quartz的调度服务与接口
-    ├── dbswitch-admin-ui             // 基于Vue2的前段WEB交互页面
-    ├── dbswitch-dist                 // 基于maven-assembly-plugin插件的项目打包模块
+    ├── dbswitch-common                 // dbswitch通用定义模块
+    ├── dbswitch-core                   // dbswitch迁移同步实现类
+    ├── dbswitch-product                // dbswitch数据库方言
+        ├── dbswitch-product-mysql      //  -> mysql方言实现类
+        ├── dbswitch-product-oracle     //  -> oracle方言实现类
+        ├── dbswitch-product-sqlserver  //  -> sqlserver方言实现类
+        ├── dbswitch-product-postgres   //  -> postgres方言实现类
+        ├── dbswitch-product-dm         //  -> dm方言实现类
+        ├── dbswitch-product-kingbase   //  -> kingbase方言实现类
+        ├── dbswitch-product-oscar      //  -> oscar方言实现类
+        ├── dbswitch-product-gbase      //  -> gbase方言实现类
+        ├── dbswitch-product-mariadb    //  -> mariadb方言实现类
+        ├── dbswitch-product-openguass  //  -> openguass方言实现类
+        ├── dbswitch-product-db2        //  -> db2方言实现类
+        ├── dbswitch-product-sybase     //  -> sybase方言实现类
+        ├── dbswitch-product-hive       //  -> hive方言实现类
+        ├── dbswitch-product-sqlite     //  -> sqlite方言实现类
+        ├── dbswitch-product-clickhouse //  -> clickhouse方言实现类
+        ├── dbswitch-product-mongodb    //  -> mongodb方言实现类
+    ├── dbswitch-data                   // 工具入口模块，读取配置文件中的参数执行异构迁移同步
+    ├── dbswitch-admin                  // 在以上模块的基础上引入Quartz的调度服务与接口
+    ├── dbswitch-admin-ui               // 基于Vue2的前段WEB交互页面
+    ├── dbswitch-dist                   // 基于maven-assembly-plugin插件的项目打包模块
 ```
  
 ## 二、编译打包
@@ -132,28 +132,28 @@ dbswitch:
   source:
     # source database connection information
     ## support multiple source database connection
-    - url: jdbc:oracle:thin:@172.17.2.10:1521:ORCL
-      driver-class-name: 'oracle.jdbc.driver.OracleDriver'
-      driver-path: D:/Workspace/dbswitch/driver/oracle/oracle-12c
-      username: 'system'
-      password: '123456'
-      # source database configuration parameters
-      ## fetch size for query source database
-      fetch-size: 10000
-      ## schema name for query source schemas, separate by ','
-      source-schema: 'TANG'
-      ## table type which include or exclude,option: TABLE,VIEW
-      table-type: 'TABLE'
-      ## table name include from table lists, separate by ','
-      source-includes: ''
-      ## table name exclude from table lists, separate by ','
-      source-excludes: ''
-      ## table name convert mapper by regular expression
-      regex-table-mapper:
-        - from-pattern: '^'
-          to-value: 'T_'
-      ## columns name convert mapper by regular expression like regex-table-mapper
-      regex-column-mapper:
+    url: jdbc:oracle:thin:@172.17.2.10:1521:ORCL
+    driver-class-name: 'oracle.jdbc.driver.OracleDriver'
+    driver-path: D:/Workspace/dbswitch/driver/oracle/oracle-12c
+    username: 'system'
+    password: '123456'
+    # source database configuration parameters
+    ## fetch size for query source database
+    fetch-size: 10000
+    ## schema name for query source schemas, separate by ','
+    source-schema: 'TANG'
+    ## table type which include or exclude,option: TABLE,VIEW
+    table-type: 'TABLE'
+    ## table name include from table lists, separate by ','
+    source-includes: ''
+    ## table name exclude from table lists, separate by ','
+    source-excludes: ''
+    ## table name convert mapper by regular expression
+    regex-table-mapper:
+      - from-pattern: '^'
+        to-value: 'T_'
+    ## columns name convert mapper by regular expression like regex-table-mapper
+    regex-column-mapper:
 
   target:
     # target database connection information
@@ -183,21 +183,21 @@ dbswitch:
 
 | 配置参数 | 配置说明 | 示例 | 备注 |
 | :------| :------ | :------ | :------ |
-| dbswitch.source[i].url | 来源端JDBC连接的URL | jdbc:oracle:thin:@10.17.1.158:1521:ORCL | 可为：oracle/mysql/mariadb/sqlserver/postgresql/db2/dm/kingbase8/highgo |
-| dbswitch.source[i].driver-class-name | 来源端数据库的驱动类名称 | oracle.jdbc.driver.OracleDriver | 对应数据库的驱动类 |
-| dbswitch.source[i].driver-path | 来源端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/oracle/oracle-12c | 对应数据库的驱动JAR所在目录 |
-| dbswitch.source[i].username | 来源端连接帐号名 | test | 无 |
-| dbswitch.source[i].password | 来源端连接帐号密码 | 123456 | 无 |
-| dbswitch.source[i].fetch-size | 来源端数据库查询时的fetch_size设置 | 10000 | 需要大于100有效 |
-| dbswitch.source[i].source-schema | 来源端的schema名称 | dbo,test | 多个之间用英文逗号分隔 |
-| dbswitch.source[i].table-type | 来源端表的类型 | TABLE | 可选值为：TABLE、VIEW ,分别代表物理表和试图表 |
-| dbswitch.source[i].source-includes | 来源端schema下的表中需要包含的表名称 | users1,orgs1 | 支持多个表（多个之间用英文逗号分隔）；支持支持正则表达式(不能含有逗号) |
-| dbswitch.source[i].source-excludes | 来源端schema下的表中需要过滤的表名称 | users,orgs | 不包含的表名称，多个之间用英文逗号分隔 |
-| dbswitch.source[i].regex-table-mapper | 基于正则表达式的表名称映射关系 | [{"from-pattern": "^","to-value": "T_"}] | 为list类型，元素存在顺序关系 |
-| dbswitch.source[i].regex-column-mapper | 基于正则表达式的字段名映射关系 | [{"from-pattern": "$","to-value": "_x"}] | 为list类型，元素存在顺序关系 |
+| dbswitch.source.url | 来源端JDBC连接的URL | jdbc:oracle:thin:@10.17.1.158:1521:ORCL | 可为：oracle/mysql/mariadb/sqlserver/postgresql/db2/dm/kingbase8/highgo |
+| dbswitch.source.driver-class-name | 来源端数据库的驱动类名称 | oracle.jdbc.driver.OracleDriver | 对应数据库的驱动类 |
+| dbswitch.source.driver-path | 来源端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/oracle/oracle-12c | 对应数据库的驱动JAR所在目录 |
+| dbswitch.source.username | 来源端连接帐号名 | test | 无 |
+| dbswitch.source.password | 来源端连接帐号密码 | 123456 | 无 |
+| dbswitch.source.fetch-size | 来源端数据库查询时的fetch_size设置 | 10000 | 需要大于100有效 |
+| dbswitch.source.source-schema | 来源端的schema名称 | dbo,test | 多个之间用英文逗号分隔 |
+| dbswitch.source.table-type | 来源端表的类型 | TABLE | 可选值为：TABLE、VIEW ,分别代表物理表和试图表 |
+| dbswitch.source.source-includes | 来源端schema下的表中需要包含的表名称 | users1,orgs1 | 支持多个表（多个之间用英文逗号分隔）；支持支持正则表达式(不能含有逗号) |
+| dbswitch.source.source-excludes | 来源端schema下的表中需要过滤的表名称 | users,orgs | 不包含的表名称，多个之间用英文逗号分隔 |
+| dbswitch.source.regex-table-mapper | 基于正则表达式的表名称映射关系 | [{"from-pattern": "^","to-value": "T_"}] | 为list类型，元素存在顺序关系 |
+| dbswitch.source.regex-column-mapper | 基于正则表达式的字段名映射关系 | [{"from-pattern": "$","to-value": "_x"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.target.url | 目的端JDBC连接的URL | jdbc:postgresql://10.17.1.90:5432/study | 可为：oracle/sqlserver/postgresql/greenplum,mysql/mariadb/db2/dm/kingbase8/highgo也支持，但字段类型兼容性问题比较多 |
 | dbswitch.target.driver-class-name |目的端数据库的驱动类名称 | org.postgresql.Driver | 对应数据库的驱动类 |
-| dbswitch.source[i].driver-path | 目的端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4 | 对应数据库的驱动JAR所在目录 |
+| dbswitch.target.driver-path | 目的端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4 | 对应数据库的驱动JAR所在目录 |
 | dbswitch.target.username | 目的端连接帐号名 | test | 无 |
 | dbswitch.target.password | 目的端连接帐号密码 | 123456 | 无 |
 | dbswitch.target.target-schema | 目的端的schema名称 | public | 目的端的schema名称只能有且只有一个 |
@@ -208,22 +208,19 @@ dbswitch:
 | dbswitch.target.writer-engine-insert | 是否使用insert写入数据 | false | 可选值为：true为insert写入、false为copy写入，只针对目的端数据库为PostgreSQL/Greenplum的有效 |
 | dbswitch.target.change-data-sync | 是否启用增量变更同步，dbswitch.target.target-drop为false时且表有主键情况下有效,千万级以上数据量建议设为false | false | 可选值为：true、false |
 
-
  **注意:**
- 
-- （1）支持源端为多个数据源类型，如果```dbswitch.source[i]```为数组类型，i为编号，从0开始的整数； 
- 
-- （2）如果```dbswitch.source[i].source-includes```不为空，则按照包含表的方式来执行； 
 
-- （3）如果```dbswitch.source[i].source-includes```为空，则按照```dbswitch.source[i].source-excludes```排除表的方式来执行。 
+- （1）如果```dbswitch.source.source-includes```不为空，则按照包含表的方式来执行； 
 
-- （4）如果```dbswitch.target.target-drop=false```，```dbswitch.target.change-data-synch=true```；时会对有主键表启用增量变更方式同步 
+- （2）如果```dbswitch.source.source-includes```为空，则按照```dbswitch.source.source-excludes```排除表的方式来执行。 
 
-- （5）对于```regex-table-mapper```和```regex-column-mappe```，为基于正则表达式替换的表名映射和字段名映射，均可以为空（代表原名映射，即源的表t_a映射到目的端也为t_a）
+- （3）如果```dbswitch.target.target-drop=false```，```dbswitch.target.change-data-synch=true```；时会对有主键表启用增量变更方式同步 
+
+- （4）对于```regex-table-mapper```和```regex-column-mappe```，为基于正则表达式替换的表名映射和字段名映射，均可以为空（代表原名映射，即源的表t_a映射到目的端也为t_a）
 
 > 提示：如果要将源端所有表名(或者字段名)添加前缀，可以配置```"from-pattern": "^","to-value": "T_"```;
 
-- （6）支持的数据库产品及其JDBC驱动连接示例如下：
+- （5）支持的数据库产品及其JDBC驱动连接示例如下：
 
 **MySQL/MariaDB数据库**
 
@@ -275,7 +272,7 @@ jdbc连接地址：jdbc:db2://172.17.2.10:50000/testdb:driverType=4;fullyMateria
 jdbc驱动名称：com.ibm.db2.jcc.DB2Driver
 ```
 
-**达梦DMDB数据库**
+**达梦DM数据库**
 
 ```
 jdbc连接地址：jdbc:dm://172.17.2.10:5236
@@ -319,7 +316,7 @@ jdbc驱动名称：org.apache.hive.jdbc.HiveDriver
 
 注意：当前只支持hive version 3.x的账号密码认证方式。
 
-**OpenGuass数据库**
+**OpenGauss数据库**
 
 ```
 jdbc连接地址：dbc:opengauss://172.17.2.10:5866/test
@@ -344,9 +341,9 @@ jdbc驱动名称：org.sqlite.JDBC
 > (a) 本地文件方式：jdbc:sqlite:/tmp/test.db , 该方式适用于dbswitch为实体机器部署的场景。
 >
 > (b) 远程文件方式: jdbc:sqlite::resource:http://172.17.2.12:8080/test.db ,该方式适用于容器方式部署的场景,  搭建文件服务器的方法可使
-> 用如下docker方式快速部署(/home/sqlites为服务器上存放sqlite数据库文件的目录)：
+> 用如下docker方式快速部署(/home/files为服务器上存放sqlite数据库文件的目录)：
 >
-> ```docker run -d --name http_file_server -p 8080:8080 -v /home/sqlites:/data inrgihc/http_file_server:latest```
+> ```docker run -d --name http_file_server -p 8080:8080 -v /home/files:/data inrgihc/http_file_server:latest```
 >
 > 说明：远程服务器文件将会被下载到本地System.getProperty("java.io.tmpdir")所指定的目录下(linux为/tmp/，Windows为C:/temp/)，并以
 > sqlite-jdbc-tmp-{XXX}.db的方式进行文件命名，其中{XXX}为文件网络地址(例如上述为http://192.168.31.57:8080/test.db) 的字符串哈希值，
@@ -563,16 +560,21 @@ cd dbswitch && mvn clean install
 #### (3)、代码集成开发
 
 ```
-// 构建任务执行的线程池
-AsyncTaskExecutor taskExecutor=new ThreadPoolTaskExecutor();
-taskExecutor.setXXXX();
+// 构建并行读取任务执行的线程池
+AsyncTaskExecutor taskReadExecutor=new ThreadPoolTaskExecutor();
+taskReadExecutor.setXXXX();
+
+// 构建并行写入任务执行的线程池
+AsyncTaskExecutor taskWriteExecutor=new ThreadPoolTaskExecutor();
+taskWriteExecutor.setXXXX();
 
 // 构造dbswitch所需的配置参数，参数说明请参考第三章第1小节
-DbswichProperties properties = new DbswichProperties();
-properties.setXXXX();
+DbswichPropertiesConfiguration properties = new DbswichPropertiesConfiguration();
+properties.setSource(XXX);
+properties.setTarget(YYY);
 
-// 将参数传递给dbswitch启动同步方式执行
-MigrationService service = new MigrationService(properties, taskExecutor);
+// 将参数传递给dbswitch启动迁移同步方式执行
+MigrationService service = new MigrationService(properties, taskReadExecutor, taskWriteExecutor);
 service.run();
 ```
 

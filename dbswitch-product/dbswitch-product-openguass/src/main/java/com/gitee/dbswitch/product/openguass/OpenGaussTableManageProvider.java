@@ -7,24 +7,15 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.product.postgresql;
+package com.gitee.dbswitch.product.openguass;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
-import lombok.extern.slf4j.Slf4j;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 
-@Slf4j
-public class PostgresTableOperateProvider extends DefaultTableOperateProvider {
+public class OpenGaussTableManageProvider extends DefaultTableManageProvider {
 
-  public PostgresTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public OpenGaussTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
-  }
-
-  @Override
-  public void truncateTableData(String schemaName, String tableName) {
-    String sql = String.format("TRUNCATE TABLE \"%s\".\"%s\" RESTART IDENTITY ",
-        schemaName, tableName);
-    this.executeSql(sql);
   }
 
   @Override
@@ -33,4 +24,5 @@ public class PostgresTableOperateProvider extends DefaultTableOperateProvider {
         schemaName, tableName);
     this.executeSql(sql);
   }
+
 }

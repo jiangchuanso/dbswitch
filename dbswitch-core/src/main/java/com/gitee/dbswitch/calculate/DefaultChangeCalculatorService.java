@@ -16,6 +16,7 @@ import com.gitee.dbswitch.common.util.JdbcTypesUtils;
 import com.gitee.dbswitch.common.util.ObjectCastUtils;
 import com.gitee.dbswitch.provider.ProductProviderFactory;
 import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
+import com.gitee.dbswitch.provider.transform.RecordTransformProvider;
 import com.gitee.dbswitch.service.DefaultMetadataService;
 import com.gitee.dbswitch.service.MetadataService;
 import java.sql.ResultSet;
@@ -282,18 +283,22 @@ public final class DefaultChangeCalculatorService implements RecordRowChangeCalc
         log.debug("###### Enter CDC calculate now");
       }
 
+      RecordTransformProvider transformer = task.getTransformer();
+
       // 进入核心比较计算算法区域
       RowChangeTypeEnum flagField = null;
       Object[] outputRow;
       Object[] one = getRowData(rsold.getResultSet());
-      Object[] two = getRowData(rsnew.getResultSet());
+      Object[] two = transformer.doTransform(task.getNewSchemaName(), task.getNewTableName(),
+          queryFieldColumn, getRowData(rsnew.getResultSet()));
       while (true) {
         if (one == null && two == null) {
           break;
         } else if (one == null && two != null) {
           flagField = RowChangeTypeEnum.VALUE_INSERT;
           outputRow = two;
-          two = getRowData(rsnew.getResultSet());
+          two = transformer.doTransform(task.getNewSchemaName(), task.getNewTableName(),
+              queryFieldColumn, getRowData(rsnew.getResultSet()));
         } else if (one != null && two == null) {
           flagField = RowChangeTypeEnum.VALUE_DELETED;
           outputRow = one;
@@ -311,7 +316,8 @@ public final class DefaultChangeCalculatorService implements RecordRowChangeCalc
             }
 
             one = getRowData(rsold.getResultSet());
-            two = getRowData(rsnew.getResultSet());
+            two = transformer.doTransform(task.getNewSchemaName(), task.getNewTableName(),
+                queryFieldColumn, getRowData(rsnew.getResultSet()));
           } else {
             if (compare < 0) {
               flagField = RowChangeTypeEnum.VALUE_DELETED;
@@ -320,7 +326,8 @@ public final class DefaultChangeCalculatorService implements RecordRowChangeCalc
             } else {
               flagField = RowChangeTypeEnum.VALUE_INSERT;
               outputRow = two;
-              two = getRowData(rsnew.getResultSet());
+              two = transformer.doTransform(task.getNewSchemaName(), task.getNewTableName(), queryFieldColumn,
+                  getRowData(rsnew.getResultSet()));
             }
           }
         }

@@ -7,20 +7,20 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.product.oracle;
+package com.gitee.dbswitch.product.oscar;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 
-public class OracleTableOperateProvider extends DefaultTableOperateProvider {
+public class OscarTableManageProvider extends DefaultTableManageProvider {
 
-  public OracleTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public OscarTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 
   @Override
   public void dropTable(String schemaName, String tableName) {
-    String sql = String.format("DROP TABLE \"%s\".\"%s\" CASCADE CONSTRAINTS", schemaName, tableName);
+    String sql = String.format("DROP TABLE \"%s\".\"%s\" CASCADE ", schemaName, tableName);
     this.executeSql(sql);
   }
 

@@ -26,6 +26,15 @@
 			</excludes>
 		</fileSet>
 
+		<!-- 创建ext目录文件夹 -->
+		<fileSet>
+			<directory>${project.basedir}</directory>
+			<outputDirectory>ext</outputDirectory>
+			<excludes>
+				<exclude>**/*</exclude>
+			</excludes>
+		</fileSet>
+
 		<!-- 打包dbswitch-admin中的配置文件到打包目录/conf 下 -->
 		<fileSet>
 			<directory>${project.parent.basedir}/dbswitch-admin/src/main/resources/
@@ -83,8 +92,21 @@
 			<directory>${project.parent.basedir}/dbswitch-admin/target
 			</directory>
 			<outputDirectory>lib</outputDirectory>
+			<excludes>
+				<exclude>dbswitch-admin-*.jar</exclude>
+			</excludes>
 			<includes>
 				<include>*.jar</include>
+			</includes>
+		</fileSet>
+
+		<!-- 将模块dbswitch-admin的jar文件单独移动到目录/ext 下 -->
+		<fileSet>
+			<directory>${project.parent.basedir}/dbswitch-admin/target
+			</directory>
+			<outputDirectory>ext</outputDirectory>
+			<includes>
+				<include>dbswitch-admin-*.jar</include>
 			</includes>
 		</fileSet>
 

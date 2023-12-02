@@ -12,12 +12,12 @@ package com.gitee.dbswitch.product.kingbase;
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.features.ProductFeatures;
-import com.gitee.dbswitch.product.postgresql.PostgresTableOperateProvider;
+import com.gitee.dbswitch.product.postgresql.PostgresTableManageProvider;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
-import com.gitee.dbswitch.provider.operate.TableOperateProvider;
-import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizer;
-import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.manage.TableManageProvider;
+import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizeProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
 import com.gitee.dbswitch.provider.write.AutoCastTableDataWriteProvider;
 import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
 import javax.sql.DataSource;
@@ -39,8 +39,8 @@ public class KingbaseFactoryProvider extends AbstractFactoryProvider {
   }
 
   @Override
-  public TableOperateProvider createTableOperateProvider() {
-    return new PostgresTableOperateProvider(this);
+  public TableManageProvider createTableManageProvider() {
+    return new PostgresTableManageProvider(this);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class KingbaseFactoryProvider extends AbstractFactoryProvider {
   }
 
   @Override
-  public TableDataSynchronizer createTableDataSynchronizer() {
-    return new AutoCastTableDataSynchronizer(this);
+  public TableDataSynchronizeProvider createTableDataSynchronizeProvider() {
+    return new AutoCastTableDataSynchronizeProvider(this);
   }
 }

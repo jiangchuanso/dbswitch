@@ -3,28 +3,28 @@ dbswitch:
     # source database connection information
     ## support MySQL/MariaDB/DB2/DM/Kingbase8/Oracle/SQLServer/PostgreSQL/Greenplum etc.
     ## support multiple source database connection
-    - url: jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true
-      driver-class-name: 'com.mysql.jdbc.Driver'
-      driver-path: D:\Workspace\IdeaProjects\dbswitch\drivers\mysql\mysql-5
-      username: 'test'
-      password: '123456'
-      # source database configuration parameters
-      ## fetch size for query source database
-      fetch-size: 10000
-      ## schema name for query source schemas, separate by ','
-      source-schema: 'test'
-      ## table type which include or exclude,option: TABLE,VIEW
-      table-type: 'TABLE'
-      ## table name include from table lists, separate by ','
-      source-includes: ''
-      ## table name exclude from table lists, separate by ','
-      source-excludes: ''
-      ## table name convert mapper by regular expression
-      regex-table-mapper:
-        - from-pattern: '^'
-          to-value: 'T_'
-      ## columns name convert mapper by regular expression like regex-table-mapper
-      regex-column-mapper:
+    url: jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true
+    driver-class-name: 'com.mysql.jdbc.Driver'
+    driver-path: D:\Workspace\IdeaProjects\dbswitch\drivers\mysql\mysql-5
+    username: 'test'
+    password: '123456'
+    # source database configuration parameters
+    ## fetch size for query source database
+    fetch-size: 10000
+    ## schema name for query source schemas, separate by ','
+    source-schema: 'test'
+    ## table type which include or exclude,option: TABLE,VIEW
+    table-type: 'TABLE'
+    ## table name include from table lists, separate by ','
+    source-includes: ''
+    ## table name exclude from table lists, separate by ','
+    source-excludes: ''
+    ## table name convert mapper by regular expression
+    regex-table-mapper:
+      - from-pattern: '^'
+        to-value: 'T_'
+    ## columns name convert mapper by regular expression like regex-table-mapper
+    regex-column-mapper:
 
   target:
     # target database connection information

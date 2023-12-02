@@ -10,11 +10,11 @@
 package com.gitee.dbswitch.product.sqlite;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 
-public class SqliteTableOperateProvider extends DefaultTableOperateProvider {
+public class SqliteTableManageProvider extends DefaultTableManageProvider {
 
-  public SqliteTableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public SqliteTableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 

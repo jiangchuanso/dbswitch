@@ -18,6 +18,7 @@ APP_HOME="$(cd "$(dirname ${APP_HOME})"; pwd)"
 
 APP_BIN_PATH=$APP_HOME/bin
 APP_LIB_PATH=$APP_HOME/lib
+APP_EXT_PATH=$APP_HOME/ext
 APP_CONF_PATH=$APP_HOME/conf
 export APP_DRIVERS_PATH=$APP_HOME/drivers
 
@@ -45,6 +46,7 @@ for i in $APP_LIB_PATH/*.jar
 do
 	CLASSPATH="$i:$CLASSPATH"
 done
+CLASSPATH="$CLASSPATH:$APP_EXT_PATH/*"
 
 res=`ps aux|grep java|grep $APP_HOME|grep $APP_MAIN|grep -v grep|awk '{print $2}'`
 if [ -n "$res"  ]; then

@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * JSON序列化与反序列化工具类
+ *
+ * @author tang
  */
 @Slf4j
 @UtilityClass

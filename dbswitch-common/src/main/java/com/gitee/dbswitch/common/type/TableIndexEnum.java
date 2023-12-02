@@ -9,6 +9,11 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.common.type;
 
+/**
+ * 表的索引类型枚举定义
+ *
+ * @author tang
+ */
 public enum TableIndexEnum {
 
   NORMAL("普通索引"),

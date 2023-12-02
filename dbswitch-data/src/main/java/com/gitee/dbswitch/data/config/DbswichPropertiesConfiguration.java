@@ -9,10 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.config;
 
+import com.gitee.dbswitch.data.entity.GlobalParamConfigProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.entity.TargetDataSourceProperties;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -23,16 +22,18 @@ import org.springframework.context.annotation.PropertySource;
  *
  * @author tang
  */
-@Configuration
 @Data
+@Configuration
 @ConfigurationProperties(prefix = "dbswitch")
 @PropertySource(
     value = {"classpath:config.properties", "classpath:config.yml", "classpath:config.yaml"},
     ignoreResourceNotFound = true,
     factory = DbswitchPropertySourceFactory.class)
-public class DbswichProperties {
+public class DbswichPropertiesConfiguration {
 
-  private List<SourceDataSourceProperties> source = new ArrayList<>();
+  private SourceDataSourceProperties source = new SourceDataSourceProperties();
 
   private TargetDataSourceProperties target = new TargetDataSourceProperties();
+
+  private GlobalParamConfigProperties config = new GlobalParamConfigProperties();
 }

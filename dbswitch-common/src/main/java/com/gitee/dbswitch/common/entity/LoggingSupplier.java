@@ -20,6 +20,10 @@ public class LoggingSupplier<T> extends AbstractLogging implements Supplier<T> {
     this.command = command;
   }
 
+  public Supplier<T> getCommand() {
+    return command;
+  }
+
   @Override
   public T get() {
     try {

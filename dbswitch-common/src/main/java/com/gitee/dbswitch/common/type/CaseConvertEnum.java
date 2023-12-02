@@ -11,6 +11,8 @@ package com.gitee.dbswitch.common.type;
 
 /**
  * 处理大小写转换的枚举类
+ *
+ * @author tang
  */
 public enum CaseConvertEnum {
   NONE(s -> s),

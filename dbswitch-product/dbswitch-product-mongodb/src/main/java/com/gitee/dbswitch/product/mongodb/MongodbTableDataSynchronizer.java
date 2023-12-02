@@ -10,10 +10,10 @@
 package com.gitee.dbswitch.product.mongodb;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizeProvider;
 import java.util.List;
 
-public class MongodbTableDataSynchronizer extends DefaultTableDataSynchronizer {
+public class MongodbTableDataSynchronizer extends DefaultTableDataSynchronizeProvider {
 
   public MongodbTableDataSynchronizer(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);

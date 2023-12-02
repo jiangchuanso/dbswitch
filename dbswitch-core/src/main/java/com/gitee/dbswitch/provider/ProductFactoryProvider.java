@@ -11,13 +11,15 @@ package com.gitee.dbswitch.provider;
 
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.features.ProductFeatures;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
+import com.gitee.dbswitch.provider.manage.TableManageProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
-import com.gitee.dbswitch.provider.operate.TableOperateProvider;
 import com.gitee.dbswitch.provider.query.DefaultTableDataQueryProvider;
 import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
-import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizer;
-import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.DefaultTableDataSynchronizeProvider;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
+import com.gitee.dbswitch.provider.transform.MappedTransformProvider;
+import com.gitee.dbswitch.provider.transform.RecordTransformProvider;
 import com.gitee.dbswitch.provider.write.DefaultTableDataWriteProvider;
 import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
 import javax.sql.DataSource;
@@ -62,6 +64,15 @@ public interface ProductFactoryProvider {
   }
 
   /**
+   * 获取记录转换Provider
+   *
+   * @return RecordTransformProvider
+   */
+  default RecordTransformProvider createRecordTransformProvider() {
+    return new MappedTransformProvider(this);
+  }
+
+  /**
    * 获取表批量写入Provider
    *
    * @param useInsert 是否使用insert写入(只对PG有效)
@@ -74,19 +85,19 @@ public interface ProductFactoryProvider {
   /**
    * 获取表操作Provider
    *
-   * @return TableOperateProvider
+   * @return TableManageProvider
    */
-  default TableOperateProvider createTableOperateProvider() {
-    return new DefaultTableOperateProvider(this);
+  default TableManageProvider createTableManageProvider() {
+    return new DefaultTableManageProvider(this);
   }
 
   /**
    * 获取数据同步Provider
    *
-   * @return TableDataSynchronizer
+   * @return TableDataSynchronizeProvider
    */
-  default TableDataSynchronizer createTableDataSynchronizer() {
-    return new DefaultTableDataSynchronizer(this);
+  default TableDataSynchronizeProvider createTableDataSynchronizeProvider() {
+    return new DefaultTableDataSynchronizeProvider(this);
   }
 
 }

@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.provider.sync;
 
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
-import com.gitee.dbswitch.common.util.ObjectCastUtils;
 import com.gitee.dbswitch.provider.AbstractCommonProvider;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import java.util.ArrayList;
@@ -34,8 +33,8 @@ import org.springframework.transaction.TransactionStatus;
  * @author tang
  */
 @Slf4j
-public class DefaultTableDataSynchronizer
-    extends AbstractCommonProvider implements TableDataSynchronizer {
+public class DefaultTableDataSynchronizeProvider
+    extends AbstractCommonProvider implements TableDataSynchronizeProvider {
 
   private JdbcTemplate jdbcTemplate;
   private PlatformTransactionManager tx;
@@ -49,7 +48,7 @@ public class DefaultTableDataSynchronizer
   protected int[] updateArgsType;
   protected int[] deleteArgsType;
 
-  public DefaultTableDataSynchronizer(ProductFactoryProvider factoryProvider) {
+  public DefaultTableDataSynchronizeProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
     this.jdbcTemplate = new JdbcTemplate(factoryProvider.getDataSource());
     this.tx = new DataSourceTransactionManager(factoryProvider.getDataSource());

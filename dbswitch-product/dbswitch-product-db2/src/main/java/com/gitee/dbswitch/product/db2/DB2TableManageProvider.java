@@ -10,11 +10,11 @@
 package com.gitee.dbswitch.product.db2;
 
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
-import com.gitee.dbswitch.provider.operate.DefaultTableOperateProvider;
+import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 
-public class DB2TableOperateProvider extends DefaultTableOperateProvider {
+public class DB2TableManageProvider extends DefaultTableManageProvider {
 
-  public DB2TableOperateProvider(ProductFactoryProvider factoryProvider) {
+  public DB2TableManageProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
   }
 

@@ -14,9 +14,9 @@ import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
-import com.gitee.dbswitch.provider.operate.TableOperateProvider;
+import com.gitee.dbswitch.provider.manage.TableManageProvider;
 import com.gitee.dbswitch.provider.query.TableDataQueryProvider;
-import com.gitee.dbswitch.provider.sync.TableDataSynchronizer;
+import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
 import com.gitee.dbswitch.provider.write.TableDataWriteProvider;
 import javax.sql.DataSource;
 
@@ -47,12 +47,12 @@ public class MongodbFactoryProvider extends AbstractFactoryProvider {
   }
 
   @Override
-  public TableOperateProvider createTableOperateProvider() {
-    return new MongodbTableOperateProvider(this);
+  public TableManageProvider createTableManageProvider() {
+    return new MongodbTableManageProvider(this);
   }
 
   @Override
-  public TableDataSynchronizer createTableDataSynchronizer() {
+  public TableDataSynchronizeProvider createTableDataSynchronizeProvider() {
     return new MongodbTableDataSynchronizer(this);
   }
 

@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.calculate;
 
+import com.gitee.dbswitch.provider.transform.RecordTransformProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -75,4 +76,10 @@ public class TaskParamEntity {
   @NonNull
   @Builder.Default
   private Map<String, String> columnsMap = Collections.emptyMap();
+
+  /**
+   * 值转换器
+   */
+  @NonNull
+  private RecordTransformProvider transformer;
 }

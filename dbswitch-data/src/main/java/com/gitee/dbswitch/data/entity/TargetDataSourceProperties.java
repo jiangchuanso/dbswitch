@@ -13,6 +13,11 @@ import com.gitee.dbswitch.common.type.CaseConvertEnum;
 import java.util.concurrent.TimeUnit;
 import lombok.Data;
 
+/**
+ * 目标端参数配置
+ *
+ * @author tang
+ */
 @Data
 public class TargetDataSourceProperties {
 
@@ -21,6 +26,7 @@ public class TargetDataSourceProperties {
   private String username;
   private String password;
   private String driverPath;
+
   private Long connectionTimeout = TimeUnit.SECONDS.toMillis(60);
   private Long maxLifeTime = TimeUnit.MINUTES.toMillis(30);
 

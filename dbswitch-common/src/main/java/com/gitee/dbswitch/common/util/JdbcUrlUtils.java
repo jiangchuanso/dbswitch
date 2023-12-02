@@ -21,8 +21,6 @@ import lombok.experimental.UtilityClass;
  * JDBC-URL参数提取工具类
  *
  * @author tang
- * @date 2021-11-20 22:54:21
- * @since 1.0
  */
 @UtilityClass
 public final class JdbcUrlUtils {

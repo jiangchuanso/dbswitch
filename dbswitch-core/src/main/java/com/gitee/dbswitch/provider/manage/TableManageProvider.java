@@ -7,9 +7,9 @@
 // Date : 2020/1/2
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.dbswitch.provider.operate;
+package com.gitee.dbswitch.provider.manage;
 
-public interface TableOperateProvider {
+public interface TableManageProvider {
 
   /**
    * 清除指定表的所有数据
