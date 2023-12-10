@@ -95,6 +95,9 @@ public final class DatabaseAwareUtils {
       if (null != url && url.contains("mongodb://")) {
         return ProductTypeEnum.MONGODB;
       }
+      if (null != url && url.contains("jest://")) {
+        return ProductTypeEnum.ELASTICSEARCH;
+      }
       throw new IllegalStateException("Unable to detect database type from data source instance");
     } catch (SQLException se) {
       throw new RuntimeException(se);

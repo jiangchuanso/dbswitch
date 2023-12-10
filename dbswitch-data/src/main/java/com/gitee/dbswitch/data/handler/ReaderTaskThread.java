@@ -242,7 +242,7 @@ public class ReaderTaskThread extends TaskProcessor<ReaderTaskResult> {
       properties.getTarget().setTargetDrop(true);
     }
 
-    if (targetProductType.isMongodb()) {
+    if (targetProductType.isMongodb() || targetProductType.isElasticSearch()) {
       try {
         targetFactoryProvider.createTableManageProvider()
             .dropTable(targetSchemaName, targetTableName);

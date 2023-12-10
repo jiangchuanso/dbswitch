@@ -168,6 +168,15 @@ public enum ProductTypeEnum {
       "jdbc:mongodb://",
       new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"},
       "jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1"),
+
+  /**
+   * ElasticSearch数据库类型
+   */
+  ELASTICSEARCH(17, "\"", "ElasticSearch", "com.gitee.jdbc.elasticsearch.JdbcDriver", 9200,
+      "",
+      "jdbc:jest://",
+      new String[]{"jdbc:jest://{host}[:{port}][\\?{params}]"},
+      "jdbc:jest://172.17.2.12:9200?useHttps=false"),
   ;
 
   private int id;
@@ -181,7 +190,7 @@ public enum ProductTypeEnum {
   private String sample;
 
   public boolean hasDatabaseName() {
-    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A).contains(this);
+    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, ELASTICSEARCH).contains(this);
   }
 
   public boolean hasFilePath() {
@@ -263,6 +272,15 @@ public enum ProductTypeEnum {
    */
   public boolean isMongodb() {
     return this == MONGODB;
+  }
+
+  /**
+   * 是否为ElasticSearch数据库类型
+   *
+   * @return boolean
+   */
+  public boolean isElasticSearch() {
+    return this == ELASTICSEARCH;
   }
 
   /**

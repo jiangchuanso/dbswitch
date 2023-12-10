@@ -80,6 +80,13 @@ public class AssignmentService {
       }
     }
 
+    Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+    DatabaseConnectionEntity sourceEntity = databaseConnectionDAO.getById(sourceConnectionId);
+    if (ProductTypeEnum.ELASTICSEARCH == sourceEntity.getType()) {
+      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+          "不支持源端数据源为ElasticSearch类型");
+    }
+
     return ConverterFactory.getConverter(AssignmentInfoConverter.class)
         .convert(assignmentTaskDAO.getById(assignment.getId()));
   }

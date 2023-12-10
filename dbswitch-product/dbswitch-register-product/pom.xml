@@ -93,6 +93,11 @@
       <artifactId>dbswitch-product-mongodb</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.gitee.dbswitch</groupId>
+      <artifactId>dbswitch-product-elasticsearch</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
