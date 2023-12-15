@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.provider.sync;
 
+import cn.hutool.json.JSONUtil;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.provider.AbstractCommonProvider;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
@@ -105,15 +106,24 @@ public class DefaultTableDataSynchronizeProvider
     }
 
     try {
-      int[] affects = jdbcTemplate
-          .batchUpdate(this.insertStatementSql, records, this.insertArgsType);
-      int affectCount = 0;
-      for (int i : affects) {
-        affectCount += i;
+      try {
+        jdbcTemplate.batchUpdate(this.insertStatementSql, records, this.insertArgsType);
+      } catch (Exception e) {
+        if (e instanceof java.sql.BatchUpdateException) {
+          for (Object[] dataList : records) {
+            try {
+              jdbcTemplate.update(this.insertStatementSql, dataList, this.updateArgsType);
+            } catch (Exception ex) {
+              log.error("Failed to insert by SQL: {}, value: {}", this.insertStatementSql,
+                  JSONUtil.toJsonStr(dataList));
+              throw ex;
+            }
+          }
+        }
       }
 
       tx.commit(status);
-      return affectCount;
+      return records.size();
     } catch (TransactionException e) {
       tx.rollback(status);
       throw e;
@@ -150,13 +160,24 @@ public class DefaultTableDataSynchronizeProvider
     }
 
     try {
-      int[] affects = jdbcTemplate.batchUpdate(this.updateStatementSql, dataLists, this.updateArgsType);
-      int affectCount = 0;
-      for (int i : affects) {
-        affectCount += i;
+      try {
+        jdbcTemplate.batchUpdate(this.updateStatementSql, dataLists, this.updateArgsType);
+      } catch (Exception e) {
+        if (e instanceof java.sql.BatchUpdateException) {
+          for (Object[] dataList : dataLists) {
+            try {
+              jdbcTemplate.update(this.updateStatementSql, dataList, this.updateArgsType);
+            } catch (Exception ex) {
+              log.error("Failed to update by SQL: {}, value: {}", this.updateStatementSql,
+                  JSONUtil.toJsonStr(dataList));
+              throw ex;
+            }
+          }
+        }
       }
+
       tx.commit(status);
-      return affectCount;
+      return dataLists.size();
     } catch (TransactionException e) {
       tx.rollback(status);
       throw e;
@@ -185,14 +206,9 @@ public class DefaultTableDataSynchronizeProvider
     }
 
     try {
-      int[] affects = jdbcTemplate.batchUpdate(this.deleteStatementSql, dataLists, this.deleteArgsType);
-      int affectCount = 0;
-      for (int i : affects) {
-        affectCount += i;
-      }
-
+      jdbcTemplate.batchUpdate(this.deleteStatementSql, dataLists, this.deleteArgsType);
       tx.commit(status);
-      return affectCount;
+      return dataLists.size();
     } catch (TransactionException e) {
       tx.rollback(status);
       throw e;

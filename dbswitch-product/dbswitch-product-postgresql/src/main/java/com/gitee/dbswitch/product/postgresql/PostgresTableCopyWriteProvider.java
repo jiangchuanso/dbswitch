@@ -286,7 +286,11 @@ public class PostgresTableCopyWriteProvider extends DefaultTableDataWriteProvide
           case Types.BOOLEAN:
           case Types.BIT:
             if (null == fieldValue) {
-              row.setBoolean(i, null);
+              if (Types.BIT == fieldType) {
+                row.setByte(i, null);
+              } else {
+                row.setBoolean(i, null);
+              }
             } else {
               Boolean val = null;
               try {
@@ -301,7 +305,11 @@ public class PostgresTableCopyWriteProvider extends DefaultTableDataWriteProvide
                     "表名[%s.%s]的字段名[%s]数据类型错误，应该为java.lang.Boolean，而实际的数据类型为%s", schemaName,
                     tableName, fieldName, fieldValue.getClass().getName()));
               }
-              row.setBoolean(i, val);
+              if (Types.BIT == fieldType) {
+                row.setByte(i, val ? Byte.valueOf((byte) 1) : Byte.valueOf((byte) 0));
+              } else {
+                row.setBoolean(i, val);
+              }
             }
             break;
           case Types.TIME:

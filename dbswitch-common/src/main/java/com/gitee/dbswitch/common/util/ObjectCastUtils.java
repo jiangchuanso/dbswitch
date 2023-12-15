@@ -933,6 +933,7 @@ public final class ObjectCastUtils {
 
   public static Object castByJdbcType(int jdbcType, Object value) {
     switch (jdbcType) {
+      case Types.BIT:
       case Types.TINYINT:
         return convert(value, ObjectCastUtils::castToByte);
       case Types.SMALLINT:
@@ -950,7 +951,6 @@ public final class ObjectCastUtils {
       case Types.DOUBLE:
         return convert(value, ObjectCastUtils::castToDouble);
       case Types.BOOLEAN:
-      case Types.BIT:
         return convert(value, ObjectCastUtils::castToBoolean);
       case Types.TIME:
         return convert(value, ObjectCastUtils::castToLocalTime);

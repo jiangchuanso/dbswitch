@@ -22,6 +22,9 @@ import com.gitee.dbswitch.service.MetadataService;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -480,6 +483,24 @@ public final class DefaultChangeCalculatorService implements RecordRowChangeCalc
       java.lang.Number s2 = (java.lang.Number) o2;
       return Long.compare(s1.longValue(), s2.longValue());
     } else if (JdbcTypesUtils.isDateTime(type)) {
+      if (o1 instanceof LocalTime) {
+        o1 = java.sql.Time.valueOf((LocalTime) o1);
+      }
+      if (o1 instanceof LocalDate) {
+        o1 = java.sql.Date.valueOf((LocalDate) o1);
+      }
+      if (o1 instanceof LocalDateTime) {
+        o1 = java.sql.Timestamp.valueOf((LocalDateTime) o1);
+      }
+      if (o2 instanceof LocalTime) {
+        o2 = java.sql.Time.valueOf((LocalTime) o2);
+      }
+      if (o2 instanceof LocalDate) {
+        o2 = java.sql.Date.valueOf((LocalDate) o2);
+      }
+      if (o2 instanceof LocalDateTime) {
+        o2 = java.sql.Timestamp.valueOf((LocalDateTime) o2);
+      }
       if (o1 instanceof java.sql.Time && o2 instanceof java.sql.Time) {
         java.sql.Time t1 = (java.sql.Time) o1;
         java.sql.Time t2 = (java.sql.Time) o2;
