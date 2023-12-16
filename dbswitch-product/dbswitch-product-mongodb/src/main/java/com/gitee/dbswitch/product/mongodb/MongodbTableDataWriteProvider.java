@@ -73,11 +73,7 @@ public class MongodbTableDataWriteProvider extends DefaultTableDataWriteProvider
     for (Object[] row : recordValues) {
       Map<String, Object> columns = new LinkedHashMap<>(fieldCount);
       for (int i = 0; i < fieldCount; ++i) {
-        if (row[i] != null && row[i].getClass().getName().equals("org.bson.types.ObjectId")) {
-          columns.put(fieldNames.get(i), String.valueOf(row[i]));
-        } else {
-          columns.put(fieldNames.get(i), row[i]);
-        }
+        columns.put(fieldNames.get(i), row[i]);
       }
       rows.add(columns);
     }
