@@ -33,29 +33,30 @@
 
 ```
 └── dbswitch
-    ├── dbswitch-common                 // dbswitch通用定义模块
-    ├── dbswitch-core                   // dbswitch迁移同步实现类
-    ├── dbswitch-product                // dbswitch数据库方言
-        ├── dbswitch-product-mysql      //  -> mysql方言实现类
-        ├── dbswitch-product-oracle     //  -> oracle方言实现类
-        ├── dbswitch-product-sqlserver  //  -> sqlserver方言实现类
-        ├── dbswitch-product-postgres   //  -> postgres方言实现类
-        ├── dbswitch-product-dm         //  -> dm方言实现类
-        ├── dbswitch-product-kingbase   //  -> kingbase方言实现类
-        ├── dbswitch-product-oscar      //  -> oscar方言实现类
-        ├── dbswitch-product-gbase      //  -> gbase方言实现类
-        ├── dbswitch-product-mariadb    //  -> mariadb方言实现类
-        ├── dbswitch-product-openguass  //  -> openguass方言实现类
-        ├── dbswitch-product-db2        //  -> db2方言实现类
-        ├── dbswitch-product-sybase     //  -> sybase方言实现类
-        ├── dbswitch-product-hive       //  -> hive方言实现类
-        ├── dbswitch-product-sqlite     //  -> sqlite方言实现类
-        ├── dbswitch-product-clickhouse //  -> clickhouse方言实现类
-        ├── dbswitch-product-mongodb    //  -> mongodb方言实现类
-    ├── dbswitch-data                   // 工具入口模块，读取配置文件中的参数执行异构迁移同步
-    ├── dbswitch-admin                  // 在以上模块的基础上引入Quartz的调度服务与接口
-    ├── dbswitch-admin-ui               // 基于Vue2的前段WEB交互页面
-    ├── dbswitch-dist                   // 基于maven-assembly-plugin插件的项目打包模块
+    ├── dbswitch-common                 	// dbswitch通用定义模块
+    ├── dbswitch-core                   	// dbswitch迁移同步实现类
+    ├── dbswitch-product                	// dbswitch数据库方言
+        ├── dbswitch-product-mysql      	//  -> mysql方言实现类
+        ├── dbswitch-product-oracle     	//  -> oracle方言实现类
+        ├── dbswitch-product-sqlserver  	//  -> sqlserver方言实现类
+        ├── dbswitch-product-postgres   	//  -> postgres方言实现类
+        ├── dbswitch-product-dm         	//  -> dm方言实现类
+        ├── dbswitch-product-kingbase   	//  -> kingbase方言实现类
+        ├── dbswitch-product-oscar      	//  -> oscar方言实现类
+        ├── dbswitch-product-gbase      	//  -> gbase方言实现类
+        ├── dbswitch-product-mariadb    	//  -> mariadb方言实现类
+        ├── dbswitch-product-openguass  	//  -> openguass方言实现类
+        ├── dbswitch-product-db2        	//  -> db2方言实现类
+        ├── dbswitch-product-sybase     	//  -> sybase方言实现类
+        ├── dbswitch-product-hive       	//  -> hive方言实现类
+        ├── dbswitch-product-sqlite     	//  -> sqlite方言实现类
+        ├── dbswitch-product-clickhouse 	//  -> clickhouse方言实现类
+        ├── dbswitch-product-mongodb    	//  -> mongodb方言实现类
+        ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类
+    ├── dbswitch-data                   	// 工具入口模块，读取配置文件中的参数执行异构迁移同步
+    ├── dbswitch-admin                  	// 在以上模块的基础上引入Quartz的调度服务与接口
+    ├── dbswitch-admin-ui               	// 基于Vue2的前段WEB交互页面
+    ├── dbswitch-dist                   	// 基于maven-assembly-plugin插件的项目打包模块
 ```
  
 ## 二、编译打包
@@ -108,6 +109,7 @@ docker run -d --name dbswitch \
  -e MYSQLDB_PORT=3306 \
  -e MYSQLDB_USERNAME=test \
  -e MYSQLDB_PASSWORD='123456' \
+ -e MYSQLDB_NAME='dbswitch' \
  -v /tmp:/tmp \
  -p 9088:9088 \
  registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:latest
@@ -359,6 +361,13 @@ jdbc驱动名称：org.sqlite.JDBC
 ```
 jdbc连接地址：jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1
 jdbc驱动名称：com.gitee.jdbc.mongodb.JdbcDriver
+```
+
+**ElasticSearch数据库**
+
+```
+jdbc连接地址：jdbc:jest://172.17.2.12:9200?useHttps=false
+jdbc驱动名称：com.gitee.jdbc.elasticsearch.JdbcDriver
 ```
 
 #### (2)、启动方法
