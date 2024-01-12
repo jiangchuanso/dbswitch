@@ -312,11 +312,11 @@
             <el-option label='只同步INSERT和UPDATE'
                        value='INSERT_UPDATE'></el-option>
             <el-option label='只同步DELETE操作'
-                       value='INSERT_DELETE'></el-option>
-            <el-option label='只同步INSERT和DELETE'
-                       value='UPDATE_DELETE'></el-option>
-            <el-option label='只同步UPDATE和DELETE'
                        value='ONLY_DELETE'></el-option>
+            <el-option label='只同步INSERT和DELETE'
+                       value='INSERT_DELETE'></el-option>
+            <el-option label='只同步UPDATE和DELETE'
+                       value='UPDATE_DELETE'></el-option>
             <el-option label='执行所有的同步操作'
                        value='INSERT_UPDATE_DELETE'></el-option>
           </el-select>

@@ -24,8 +24,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,9 @@ public final class DataSourceUtils {
 
   public static final int MAX_THREAD_COUNT = 10;
   public static final int MAX_TIMEOUT_MS = 60000;
+
+  private static Object mutexForMap = new Object();
+  private static Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
 
   /**
    * 创建于指定数据库连接描述符的连接池
@@ -195,7 +200,7 @@ public final class DataSourceUtils {
     ClassLoader parent = driverClass.contains("postgresql")
         ? ClassLoaderUtil.getContextClassLoader()
         : ClassLoaderUtil.getSystemClassLoader().getParent();
-    URLClassLoader loader = new JarClassLoader(driverPath, parent);
+    URLClassLoader loader = getOrCreateClassLoader(driverPath, parent);
     try {
       Class<?> clazz = loader.loadClass(driverClass);
       clazz.getConstructor().newInstance();
@@ -204,6 +209,21 @@ public final class DataSourceUtils {
       log.error("Could not load class : {} from driver path: {}", driverClass, driverPath, e);
       throw new RuntimeException(e);
     }
+  }
+
+  private static URLClassLoader getOrCreateClassLoader(String path, ClassLoader parent) {
+    URLClassLoader urlClassLoader = classLoaderMap.get(path);
+    if (null == urlClassLoader) {
+      synchronized (mutexForMap) {
+        urlClassLoader = classLoaderMap.get(path);
+        if (null == urlClassLoader) {
+          log.info("Create Jar ClassLoader from path: {}", path);
+          urlClassLoader = new JarClassLoader(path, parent);
+          classLoaderMap.put(path, urlClassLoader);
+        }
+      }
+    }
+    return urlClassLoader;
   }
 
   private static String executeStringReturnedSql(

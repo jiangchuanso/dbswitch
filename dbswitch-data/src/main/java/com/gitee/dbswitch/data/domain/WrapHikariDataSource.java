@@ -122,10 +122,5 @@ public class WrapHikariDataSource implements CloseableDataSource {
 
   public void close() {
     hikariDataSource.close();
-    try {
-      urlClassLoader.close();
-    } catch (IOException e) {
-      log.warn(e.getMessage(), e);
-    }
   }
 }
