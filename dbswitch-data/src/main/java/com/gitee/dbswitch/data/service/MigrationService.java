@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.data.service;
 
-import cn.hutool.system.SystemUtil;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.LoggingRunnable;
 import com.gitee.dbswitch.common.entity.MdcKeyValue;
@@ -20,6 +19,7 @@ import com.gitee.dbswitch.core.robot.RobotWriter;
 import com.gitee.dbswitch.data.config.DbswichPropertiesConfiguration;
 import com.gitee.dbswitch.data.entity.GlobalParamConfigProperties;
 import com.gitee.dbswitch.data.util.DataSourceUtils;
+import com.gitee.dbswitch.data.util.MachineUtils;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -106,22 +106,23 @@ public class MigrationService {
    * 执行主逻辑
    */
   private void doRun() {
-    StopWatch watch = new StopWatch();
-    watch.start();
-
     log.info("dbswitch data service is started....");
-    log.info(SystemUtil.getOsInfo().toString());
-    log.info(SystemUtil.getJvmInfo().toString());
-    log.info(SystemUtil.getRuntimeInfo().toString());
+    log.info("Task run environment information:\n{}", MachineUtils.getPrintInformation());
     //log.info("input configuration \n{}", JsonUtils.toJsonString(configuration));
 
     GlobalParamConfigProperties globalParam = configuration.getConfig();
     int maxQueueSize = globalParam.getChannelQueueSize();
+    int writeThreadNum = globalParam.getWriteThreadNum();
+    boolean concurrentWrite = DataSourceUtils.supportConcurrentWrite(configuration.getTarget());
+
+    StopWatch watch = new StopWatch();
+    watch.start();
+
     AbstractBatchExchanger exchanger = new DefaultBatchExchanger(readExecutor, writeExecutor, maxQueueSize, perfStats);
     try (CloseableDataSource targetDataSource = DataSourceUtils.createTargetDataSource(configuration.getTarget())) {
       try (CloseableDataSource sourceDataSource = DataSourceUtils.createSourceDataSource(configuration.getSource())) {
         robotReader = new DefaultReaderRobot(mdcKeyValue, configuration, sourceDataSource, targetDataSource);
-        robotWriter = new DefaultWriterRobot(mdcKeyValue, robotReader, globalParam.getWriteThreadNum());
+        robotWriter = new DefaultWriterRobot(mdcKeyValue, robotReader, writeThreadNum, concurrentWrite);
         boolean success = executeSqlScripts(targetDataSource, configuration.getTarget().getBeforeSqlScripts());
         try {
           exchanger.exchange(robotReader, robotWriter);

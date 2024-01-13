@@ -30,4 +30,5 @@ public class WriterTaskParam implements TaskParam {
 
   private MemChannel memChannel;
   private RobotReader robotReader;
+  private boolean concurrentWrite;
 }

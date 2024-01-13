@@ -98,10 +98,5 @@ public class WrapCommonDataSource implements CloseableDataSource {
   }
 
   public void close() {
-    try {
-      urlClassLoader.close();
-    } catch (IOException e) {
-      log.warn(e.getMessage(), e);
-    }
   }
 }

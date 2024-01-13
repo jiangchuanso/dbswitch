@@ -38,16 +38,19 @@ public class DefaultWriterRobot extends RobotWriter<WriterTaskResult> {
 
   private final MdcKeyValue mdcKeyValue;
   private final RobotReader robotReader;
-  private final int writeThreadNum; // 4 <= writeThreadNum <= 8
+  private final int writeThreadNum;
+  private final boolean supportConcurrentWrite;
   private AsyncTaskExecutor threadExecutor;
   private List<Supplier> writeTaskThreads;
   private List<CompletableFuture> futures;
 
-  public DefaultWriterRobot(MdcKeyValue mdcKeyValue, RobotReader robotReader, int writeThreadNum) {
+  public DefaultWriterRobot(MdcKeyValue mdcKeyValue, RobotReader robotReader, int writeThreadNum,
+      boolean concurrentWrite) {
     ExamineUtils.checkArgument(writeThreadNum > 0, "writeThreadNum(%s) must >0 ", writeThreadNum);
     this.mdcKeyValue = mdcKeyValue;
     this.robotReader = robotReader;
     this.writeThreadNum = writeThreadNum;
+    this.supportConcurrentWrite = concurrentWrite;
   }
 
   @Override
@@ -64,6 +67,7 @@ public class DefaultWriterRobot extends RobotWriter<WriterTaskResult> {
         .builder()
         .robotReader(robotReader)
         .memChannel(robotReader.getChannel())
+        .concurrentWrite(supportConcurrentWrite)
         .build();
     for (int i = 0; i < writeThreadNum; ++i) {
       if (Objects.nonNull(mdcKeyValue)) {

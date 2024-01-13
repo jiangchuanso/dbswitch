@@ -45,8 +45,7 @@ public final class DataSourceUtils {
   public static final int MAX_THREAD_COUNT = 10;
   public static final int MAX_TIMEOUT_MS = 60000;
 
-  private static Object mutexForMap = new Object();
-  private static Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
+  private static final Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
 
   /**
    * 创建于指定数据库连接描述符的连接池
@@ -115,13 +114,8 @@ public final class DataSourceUtils {
     } else if (!ds.getJdbcUrl().contains("jdbc:jest://")) {
       ds.setConnectionTestQuery("SELECT 1");
     }
-    if (properties.getDriverClassName().contains("sqlite")) {
-      ds.setMaximumPoolSize(1);
-      ds.setMinimumIdle(1);
-    } else {
-      ds.setMaximumPoolSize(MAX_THREAD_COUNT);
-      ds.setMinimumIdle(MAX_THREAD_COUNT);
-    }
+    ds.setMaximumPoolSize(MAX_THREAD_COUNT);
+    ds.setMinimumIdle(MAX_THREAD_COUNT);
     ds.setMaxLifetime(properties.getMaxLifeTime());
     ds.setConnectionTimeout(properties.getConnectionTimeout());
     ds.setIdleTimeout(MAX_TIMEOUT_MS);
@@ -173,6 +167,11 @@ public final class DataSourceUtils {
     return new WrapCommonDataSource(dataSource, urlClassLoader);
   }
 
+  public static boolean supportConcurrentWrite(TargetDataSourceProperties properties) {
+    return !properties.getDriverClassName().contains("sqlite")
+        && !properties.getUrl().contains("jdbc:sqlite:");
+  }
+
   private static InvisibleDataSource createInvisibleDataSource(
       ClassLoader cl,
       String jdbcUrl,
@@ -211,13 +210,14 @@ public final class DataSourceUtils {
     }
   }
 
-  private static URLClassLoader getOrCreateClassLoader(String path, ClassLoader parent) {
+  private static URLClassLoader getOrCreateClassLoader(
+      String path, ClassLoader parent) {
     URLClassLoader urlClassLoader = classLoaderMap.get(path);
     if (null == urlClassLoader) {
-      synchronized (mutexForMap) {
+      synchronized (DataSourceUtils.class) {
         urlClassLoader = classLoaderMap.get(path);
         if (null == urlClassLoader) {
-          log.info("Create Jar ClassLoader from path: {}", path);
+          log.info("Create jar classLoader from path: {}", path);
           urlClassLoader = new JarClassLoader(path, parent);
           classLoaderMap.put(path, urlClassLoader);
         }
