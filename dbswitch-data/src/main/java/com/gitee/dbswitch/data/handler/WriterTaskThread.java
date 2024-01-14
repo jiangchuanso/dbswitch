@@ -43,7 +43,8 @@ public class WriterTaskThread extends TaskProcessor<WriterTaskResult> {
 
     try {
       BatchElement elem;
-      while ((elem = memChannel.poll()) != null || robotReader.getRemainingCount() > 0) {
+      while (!memChannel.isEmpty() || robotReader.getRemainingCount() > 0) {
+        elem = memChannel.poll();
         if (Thread.currentThread().isInterrupted()) {
           break;
         }

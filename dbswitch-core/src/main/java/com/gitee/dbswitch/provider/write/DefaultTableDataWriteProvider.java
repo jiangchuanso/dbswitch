@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.provider.write;
 
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
-import com.gitee.dbswitch.common.util.ObjectCastUtils;
 import com.gitee.dbswitch.provider.AbstractCommonProvider;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
 @Slf4j
@@ -86,9 +84,6 @@ public class DefaultTableDataWriteProvider
         log.debug("{} insert data affect count: {}", getProductType(), affectCount);
       }
       return affectCount;
-    } catch (TransactionException e) {
-      tx.rollback(status);
-      throw e;
     } catch (Exception e) {
       tx.rollback(status);
       throw e;

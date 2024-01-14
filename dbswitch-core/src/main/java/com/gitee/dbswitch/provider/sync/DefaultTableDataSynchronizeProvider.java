@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
 /**
@@ -119,14 +118,13 @@ public class DefaultTableDataSynchronizeProvider
               throw ex;
             }
           }
+        } else {
+          throw e;
         }
       }
 
       tx.commit(status);
       return records.size();
-    } catch (TransactionException e) {
-      tx.rollback(status);
-      throw e;
     } catch (Exception e) {
       tx.rollback(status);
       throw e;
@@ -173,14 +171,13 @@ public class DefaultTableDataSynchronizeProvider
               throw ex;
             }
           }
+        } else {
+          throw e;
         }
       }
 
       tx.commit(status);
       return dataLists.size();
-    } catch (TransactionException e) {
-      tx.rollback(status);
-      throw e;
     } catch (Exception e) {
       tx.rollback(status);
       throw e;
@@ -209,9 +206,6 @@ public class DefaultTableDataSynchronizeProvider
       jdbcTemplate.batchUpdate(this.deleteStatementSql, dataLists, this.deleteArgsType);
       tx.commit(status);
       return dataLists.size();
-    } catch (TransactionException e) {
-      tx.rollback(status);
-      throw e;
     } catch (Exception e) {
       tx.rollback(status);
       throw e;
