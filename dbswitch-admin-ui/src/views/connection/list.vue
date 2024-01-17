@@ -16,7 +16,10 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addConnection">添加</el-button>
+                     @click="addConnection">接入数据源</el-button>
+<!--                     @click="selectDataSource">接入数据源-->
+<!--          </el-button>-->
+
         </div>
       </div>
 
@@ -25,10 +28,10 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         label="序号"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="连接名称"
+                         label="数据源名称"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="createTime"
@@ -58,22 +61,26 @@
                          type="danger"
                          icon="el-icon-video-play"
                          @click="handleTest(scope.$index, scope.row)"
-                         round>测试</el-button>
+                         round>测试
+              </el-button>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-document"
                          @click="handleMore(scope.$index, scope.row)"
-                         round>详情</el-button>
+                         round>详情
+              </el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑</el-button>
+                         round>编辑
+              </el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>删除
+              </el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -155,6 +162,31 @@
         </div>
       </el-dialog>
 
+      <el-dialog title="接入数据源"
+                 :visible.sync="dataSourceCreateStep1"
+                 :showClose="false"
+                 :before-close="handleClose">
+
+
+        <el-form :model="createform"
+                 size="mini"
+                 status-icon
+                 :rules="rules"
+                 ref="createform">
+          <el-form-item label="数据库类型"
+                        label-width="120px"
+                        :required=true
+                        prop="type">
+            <el-radio-group v-model="createform.type" @change="selectChangedDriverVersion">
+              <el-radio :label="item.type" :key="index" v-for="(item,index) in databaseType">{{ item.type }}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+
+        </el-form>
+
+
+      </el-dialog>
+
       <el-dialog title="添加数据源连接信息"
                  :visible.sync="createFormVisible"
                  :showClose="false"
@@ -164,7 +196,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="连接名称"
+          <el-form-item label="数据源名称"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -207,7 +239,7 @@
             <el-tooltip placement="top">
               <i class="el-icon-question">样例:</i>
               <div slot="content">
-                {{createform.sample}}
+                {{ createform.sample }}
               </div>
             </el-tooltip>
             <el-input type="textarea"
@@ -218,14 +250,14 @@
                       auto-complete="off">
             </el-input>
           </el-form-item>
-          <el-form-item label="账号名称"
+          <el-form-item label="用户名"
                         label-width="120px"
                         prop="username"
                         style="width:85%">
             <el-input v-model="createform.username"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="连接密码"
+          <el-form-item label="密码"
                         label-width="120px"
                         prop="password"
                         style="width:85%">
@@ -238,7 +270,8 @@
              class="dialog-footer">
           <el-button @click="createFormVisible = false">取 消</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">确 定
+          </el-button>
         </div>
       </el-dialog>
 
@@ -317,7 +350,8 @@
              class="dialog-footer">
           <el-button @click="updateFormVisible = false">取 消</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">确 定
+          </el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -327,7 +361,7 @@
 <script>
 
 export default {
-  data () {
+  data() {
     return {
       loading: true,
       keyword: null,
@@ -337,8 +371,7 @@ export default {
       totalCount: 2,
       databaseType: [],
       connectionDriver: [],
-      tableData: [
-      ],
+      tableData: [],
       queryForm: {
         title: "",
         type: "",
@@ -413,7 +446,8 @@ export default {
       },
       dialogFormVisible: false,
       createFormVisible: false,
-      updateFormVisible: false
+      updateFormVisible: false,
+      dataSourceCreateStep1: false,
     }
   },
   methods: {
@@ -430,18 +464,18 @@ export default {
           size: this.pageSize
         })
       }).then(res => {
-        if (0 === res.data.code) {
-          this.currentPage = res.data.pagination.page;
-          this.pageSize = res.data.pagination.size;
-          this.totalCount = res.data.pagination.total;
-          this.tableData = res.data.data;
-        } else {
-          alert("加载任务列表失败:" + res.data.message);
-        }
-      },
-        function () {
-          console.log("load connection list failed");
-        }
+            if (0 === res.data.code) {
+              this.currentPage = res.data.pagination.page;
+              this.pageSize = res.data.pagination.size;
+              this.totalCount = res.data.pagination.total;
+              this.tableData = res.data.data;
+            } else {
+              alert("加载任务列表失败:" + res.data.message);
+            }
+          },
+          function () {
+            console.log("load connection list failed");
+          }
       );
     },
     searchByKeyword: function () {
@@ -454,32 +488,32 @@ export default {
         method: "GET",
         url: "/dbswitch/admin/api/v1/connection/types"
       }).then(
-        res => {
-          if (0 === res.data.code) {
-            this.databaseType = res.data.data;
-          } else {
-            alert("加载任务列表失败:" + res.data.message);
+          res => {
+            if (0 === res.data.code) {
+              this.databaseType = res.data.data;
+            } else {
+              alert("加载任务列表失败:" + res.data.message);
+            }
+          },
+          function () {
+            console.log("failed");
           }
-        },
-        function () {
-          console.log("failed");
-        }
       );
     },
-    handleClose (done) {
+    handleClose(done) {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此数据源ID=" + row.id + "删除么, 是否继续?",
-        "提示",
-        {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }
+          "此操作将此数据源ID=" + row.id + "删除么, 是否继续?",
+          "提示",
+          {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+          }
       ).then(() => {
         this.$http.delete(
-          "/dbswitch/admin/api/v1/connection/delete/" + row.id
+            "/dbswitch/admin/api/v1/connection/delete/" + row.id
         ).then(res => {
           //console.log(res);
           if (0 === res.data.code) {
@@ -496,7 +530,7 @@ export default {
     },
     handleTest: function (index, row) {
       this.$http.get(
-        "/dbswitch/admin/api/v1/connection/test/" + row.id
+          "/dbswitch/admin/api/v1/connection/test/" + row.id
       ).then(res => {
         //console.log(res);
         if (0 === res.data.code) {
@@ -509,6 +543,10 @@ export default {
     addConnection: function () {
       this.createFormVisible = true;
       this.createform = {};
+    },
+    selectDataSource: function () {
+      this.dataSourceCreateStep1 = true;
+
     },
     handleCreate: function () {
       let driverClass = "";
@@ -557,14 +595,14 @@ export default {
     selectChangedDriverVersion: function (value) {
       this.connectionDriver = [];
       this.$http.get(
-        "/dbswitch/admin/api/v1/connection/" + value + "/drivers"
+          "/dbswitch/admin/api/v1/connection/" + value + "/drivers"
       ).then(res => {
         if (0 === res.data.code) {
           this.connectionDriver = res.data.data;
           let varDatabaseType = this.databaseType.find(
-            (item) => {
-              return item.type === value;
-            });
+              (item) => {
+                return item.type === value;
+              });
           if (varDatabaseType) {
             this.createform.sample = varDatabaseType.sample;
           }
@@ -577,7 +615,7 @@ export default {
     handleUpdate: function (index, row) {
       this.updateform = JSON.parse(JSON.stringify(row));
       this.$http.get(
-        "/dbswitch/admin/api/v1/connection/" + this.updateform.type + "/drivers"
+          "/dbswitch/admin/api/v1/connection/" + this.updateform.type + "/drivers"
       ).then(res => {
         if (0 === res.data.code) {
           this.connectionDriver = res.data.data;
@@ -643,9 +681,9 @@ export default {
       this.loading = true;
       this.currentPage = currentPage;
       this.loadData();
-    }
+    },
   },
-  created () {
+  created() {
     this.loadDatabaseTypes();
     this.loadData();
   }
@@ -657,12 +695,14 @@ export default {
   width: 100%;
   height: 100%;
 }
+
 .el-card,
 .el-message {
   width: 100%;
   height: 100%;
   overflow: auto;
 }
+
 .connection-list-top {
   width: 100%;
   display: flex;
@@ -675,14 +715,18 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+
 .left-search-input {
   width: 300px;
   margin-right: auto;
   margin: 10px 5px;
 }
+
 .right-add-button-group {
   width: 100px;
   margin-left: auto;
   margin: 10px 5px;
 }
 </style>
+
+

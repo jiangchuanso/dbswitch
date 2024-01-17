@@ -13,7 +13,7 @@
               <li v-for="(item,index) in connectionTypes"
                   :key="index"
                   @click="handleChooseClick(item.type,index)"
-                  :class="{active:index==isActive}">[{{item.id}}]{{item.type}}</li>
+                  :class="{active:index==isActive}">[{{item.id}}] {{item.type}}</li>
             </ul>
           </div>
         </el-card>
