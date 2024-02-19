@@ -235,7 +235,16 @@ public enum ProductTypeEnum {
    * @return boolean
    */
   public boolean isLikeMysql() {
-    return this == MYSQL || this == MARIADB || this == GBASE8A;
+    return this == MYSQL || this == MARIADB;
+  }
+
+  /**
+   * 类似于MySQL系列的数据库类型
+   *
+   * @return boolean
+   */
+  public boolean isLikeGbase8a() {
+    return this == GBASE8A;
   }
 
   /**
