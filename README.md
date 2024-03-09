@@ -42,6 +42,7 @@
         ├── dbswitch-product-postgres   	//  -> postgres方言实现类
         ├── dbswitch-product-dm         	//  -> dm方言实现类
         ├── dbswitch-product-kingbase   	//  -> kingbase方言实现类
+        ├── dbswitch-product-highgo    		//  -> highgo方言实现类
         ├── dbswitch-product-oscar      	//  -> oscar方言实现类
         ├── dbswitch-product-gbase      	//  -> gbase方言实现类
         ├── dbswitch-product-mariadb    	//  -> mariadb方言实现类
@@ -305,8 +306,8 @@ jdbc驱动名称：com.gbase.jdbc.Driver
 **翰高HighGo数据库(可按PostgreSQL使用)**
  
 ```
-jdbc连接地址：jdbc:postgresql://172.17.2.10:5866/highgo
-jdbc驱动名称：org.postgresql.Driver
+jdbc连接地址：jdbc:highgo://172.17.2.10:5866/highgo
+jdbc驱动名称：com.highgo.jdbc.Driver
 ```
 
 **Apache Hive数据库**
