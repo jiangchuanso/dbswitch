@@ -26,7 +26,7 @@ public enum ProductTypeEnum {
   /**
    * MySQL数据库类型
    */
-  MYSQL(1, "`", "mysql", "com.mysql.jdbc.Driver", 3306,
+  MYSQL(1, "`", "MySQL", "com.mysql.jdbc.Driver", 3306,
       "/* ping */ SELECT 1",
       "jdbc:mysql://",
       new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -35,7 +35,7 @@ public enum ProductTypeEnum {
   /**
    * MariaDB数据库类型
    */
-  MARIADB(2, "`", "mariadb", "org.mariadb.jdbc.Driver", 3306,
+  MARIADB(2, "`", "MariaDB", "org.mariadb.jdbc.Driver", 3306,
       "SELECT 1",
       "jdbc:mariadb://",
       new String[]{"jdbc:mariadb://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -44,7 +44,7 @@ public enum ProductTypeEnum {
   /**
    * Oracle数据库类型
    */
-  ORACLE(3, "\"", "oracle", "oracle.jdbc.driver.OracleDriver", 1521,
+  ORACLE(3, "\"", "Oracle", "oracle.jdbc.driver.OracleDriver", 1521,
       "SELECT 'Hello' from DUAL",
       "jdbc:oracle:thin:@",
       new String[]{"jdbc:oracle:thin:@{host}:{port}:{database}",
@@ -54,7 +54,7 @@ public enum ProductTypeEnum {
   /**
    * Microsoft SQL Server数据库类型(>=2005)
    */
-  SQLSERVER(4, "\"", "sqlserver", "com.microsoft.sqlserver.jdbc.SQLServerDriver", 1433,
+  SQLSERVER(4, "\"", "SqlServer", "com.microsoft.sqlserver.jdbc.SQLServerDriver", 1433,
       "SELECT 1+2 as a",
       "jdbc:sqlserver://",
       new String[]{"jdbc:sqlserver://{host}[:{port}][;DatabaseName={database}][;{params}]"},
@@ -63,7 +63,7 @@ public enum ProductTypeEnum {
   /**
    * PostgreSQL数据库类型
    */
-  POSTGRESQL(5, "\"", "postgresql", "org.postgresql.Driver", 5432,
+  POSTGRESQL(5, "\"", "PostgreSql", "org.postgresql.Driver", 5432,
       "SELECT 1",
       "jdbc:postgresql://",
       new String[]{"jdbc:postgresql://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -72,7 +72,7 @@ public enum ProductTypeEnum {
   /**
    * DB2数据库类型
    */
-  DB2(6, "\"", "db2", "com.ibm.db2.jcc.DB2Driver", 50000,
+  DB2(6, "\"", "DB2", "com.ibm.db2.jcc.DB2Driver", 50000,
       "SELECT 1 FROM SYSIBM.SYSDUMMY1",
       "jdbc:db2://",
       new String[]{"jdbc:db2://{host}:{port}/{database}[:{params}]"},
@@ -81,7 +81,7 @@ public enum ProductTypeEnum {
   /**
    * [国产] 达梦(DM)数据库类型
    */
-  DM(7, "\"", "dm", "dm.jdbc.driver.DmDriver", 5236,
+  DM(7, "\"", "DM", "dm.jdbc.driver.DmDriver", 5236,
       "SELECT 'Hello' from DUAL",
       "jdbc:dm://",
       new String[]{"jdbc:dm://{host}:{port}[/{database}][\\?{params}]"},
@@ -90,7 +90,7 @@ public enum ProductTypeEnum {
   /**
    * [国产] 金仓(Kingbase)数据库类型
    */
-  KINGBASE(8, "\"", "kingbase", "com.kingbase8.Driver", 54321,
+  KINGBASE(8, "\"", "KingBase", "com.kingbase8.Driver", 54321,
       "SELECT 1",
       "jdbc:kingbase8://",
       new String[]{"jdbc:kingbase8://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -99,7 +99,7 @@ public enum ProductTypeEnum {
   /**
    * [国产] 神通(Oscar)数据库类型
    */
-  OSCAR(9, "\"", "oscar", "com.oscar.Driver", 2003,
+  OSCAR(9, "\"", "Oscar", "com.oscar.Driver", 2003,
       "SELECT 1",
       "jdbc:oscar://",
       new String[]{"jdbc:oscar://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -108,7 +108,7 @@ public enum ProductTypeEnum {
   /**
    * [国产] 南大通用(GBase8A)数据库类型
    */
-  GBASE8A(10, "`", "gbase8a", "com.gbase.jdbc.Driver", 5258,
+  GBASE8A(10, "`", "GBase8A", "com.gbase.jdbc.Driver", 5258,
       "/* ping */ SELECT 1",
       "jdbc:gbase://",
       new String[]{"jdbc:gbase://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -117,7 +117,7 @@ public enum ProductTypeEnum {
   /**
    * Highgo数据库类型:https://blog.csdn.net/weixin_39676699/article/details/134338598
    */
-  HIGHGO(11, "\"", "highgo", "com.highgo.jdbc.Driver", 5866,
+  HIGHGO(11, "\"", "HighGo", "com.highgo.jdbc.Driver", 5866,
       "SELECT 1",
       "jdbc:highgo://",
       new String[]{"jdbc:highgo://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -126,7 +126,7 @@ public enum ProductTypeEnum {
   /**
    * Sybase 数据库类型
    */
-  SYBASE(12, "\"", "sybase", "com.sybase.jdbc4.jdbc.SybDriver", 5000,
+  SYBASE(12, "\"", "Sybase", "com.sybase.jdbc4.jdbc.SybDriver", 5000,
       "SELECT 1+2 as a",
       "jdbc:sybase:Tds:",
       new String[]{"jdbc:sybase:Tds:{host}[:{port}][/{database}][\\?{params}]"},
@@ -135,7 +135,7 @@ public enum ProductTypeEnum {
   /**
    * Hive 数据库类型
    */
-  HIVE(13, "`", "hive", "org.apache.hive.jdbc.HiveDriver", 10000,
+  HIVE(13, "`", "Hive", "org.apache.hive.jdbc.HiveDriver", 10000,
       "SELECT 1",
       "jdbc:hive2://",
       new String[]{"jdbc:hive2://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -145,7 +145,7 @@ public enum ProductTypeEnum {
    * Sqlite v3数据库类型
    */
   // 参考文章：https://blog.csdn.net/wank1259162/article/details/104946744
-  SQLITE3(14, "\"", "sqlite3", "org.sqlite.JDBC", 0,
+  SQLITE3(14, "\"", "Sqlite3", "org.sqlite.JDBC", 0,
       "SELECT 1",
       "jdbc:sqlite:",
       new String[]{"jdbc:sqlite:{file}", "jdbc:sqlite::resource:{file}"},
@@ -154,7 +154,7 @@ public enum ProductTypeEnum {
   /**
    * OpenGauss数据库类型
    */
-  OPENGAUSS(15, "\"", "opengauss", "org.opengauss.Driver", 15432,
+  OPENGAUSS(15, "\"", "OpenGauss", "org.opengauss.Driver", 15432,
       "SELECT 1",
       "jdbc:opengauss://",
       new String[]{"jdbc:opengauss://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -163,7 +163,7 @@ public enum ProductTypeEnum {
   /**
    * ClickHouse数据库类型
    */
-  CLICKHOUSE(16, "`", "clickhouse", "com.clickhouse.jdbc.ClickHouseDriver", 8123,
+  CLICKHOUSE(16, "`", "ClickHouse", "com.clickhouse.jdbc.ClickHouseDriver", 8123,
       "SELECT 1",
       "jdbc:clickhouse://",
       new String[]{"jdbc:clickhouse://{host}[:{port}]/[{database}][\\?{params}]"},
@@ -172,7 +172,7 @@ public enum ProductTypeEnum {
   /**
    * MongoDB数据库类型
    */
-  MONGODB(17, "\"", "mongoDB", "com.gitee.jdbc.mongodb.JdbcDriver", 27017,
+  MONGODB(17, "\"", "MongoDB", "com.gitee.jdbc.mongodb.JdbcDriver", 27017,
       "use admin;",
       "jdbc:mongodb://",
       new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"},

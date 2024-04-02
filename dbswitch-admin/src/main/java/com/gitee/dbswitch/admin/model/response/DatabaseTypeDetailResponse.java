@@ -30,4 +30,8 @@ public class DatabaseTypeDetailResponse {
 
   @ApiModelProperty("连接串样例")
   private String sample;
+
+  @ApiModelProperty("数据库名称")
+  private String name;
+
 }

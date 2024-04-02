@@ -93,7 +93,7 @@ public class ConnectionService {
       detail.setType(type.getName().toUpperCase());
       detail.setDriver(type.getDriver());
       detail.setSample(type.getSample());
-
+      detail.setName(type.getName());
       lists.add(detail);
     }
 
