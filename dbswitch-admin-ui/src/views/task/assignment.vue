@@ -26,6 +26,7 @@
                 border>
         <el-table-column prop="id"
                          label="编号"
+                         type="selection"
                          min-width="6%"></el-table-column>
         <el-table-column prop="name"
                          label="任务名称"
@@ -35,15 +36,33 @@
                          label="集成模式"
                          :formatter="stringFormatSchedule"
                          min-width="8%"></el-table-column>
-        <el-table-column prop="name"
+        <el-table-column
                          label="源端数据源"
-                         show-overflow-tooltip
-                         min-width="10%"></el-table-column>
-        <el-table-column prop="name"
+                         min-width="10%">
+                         <template slot-scope="scope">
+                           <el-popover trigger="hover" placement="top">
+                             <p>源端数据源：{{ scope.row.sourceSchema }}</p>
+                             <p>源端数据源类型：{{ scope.row.sourceType }}</p>
+                             <div slot="reference" class="name-wrapper">
+                               <el-tag size="medium">{{ scope.row.sourceSchema }}</el-tag>
+                             </div>
+                           </el-popover>
+                         </template>
+        </el-table-column>
+        <el-table-column
                          label="目标端数据源"
-                         show-overflow-tooltip
-                         min-width="10%"></el-table-column>
-        <el-table-column prop="name"
+                         min-width="10%">
+                         <template slot-scope="scope">
+                           <el-popover trigger="hover" placement="top">
+                             <p>目标端数据源：{{ scope.row.targetSchema }}</p>
+                             <p>目标端数据源类型：{{ scope.row.targetType }}</p>
+                             <div slot="reference" class="name-wrapper">
+                               <el-tag size="medium">{{ scope.row.targetSchema }}</el-tag>
+                             </div>
+                           </el-popover>
+                         </template>
+        </el-table-column>
+        <el-table-column prop="runStatus"
                          label="运行状态"
                          show-overflow-tooltip
                          min-width="10%"></el-table-column>
@@ -171,8 +190,14 @@ export default {
       if (row.scheduleMode == "MANUAL") {
         return "手动";
       } else {
-        return "系统";
+        return "定时";
       }
+    },
+    stringSourceSchema (row, column) {
+      return row.sourceSchema + " / " + row.sourceType
+    },
+    stringTargetSchema (row, column) {
+      return row.targetSchema + " / " + row.targetType
     },
     handleCreate: function () {
       this.$router.push('/task/create')
@@ -292,6 +317,12 @@ export default {
   height: 100%;
 }
 
+.el-table__cell{
+  background-color: #f5f7fa; /* 自定义背景色 */
+  color: #303133; /* 自定义字体颜色 */
+  border-right: 0px solid #EBEEF5!important;
+}
+
 .demo-table-expand {
   font-size: 0;
 }
@@ -336,4 +367,6 @@ export default {
   margin-left: auto;
   margin: 10px 5px;
 }
+
+
 </style>

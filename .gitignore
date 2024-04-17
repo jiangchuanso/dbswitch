@@ -25,3 +25,5 @@ target/
 /.nb-gradle/
 node_modules/
 dist/
+./logs/error_server.log
+./logs/dbswitch_server.log

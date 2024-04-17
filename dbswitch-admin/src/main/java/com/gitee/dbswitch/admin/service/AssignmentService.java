@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
@@ -19,13 +20,16 @@ import com.gitee.dbswitch.admin.dao.AssignmentConfigDAO;
 import com.gitee.dbswitch.admin.dao.AssignmentTaskDAO;
 import com.gitee.dbswitch.admin.dao.DatabaseConnectionDAO;
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
+import com.gitee.dbswitch.admin.entity.AssignmentJobEntity;
 import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
+import com.gitee.dbswitch.admin.mapper.AssignmentJobMapper;
 import com.gitee.dbswitch.admin.model.request.AssigmentCreateRequest;
 import com.gitee.dbswitch.admin.model.request.AssigmentUpdateRequest;
 import com.gitee.dbswitch.admin.model.request.AssignmentSearchRequest;
 import com.gitee.dbswitch.admin.model.response.AssignmentDetailResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
+import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.common.converter.ConverterFactory;
@@ -63,6 +67,9 @@ public class AssignmentService {
 
   @Resource
   private DriverLoadService driverLoadService;
+
+  @Resource
+  private AssignmentJobMapper assignmentJobMapper;
 
   @Transactional(rollbackFor = Exception.class)
   public AssignmentInfoResponse createAssignment(AssigmentCreateRequest request) {
@@ -129,10 +136,36 @@ public class AssignmentService {
   }
 
   public PageResult<AssignmentInfoResponse> listAll(AssignmentSearchRequest request) {
-    Supplier<List<AssignmentInfoResponse>> method = () ->
-        ConverterFactory.getConverter(AssignmentInfoConverter.class)
-            .convert(assignmentTaskDAO.listAll(request.getSearchText()));
+    Supplier<List<AssignmentInfoResponse>> method = () -> {
+      List<AssignmentInfoResponse> assignmentInfoResponseList = ConverterFactory.getConverter(AssignmentInfoConverter.class)
+          .convert(assignmentTaskDAO.listAll(request.getSearchText()));
+      assignmentInfoResponseList.forEach((e)->{
+        AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(e.getId());
 
+        Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+        DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
+        String sourceSchema = assignmentConfigEntity.getSourceSchema();
+        e.setSourceSchema(sourceSchema);
+        String sourceType = databaseConnectionEntity.getType().getName();
+        e.setSourceType(sourceType);
+
+        Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+        DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
+        String targetSchema = assignmentConfigEntity.getTargetSchema();
+        e.setTargetSchema(targetSchema);
+        String targetType = databaseConnectionEntity1.getType().getName();
+        e.setTargetType(targetType);
+
+        AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
+            new LambdaQueryWrapper<AssignmentJobEntity>()
+                .eq(AssignmentJobEntity::getAssignmentId, e.getId()).orderByDesc(AssignmentJobEntity::getCreateTime)
+                .last(" limit 1 "));
+        Integer status = assignmentJobEntity.getStatus();
+        e.setRunStatus(JobStatusEnum.of(status).getName());
+
+      });
+      return assignmentInfoResponseList;
+    };
     return PageUtils.getPage(method, request.getPage(), request.getSize());
   }
 

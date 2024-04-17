@@ -17,10 +17,10 @@ import lombok.Getter;
 public enum JobStatusEnum {
 
   INIT(0, "未执行"),
-  RUNNING(1, "运行中"),
-  FAIL(2, "失败"),
-  PASS(3, "成功"),
-  CANCEL(4, "手动终止"),
+  RUNNING(1, "执行中"),
+  FAIL(2, "执行异常"),
+  PASS(3, "执行成功"),
+  CANCEL(4, "任务取消"),
   ;
 
   private int value;
