@@ -8,10 +8,10 @@
                      :startVal="startVal"
                      :endVal="statistics.connectionStatistics.totalCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">数据源连接数</p>
+            <p class="cardItem_p1">数据源数</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-s-grid color-green1"></i>
+            <i class="el-icon-cpu color-green1"></i>
           </div>
         </div>
       </el-col>
@@ -25,7 +25,7 @@
             <p class="cardItem_p1">任务总数</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-s-data color-blue"></i>
+            <i class="el-icon-burger color-blue"></i>
           </div>
         </div>
       </el-col>
@@ -36,10 +36,10 @@
                      :startVal="startVal"
                      :endVal="statistics.assignmentTaskStatistics.publishedCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">任务发布数</p>
+            <p class="cardItem_p1">任务发布</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-loading color-green2"></i>
+            <i class="el-icon-potato-strips color-green2"></i>
           </div>
         </div>
       </el-col>
@@ -50,10 +50,10 @@
                      :startVal="startVal"
                      :endVal="statistics.assignmentJobStatistics.totalCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">作业执行数</p>
+            <p class="cardItem_p1">作业执行</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-office-building color-red"></i>
+            <i class="el-icon-bicycle color-red"></i>
           </div>
         </div>
       </el-col>
@@ -64,10 +64,10 @@
                      :startVal="startVal"
                      :endVal="statistics.assignmentJobStatistics.runningCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">执行中</p>
+            <p class="cardItem_p1">执行中&nbsp;&nbsp;&nbsp;</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-office-building color-running"></i>
+            <i class="el-icon-loading color-running"></i>
           </div>
         </div>
       </el-col>
@@ -81,7 +81,7 @@
             <p class="cardItem_p1">执行异常</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-office-building color-error"></i>
+            <i class="el-icon-error color-error"></i>
           </div>
         </div>
       </el-col>
@@ -95,7 +95,7 @@
             <p class="cardItem_p1">任务取消</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-office-building color-cancel"></i>
+            <i class="el-icon-remove color-cancel"></i>
           </div>
         </div>
       </el-col>
@@ -109,7 +109,7 @@
             <p class="cardItem_p1">执行成功</p>
           </div>
           <div class="cardItem_icon">
-            <i class="el-icon-office-building color-success"></i>
+            <i class="el-icon-success color-success"></i>
           </div>
         </div>
       </el-col>

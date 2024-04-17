@@ -3,7 +3,7 @@
     <el-dropdown>
       <div class="user-dropdown-photo">
         <span class="user-dropdown-text">
-          {{ nickname }}({{username}})
+          {{username}}
           <i class="el-icon-caret-bottom"></i>
         </span>
         <img src="../../assets/user.jpg"
@@ -57,11 +57,14 @@ export default {
   height: 60px;
   padding: 10px 0;
   float: right;
+  cursor: pointer;
 }
 
 .user-dropdown-wrap .user-dropdown-photo img {
   width: 30px;
   height: 30px;
   vertical-align: middle;
+  margin-right: 10px;
+  cursor: pointer;
 }
 </style>
