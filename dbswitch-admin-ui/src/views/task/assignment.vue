@@ -1,23 +1,33 @@
 <template>
   <div>
     <el-card>
+      <el-row>
+        <el-button size="mini" icon="el-icon-switch-button" :disabled=false plain>启动</el-button>
+        <el-button size="mini" icon="el-icon-video-pause" :disabled=true plain>停止</el-button>
+        <span style="color:#e9e9f3;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+        <el-button size="mini" plain>导入任务</el-button>
+        <el-button size="mini" :disabled=true plain>导出任务</el-button>
+<!--        <div class="right-add-button-group">-->
+          <el-button class="right-add-button-group" type="primary"
+                     size="mini"
+                     icon="el-icon-document-add"
+                     @click="handleCreate">创建任务
+          </el-button>
+<!--        </div>-->
+      </el-row>
       <div class="assignment-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="请输入任务名称关键字搜索"
+            <el-input size="mini" placeholder="请输入任务名称关键字搜索"
                       v-model="keyword"
                       :clearable=true
                       @change="searchByKeyword"
-                      style="width:300px">
+                      style="width:100%">
+              <el-button @click="searchByKeyword" slot="append" icon="el-icon-search"></el-button>
             </el-input>
           </div>
         </div>
-        <div class="right-add-button-group">
-          <el-button type="primary"
-                     size="mini"
-                     icon="el-icon-document-add"
-                     @click="handleCreate">添加</el-button>
-        </div>
+
       </div>
 
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
@@ -37,35 +47,45 @@
                          :formatter="stringFormatSchedule"
                          min-width="8%"></el-table-column>
         <el-table-column
-                         label="源端数据源"
-                         min-width="10%">
-                         <template slot-scope="scope">
-                           <el-popover trigger="hover" placement="top">
-                             <p>源端数据源：{{ scope.row.sourceSchema }}</p>
-                             <p>源端数据源类型：{{ scope.row.sourceType }}</p>
-                             <div slot="reference" class="name-wrapper">
-                               <el-tag size="medium">{{ scope.row.sourceSchema }}</el-tag>
-                             </div>
-                           </el-popover>
-                         </template>
+            label="源端数据源"
+            min-width="10%">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <p>源端数据源：{{ scope.row.sourceSchema }}</p>
+              <p>源端数据源类型：{{ scope.row.sourceType }}</p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="medium">{{ scope.row.sourceSchema }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
         </el-table-column>
         <el-table-column
-                         label="目标端数据源"
-                         min-width="10%">
-                         <template slot-scope="scope">
-                           <el-popover trigger="hover" placement="top">
-                             <p>目标端数据源：{{ scope.row.targetSchema }}</p>
-                             <p>目标端数据源类型：{{ scope.row.targetType }}</p>
-                             <div slot="reference" class="name-wrapper">
-                               <el-tag size="medium">{{ scope.row.targetSchema }}</el-tag>
-                             </div>
-                           </el-popover>
-                         </template>
+            label="目标端数据源"
+            min-width="10%">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <p>目标端数据源：{{ scope.row.targetSchema }}</p>
+              <p>目标端数据源类型：{{ scope.row.targetType }}</p>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="medium">{{ scope.row.targetSchema }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
         </el-table-column>
-        <el-table-column prop="runStatus"
-                         label="运行状态"
-                         show-overflow-tooltip
-                         min-width="10%"></el-table-column>
+
+        <el-table-column
+            label="运行状态"
+            show-overflow-tooltip
+            min-width="10%">
+          <template slot-scope="scope">
+            <el-icon class="el-icon-success color-success" v-if="scope.row.runStatus == '执行成功'"></el-icon>
+            <el-icon class="el-icon-error color-error" v-if="scope.row.runStatus == '执行异常'"></el-icon>
+            <el-icon class="el-icon-remove color-cancel" v-if="scope.row.runStatus == '任务取消'"></el-icon>
+            <el-icon class="el-icon-loading color-running" v-if="scope.row.runStatus == '执行中'"></el-icon>
+            <span>{{ scope.row.runStatus }}</span>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="isPublished"
                          label="任务状态"
                          :formatter="boolFormatPublish"
@@ -82,40 +102,47 @@
                          type="primary"
                          icon="el-icon-timer"
                          @click="handlePublish(scope.$index, scope.row)"
-                         round>调度日志</el-button>
+                         round>调度日志
+              </el-button>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-timer"
                          v-if="scope.row.isPublished===false"
                          @click="handlePublish(scope.$index, scope.row)"
-                         round>启动</el-button>
+                         round>启动
+              </el-button>
               <el-button size="small"
                          type="info"
                          icon="el-icon-delete-location"
                          v-if="scope.row.isPublished===true"
                          @click="handleRetireTask(scope.$index, scope.row)"
-                         round>停止</el-button>
+                         round>停止
+              </el-button>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-video-play"
                          @click="handleRunTask(scope.$index, scope.row)"
-                         round>手工调度</el-button>
+                         round>手工调度
+              </el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-document"
                          @click="handleDetail(scope.$index, scope.row)"
-                         round>详情</el-button>
+                         round>详情
+              </el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>修改</el-button>
+                         round>修改
+              </el-button>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-delete"
                          v-if="scope.row.isPublished===false"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>删除
+              </el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -137,7 +164,7 @@
 <script>
 export default {
 
-  data () {
+  data() {
     return {
       loading: true,
       currentPage: 1,
@@ -161,65 +188,65 @@ export default {
           size: this.pageSize
         })
       }).then(res => {
-        if (0 === res.data.code) {
-          this.currentPage = res.data.pagination.page;
-          this.pageSize = res.data.pagination.size;
-          this.totalCount = res.data.pagination.total;
-          this.tableData = res.data.data;
-        } else {
-          alert("加载任务列表失败:" + res.data.message);
-        }
-      },
-        function () {
-          console.log("load assignments list failed");
-        }
+            if (0 === res.data.code) {
+              this.currentPage = res.data.pagination.page;
+              this.pageSize = res.data.pagination.size;
+              this.totalCount = res.data.pagination.total;
+              this.tableData = res.data.data;
+            } else {
+              alert("加载任务列表失败:" + res.data.message);
+            }
+          },
+          function () {
+            console.log("load assignments list failed");
+          }
       );
     },
     searchByKeyword: function () {
       this.currentPage = 1;
       this.loadData();
     },
-    boolFormatPublish (row, column) {
+    boolFormatPublish(row, column) {
       if (row.isPublished === true) {
         return "启动";
       } else {
         return "停止";
       }
     },
-    stringFormatSchedule (row, column) {
+    stringFormatSchedule(row, column) {
       if (row.scheduleMode == "MANUAL") {
         return "手动";
       } else {
         return "定时";
       }
     },
-    stringSourceSchema (row, column) {
+    stringSourceSchema(row, column) {
       return row.sourceSchema + " / " + row.sourceType
     },
-    stringTargetSchema (row, column) {
+    stringTargetSchema(row, column) {
       return row.targetSchema + " / " + row.targetType
     },
     handleCreate: function () {
       this.$router.push('/task/create')
     },
     handleDetail: function (index, row) {
-      this.$router.push({ path: '/task/detail', query: { id: row.id } })
+      this.$router.push({path: '/task/detail', query: {id: row.id}})
     },
     handleUpdate: function (index, row) {
-      this.$router.push({ path: '/task/update', query: { id: row.id } })
+      this.$router.push({path: '/task/update', query: {id: row.id}})
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此任务ID=" + row.id + "删除么, 是否继续?",
-        "提示",
-        {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        }
+          "此操作将此任务ID=" + row.id + "删除么, 是否继续?",
+          "提示",
+          {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+          }
       ).then(() => {
         this.$http.delete(
-          "/dbswitch/admin/api/v1/assignment/delete/" + row.id
+            "/dbswitch/admin/api/v1/assignment/delete/" + row.id
         ).then(res => {
           if (0 === res.data.code) {
             this.loadData();
@@ -298,7 +325,7 @@ export default {
       this.loadData();
     }
   },
-  created () {
+  created() {
     this.loadData();
   },
 };
@@ -317,8 +344,8 @@ export default {
   height: 100%;
 }
 
-/deep/ .el-table--border .el-table__cell{
-  border-right:0px solid red !important;
+/deep/ .el-table--border .el-table__cell {
+  border-right: 0px solid red !important;
 }
 
 .demo-table-expand {
@@ -350,21 +377,43 @@ export default {
 }
 
 .left-search-input-group {
-  width: calc(100% - 100px);
+  width: 100%;
   margin-right: auto;
   display: flex;
   justify-content: space-between;
 }
+
 .left-search-input {
-  width: 300px;
+  width: 100%;
   margin-right: auto;
-  margin: 10px 5px;
+  margin: 10px 0px;
 }
+
 .right-add-button-group {
   width: 100px;
   margin-left: auto;
-  margin: 10px 5px;
+  //margin: 0px 0px;
+  float: right;
 }
 
+.color-running {
+  color: #8c85d1 !important;
+}
+
+.color-error {
+  color: #ff9c86 !important;
+}
+
+.color-cancel {
+  color: #a0a6b8 !important;
+}
+
+.color-success {
+  color: #6cdbbc !important;
+}
+
+.btn-common{
+
+}
 
 </style>
