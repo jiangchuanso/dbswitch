@@ -784,7 +784,7 @@ export default {
           }
         ]
       },
-      active: 3,
+      active: 1,
       sourceConnection: {},
       targetConnection: {},
       sourceConnectionSchemas: [],
