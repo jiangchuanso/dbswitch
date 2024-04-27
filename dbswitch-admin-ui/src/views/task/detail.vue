@@ -9,17 +9,17 @@
                        border>
         <el-descriptions-item label="任务名称">{{updateform.name}}</el-descriptions-item>
         <el-descriptions-item label="任务描述">{{updateform.description}}</el-descriptions-item>
-        <el-descriptions-item label="调度方式">
+        <el-descriptions-item label="集成模式">
           <span v-if="updateform.scheduleMode == 'MANUAL'">
-            手动执行
+            手动
           </span>
           <span v-if="updateform.scheduleMode == 'SYSTEM_SCHEDULED'">
-            系统调度
+            定时
           </span>
         </el-descriptions-item>
         <el-descriptions-item v-if="updateform.scheduleMode == 'SYSTEM_SCHEDULED'"
                               label="CRON表达式">{{updateform.cronExpression}}</el-descriptions-item>
-        <el-descriptions-item label="源端数据源">[{{updateform.sourceConnectionId}}]{{updateform.sourceConnectionName}}</el-descriptions-item>
+        <el-descriptions-item label="源端数据源">[{{updateform.sourceConnectionId}}] {{updateform.sourceConnectionName}}</el-descriptions-item>
         <el-descriptions-item label="源端schema">{{updateform.sourceSchema}}</el-descriptions-item>
         <el-descriptions-item label="源端表类型">{{updateform.tableType}}</el-descriptions-item>
         <el-descriptions-item label="源端表选择方式">
@@ -35,7 +35,7 @@
           <p v-for="item in updateform.sourceTables"
              v-bind:key="item">{{item}}</p>
         </el-descriptions-item>
-        <el-descriptions-item label="目地端数据源">[{{updateform.targetConnectionId}}]{{updateform.targetConnectionName}}</el-descriptions-item>
+        <el-descriptions-item label="目地端数据源">[{{updateform.targetConnectionId}}] {{updateform.targetConnectionName}}</el-descriptions-item>
         <el-descriptions-item label="目地端schema">{{updateform.targetSchema}}</el-descriptions-item>
         <el-descriptions-item label="自动同步模式">
           <span v-if="updateform.autoSyncMode == 2">
@@ -126,7 +126,8 @@
     <el-button type="primary"
                size="mini"
                icon="el-icon-arrow-left"
-               @click="handleGoBack">
+               @click="handleGoBack"
+               style="margin: 12px 0px 20px;float: right">
       返回
     </el-button>
   </el-card>

@@ -87,7 +87,7 @@
                      placeholder="请选择">
             <el-option v-for="(item,index) in connectionNameList"
                        :key="index"
-                       :label="`[${item.id}]${item.name}`"
+                       :label="`[${item.id}] ${item.name}`"
                        :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -1150,7 +1150,7 @@ export default {
 }
 
 .tips-style {
-  font-size: 10px;
+  font-size: 12px;
   color: #a0a6b8;
 }
 

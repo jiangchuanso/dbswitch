@@ -14,46 +14,52 @@
              :rules="rules"
              ref="updateform">
 
-      <div v-show="active == 1">
-        <el-form-item label="名称"
-                      label-width="240px"
+      <div v-show="active == 1" class="common-top">
+        <el-form-item label="任务名称"
+                      label-width="100px"
                       :required=true
                       prop="name"
                       style="width:65%">
           <el-input v-model="updateform.name"
-                    auto-complete="off"></el-input>
+                    auto-complete="off"
+                    style="width:50%"></el-input>
+          <label
+              class="tips-style block">请输入任务名称，只能以字母、数字为开头，包含字母、数字和._-，3-100个字符</label>
         </el-form-item>
         <el-form-item label="描述"
-                      label-width="240px"
+                      label-width="100px"
                       prop="description"
                       style="width:65%">
           <el-input v-model="updateform.description"
                     type="textarea"
                     :rows="3"
-                    auto-complete="off"></el-input>
+                    auto-complete="off"
+                    placeholder="请输入任务描述"
+                    style="width:50%"></el-input>
         </el-form-item>
-        <el-form-item label="调度方式"
-                      label-width="240px"
+        <el-form-item label="集成模式"
+                      label-width="100px"
                       :required=true
                       prop="scheduleMode"
                       style="width:65%">
-          <el-select v-model="updateform.scheduleMode">
-            <el-option label="手动调度"
-                       value="MANUAL"></el-option>
-            <el-option label="系统调度"
-                       value="SYSTEM_SCHEDULED"></el-option>
-          </el-select>
+<!--          <el-select v-model="updateform.scheduleMode">-->
+<!--            <el-option label="手动调度"-->
+<!--                       value="MANUAL"></el-option>-->
+<!--            <el-option label="系统调度"-->
+<!--                       value="SYSTEM_SCHEDULED"></el-option>-->
+<!--          </el-select>-->
+
+          <el-input v-model="updateform.scheduleMode" v-if="false"></el-input>
+          <el-radio-group v-model="updateform.scheduleModeTemp" size="mini" @change="scheduleModeUpdate">
+            <el-radio-button value="MANUAL" label="手动调度"></el-radio-button>
+            <el-radio-button value="SYSTEM_SCHEDULED" label="系统调度"></el-radio-button>
+          </el-radio-group>
+
         </el-form-item>
-        <el-form-item label="Cron表达式"
-                      label-width="240px"
+        <el-form-item label="执行周期"
+                      label-width="100px"
                       style="width:65%"
                       v-if="updateform.scheduleMode=='SYSTEM_SCHEDULED'">
-          <el-tooltip placement="top">
-            <div slot="content">
-              执行周期为CRON表达式，即可以选择以下内置的周期，也可以自行输入或粘贴合法的CRON表达式(最小间隔时间为2分钟)。
-            </div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
           <el-select v-model="updateform.cronExpression"
                      filterable
                      allow-create>
@@ -72,9 +78,11 @@
             <el-option label="每日0时执行1次"
                        value="0 0 0 1/1 * ? *"></el-option>
           </el-select>
+          <label
+              class="tips-style block">执行周期为CRON表达式，即可以选择以下内置的周期，也可以自行输入或粘贴合法的CRON表达式(最小间隔时间为2分钟)。</label>
         </el-form-item>
       </div>
-      <div v-show="active == 2">
+      <div v-show="active == 2" class="common-top">
         <el-form-item label="源端数据源"
                       label-width="240px"
                       :required=true
@@ -153,7 +161,7 @@
           </el-select>
         </el-form-item>
       </div>
-      <div v-show="active == 3">
+      <div v-show="active == 3" class="common-top">
         <el-form-item label="目的端数据源"
                       label-width="240px"
                       :required=true
@@ -385,7 +393,7 @@
                     auto-complete="off"></el-input>
         </el-form-item>
       </div>
-      <div v-show="active == 4">
+      <div v-show="active == 4" class="common-top">
         <el-alert title="说明信息"
                   type="success">
           <p>(1) 当表名映射规则记录为空时，代表目标表名与源表名的名称相同;</p>
@@ -467,7 +475,7 @@
           </el-table-column>
         </el-table>
       </div>
-      <div v-show="active == 5">
+      <div v-show="active == 5" class="common-top">
         <el-descriptions size="small"
                          :column="1"
                          label-class-name="el-descriptions-item-label-class"
@@ -676,6 +684,7 @@ export default {
         name: "",
         description: "",
         scheduleMode: "MANUAL",
+        scheduleModeTemp: "手动调度",
         cronExpression: "",
         sourceConnectionId: '请选择',
         sourceSchema: "",
@@ -796,7 +805,7 @@ export default {
         ]
       },
       can_go_back: true,
-      active: 5,
+      active: 1,
       sourceConnection: {},
       targetConnection: {},
       sourceConnectionSchemas: [],
@@ -811,6 +820,22 @@ export default {
     }
   },
   methods: {
+    initScheduleModeTemp(val){
+      if (val === 'SYSTEM_SCHEDULED'){
+        return "系统调度"
+      }
+      if (val === 'MANUAL'){
+        return "手动调度"
+      }
+    },
+    scheduleModeUpdate(val){
+      if (val === '系统调度'){
+        this.updateform.scheduleMode = "SYSTEM_SCHEDULED"
+      }
+      if (val === '手动调度'){
+        this.updateform.scheduleMode = "MANUAL"
+      }
+    },
     handleClose (done) {
     },
     next () {
@@ -866,6 +891,7 @@ export default {
             name: detail.name,
             description: detail.description,
             scheduleMode: detail.scheduleMode,
+            scheduleModeTemp: this.initScheduleModeTemp(detail.scheduleMode),
             cronExpression: detail.cronExpression,
             sourceConnectionId: detail.configuration.sourceConnectionId,
             sourceConnectionName: detail.configuration.sourceConnectionName,
@@ -1219,5 +1245,19 @@ export default {
   .el-descriptions-item__label {
   min-width: 20px;
   max-width: 60px;
+}
+
+.tips-style {
+  font-size: 12px;
+  color: #a0a6b8;
+}
+
+.block{
+  padding-top: 6px;
+  display: block;
+}
+
+.common-top{
+  margin-top: 40px;
 }
 </style>

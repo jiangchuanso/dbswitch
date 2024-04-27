@@ -360,7 +360,7 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-          "此操作将此任务ID=" + row.id + "删除么, 是否继续?",
+          "是否确定删除任务【"+row.name+"】?",
           "提示",
           {
             confirmButtonText: "确定",
