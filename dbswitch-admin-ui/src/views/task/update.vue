@@ -84,7 +84,7 @@
       </div>
       <div v-show="active == 2" class="common-top">
         <el-form-item label="源端数据源"
-                      label-width="240px"
+                      label-width="100px"
                       :required=true
                       prop="sourceConnectionId"
                       style="width:65%">
@@ -98,7 +98,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="源端模式名"
-                      label-width="240px"
+                      label-width="100px"
                       :required=true
                       prop="sourceSchema"
                       style="width:65%">
@@ -113,7 +113,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="源端表类型"
-                      label-width="240px"
+                      label-width="100px"
                       :required=true
                       prop="tableType"
                       style="width:65%">
@@ -127,7 +127,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="配置方式"
-                      label-width="240px"
+                      label-width="100px"
                       :required=true
                       prop="includeOrExclude"
                       style="width:65%">
@@ -140,16 +140,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="表名配置"
-                      label-width="240px"
+                      label-width="100px"
                       :required=false
                       prop="sourceTables"
                       style="width:65%">
-          <el-tooltip placement="top">
-            <div slot="content">
-              当为包含表时，选择所要精确包含的表名，如果不选则代表选择所有；当为排除表时，选择索要精确排除的表名。
-            </div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
           <el-select placeholder="请选择表名"
                      multiple
                      filterable
@@ -159,11 +153,13 @@
                        :label="item"
                        :value="item"></el-option>
           </el-select>
+          <label
+              class="tips-style block">当为包含表时，选择所要精确包含的表名，如果不选则代表选择所有；当为排除表时，选择索要精确排除的表名。</label>
         </el-form-item>
       </div>
       <div v-show="active == 3" class="common-top">
         <el-form-item label="目的端数据源"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       prop="targetConnectionId"
                       style="width:65%">
@@ -177,7 +173,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="目的端模式名"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       prop="targetSchema"
                       style="width:65%">
@@ -190,7 +186,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="自动同步模式"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       prop="autoSyncMode"
                       style="width:65%">
@@ -216,7 +212,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="建表字段自增"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       v-if=" updateform.autoSyncMode!==0 "
                       prop="targetAutoIncrement"
@@ -235,7 +231,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="表名大小写转换"
-                      label-width="240px"
+                      label-width="130px"
                       :required=true
                       prop="tableNameCase"
                       style="width:45%">
@@ -255,7 +251,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="列名大小写转换"
-                      label-width="240px"
+                      label-width="130px"
                       :required=true
                       prop="columnNameCase"
                       style="width:45%">
@@ -275,7 +271,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数据批次大小"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       v-if=" updateform.autoSyncMode!==1 "
                       prop="batchSize"
@@ -303,7 +299,7 @@
         </el-form-item>
         </el-form-item>
         <el-form-item label="通道队列大小"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       v-if=" updateform.autoSyncMode!==1 "
                       prop="channelSize"
@@ -332,7 +328,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="同步操作方法"
-                      label-width="240px"
+                      label-width="120px"
                       :required=true
                       v-if=" updateform.autoSyncMode!==1 "
                       prop="targetSyncOption"
@@ -361,36 +357,32 @@
           </el-select>
         </el-form-item>
         <el-form-item label="同步前置执行SQL脚本"
-                      label-width="240px"
+                      label-width="160px"
                       v-if=" updateform.autoSyncMode!==1 "
                       prop="beforeSqlScripts"
                       style="width:65%">
-          <el-tooltip placement="top">
-            <div slot="content">
-              数据同步写入目标断数据库前执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库关闭外键约束 SET FOREIGN_KEY_CHECKS = 0
-            </div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
           <el-input v-model="updateform.beforeSqlScripts"
                     type="textarea"
                     :rows="3"
-                    auto-complete="off"></el-input>
+                    auto-complete="off"
+                    style="width: 65%"></el-input>
+          <label
+              class="tips-style block">数据同步写入目标端数据库前执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库关闭外键约束 SET FOREIGN_KEY_CHECKS
+            = 0</label>
         </el-form-item>
         <el-form-item label="同步后置执行SQL脚本"
-                      label-width="240px"
+                      label-width="160px"
                       v-if=" updateform.autoSyncMode!==1 "
                       prop="afterSqlScripts"
                       style="width:65%">
-          <el-tooltip placement="top">
-            <div slot="content">
-              数据同步写入目标断数据库后执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库恢复外键约束 SET FOREIGN_KEY_CHECKS = 1
-            </div>
-            <i class="el-icon-question"></i>
-          </el-tooltip>
+
           <el-input v-model="updateform.afterSqlScripts"
                     type="textarea"
                     :rows="3"
-                    auto-complete="off"></el-input>
+                    auto-complete="off"
+                    style="width: 65%"></el-input>
+          <label
+              class="tips-style block">数据同步写入目标端数据库后执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库恢复外键约束 SET FOREIGN_KEY_CHECKS = 1</label>
         </el-form-item>
       </div>
       <div v-show="active == 4" class="common-top">
@@ -613,8 +605,7 @@
       提交
     </el-button>
     <el-button round
-               @click="handleGoBack"
-               v-if="active == 5 && can_go_back">
+               @click="handleGoBack">
       返回
     </el-button>
 
@@ -847,9 +838,10 @@ export default {
       if (this.active-- < 2) this.active = 1
     },
     handleGoBack () {
-      if (this.can_go_back) {
-        this.$router.go(-1);
-      }
+      // if (this.can_go_back) {
+      //   this.$router.go(-1);
+      // }
+      this.$router.push('/task/assignment')
     },
     loadConnections: function () {
       this.connectionNameList = [];
@@ -1199,7 +1191,10 @@ export default {
             })
           }).then(res => {
             if (0 === res.data.code) {
-              this.$message("修改任务成功");
+              this.$message({
+                message: '修改任务成功!',
+                type: 'success'
+              });
               this.$router.push('/task/assignment')
             } else {
               if (res.data.message) {

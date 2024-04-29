@@ -40,12 +40,16 @@
                          label="编号"
                          type="selection"
                          min-width="6%"></el-table-column>
-        <el-table-column prop="name"
+        <el-table-column
                          label="任务名称"
-                         show-overflow-tooltip
-                         min-width="10%"></el-table-column>
+                         min-width="10%">
+          <template slot-scope="scope">
+            <span @click="handleDetail(scope.$index, scope.row)" class="task-name">{{scope.row.name}}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="scheduleMode"
                          label="集成模式"
+                         sortable
                          :formatter="stringFormatSchedule"
                          min-width="8%"></el-table-column>
         <el-table-column
@@ -78,6 +82,7 @@
         <el-table-column
             label="运行状态"
             show-overflow-tooltip
+            sortable
             min-width="10%">
           <template slot-scope="scope">
             <el-icon class="el-icon-success color-success" v-if="scope.row.runStatus == '执行成功'"></el-icon>
@@ -91,6 +96,7 @@
 
         <el-table-column prop="isPublished"
                          label="任务状态"
+                         sortable
                          :formatter="boolFormatPublish"
                          :show-overflow-tooltip="true"
                          min-width="8%"></el-table-column>
@@ -548,8 +554,14 @@ export default {
   color: #6cdbbc !important;
 }
 
-.btn-common {
+.task-name {
+  color: #409EFF;
+  cursor: pointer;
+}
 
+.task-name:hover {
+  color: red;
+  text-decoration: underline;
 }
 
 </style>
