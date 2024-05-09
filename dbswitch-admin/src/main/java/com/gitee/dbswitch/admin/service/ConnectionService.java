@@ -164,7 +164,7 @@ public class ConnectionService {
     MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       List<String> tables = Optional.ofNullable(
-          metaDataService.queryTableList(schema))
+              metaDataService.queryTableList(schema))
           .orElseGet(ArrayList::new).stream()
           .filter(t -> !t.isViewTable())
           .map(t -> t.getTableName())
@@ -180,7 +180,7 @@ public class ConnectionService {
     MetadataService metaDataService = getMetaDataCoreService(dbConn);
     try {
       List<String> tables = Optional.ofNullable(
-          metaDataService.queryTableList(schema))
+              metaDataService.queryTableList(schema))
           .orElseGet(ArrayList::new).stream()
           .filter(t -> t.isViewTable())
           .map(t -> t.getTableName())

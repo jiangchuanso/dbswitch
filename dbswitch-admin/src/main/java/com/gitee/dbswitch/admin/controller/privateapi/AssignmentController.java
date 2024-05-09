@@ -119,7 +119,7 @@ public class AssignmentController {
   @ApiOperation(value = "导出")
   @PostMapping(value = "/export")
   public void exportAssignments(@RequestParam(value = "ids") List<Long> ids, HttpServletResponse response) {
-    assignmentService.exportAssignments(ids,response);
+    assignmentService.exportAssignments(ids, response);
   }
 
 }

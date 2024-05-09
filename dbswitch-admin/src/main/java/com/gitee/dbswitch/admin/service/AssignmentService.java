@@ -63,331 +63,333 @@ import com.gitee.dbswitch.data.util.JsonUtils;
 @Service
 public class AssignmentService {
 
-	@Resource
-	private AssignmentTaskDAO assignmentTaskDAO;
+  @Resource
+  private AssignmentTaskDAO assignmentTaskDAO;
 
-	@Resource
-	private AssignmentConfigDAO assignmentConfigDAO;
+  @Resource
+  private AssignmentConfigDAO assignmentConfigDAO;
 
-	@Resource
-	private ScheduleService scheduleService;
+  @Resource
+  private ScheduleService scheduleService;
 
-	@Resource
-	private DatabaseConnectionDAO databaseConnectionDAO;
+  @Resource
+  private DatabaseConnectionDAO databaseConnectionDAO;
 
-	@Resource
-	private DriverLoadService driverLoadService;
+  @Resource
+  private DriverLoadService driverLoadService;
 
-	@Resource
-	private AssignmentJobMapper assignmentJobMapper;
+  @Resource
+  private AssignmentJobMapper assignmentJobMapper;
 
-	@Transactional(rollbackFor = Exception.class)
-	public AssignmentInfoResponse createAssignment(AssigmentCreateRequest request) {
-		AssignmentTaskEntity assignment = request.toAssignmentTask();
-		assignmentTaskDAO.insert(assignment);
+  @Transactional(rollbackFor = Exception.class)
+  public AssignmentInfoResponse createAssignment(AssigmentCreateRequest request) {
+    AssignmentTaskEntity assignment = request.toAssignmentTask();
+    assignmentTaskDAO.insert(assignment);
 
-		AssignmentConfigEntity assignmentConfigEntity = request.toAssignmentConfig(assignment.getId());
-		assignmentConfigDAO.insert(assignmentConfigEntity);
+    AssignmentConfigEntity assignmentConfigEntity = request.toAssignmentConfig(assignment.getId());
+    assignmentConfigDAO.insert(assignmentConfigEntity);
 
-		Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-		DatabaseConnectionEntity targetEntity = databaseConnectionDAO.getById(targetConnectionId);
-		if (ProductTypeEnum.SQLITE3 == targetEntity.getType()) {
-			if (ProductTypeEnum.isUnsupportedTargetSqlite(targetEntity.getUrl())) {
-				throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
-						"不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
-			}
-		}
+    Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+    DatabaseConnectionEntity targetEntity = databaseConnectionDAO.getById(targetConnectionId);
+    if (ProductTypeEnum.SQLITE3 == targetEntity.getType()) {
+      if (ProductTypeEnum.isUnsupportedTargetSqlite(targetEntity.getUrl())) {
+        throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+            "不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
+      }
+    }
 
-		Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
-		DatabaseConnectionEntity sourceEntity = databaseConnectionDAO.getById(sourceConnectionId);
-		if (ProductTypeEnum.ELASTICSEARCH == sourceEntity.getType()) {
-			throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
-					"不支持源端数据源为ElasticSearch类型");
-		}
+    Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+    DatabaseConnectionEntity sourceEntity = databaseConnectionDAO.getById(sourceConnectionId);
+    if (ProductTypeEnum.ELASTICSEARCH == sourceEntity.getType()) {
+      throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+          "不支持源端数据源为ElasticSearch类型");
+    }
 
-		return ConverterFactory.getConverter(AssignmentInfoConverter.class)
-				.convert(assignmentTaskDAO.getById(assignment.getId()));
-	}
+    return ConverterFactory.getConverter(AssignmentInfoConverter.class)
+        .convert(assignmentTaskDAO.getById(assignment.getId()));
+  }
 
-	public void deleteAssignment(Long id) {
-		AssignmentTaskEntity taskEntity = assignmentTaskDAO.getById(id);
-		if (null != taskEntity && null != taskEntity.getPublished() && taskEntity.getPublished()) {
-			throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY,
-					"已经发布的任务需先下线后方可执行删除操作");
-		}
-		assignmentTaskDAO.deleteById(id);
-	}
+  public void deleteAssignment(Long id) {
+    AssignmentTaskEntity taskEntity = assignmentTaskDAO.getById(id);
+    if (null != taskEntity && null != taskEntity.getPublished() && taskEntity.getPublished()) {
+      throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY,
+          "已经发布的任务需先下线后方可执行删除操作");
+    }
+    assignmentTaskDAO.deleteById(id);
+  }
 
-	@Transactional(rollbackFor = Exception.class)
-	public void updateAssignment(AssigmentUpdateRequest request) {
-		AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(request.getId());
-		if (Objects.isNull(assignmentTaskEntity)) {
-			throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + request.getId());
-		} else if (assignmentTaskEntity.getPublished()) {
-			throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY, "ID=" + request.getId());
-		}
+  @Transactional(rollbackFor = Exception.class)
+  public void updateAssignment(AssigmentUpdateRequest request) {
+    AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(request.getId());
+    if (Objects.isNull(assignmentTaskEntity)) {
+      throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + request.getId());
+    } else if (assignmentTaskEntity.getPublished()) {
+      throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY, "ID=" + request.getId());
+    }
 
-		AssignmentTaskEntity newAssignmentTaskEntity = request.toAssignmentTask();
-		assignmentTaskDAO.updateById(newAssignmentTaskEntity);
+    AssignmentTaskEntity newAssignmentTaskEntity = request.toAssignmentTask();
+    assignmentTaskDAO.updateById(newAssignmentTaskEntity);
 
-		AssignmentConfigEntity assignmentConfigEntity = request
-				.toAssignmentConfig(assignmentTaskEntity.getId());
-		assignmentConfigDAO.deleteByAssignmentTaskId(assignmentTaskEntity.getId());
-		assignmentConfigDAO.insert(assignmentConfigEntity);
+    AssignmentConfigEntity assignmentConfigEntity = request
+        .toAssignmentConfig(assignmentTaskEntity.getId());
+    assignmentConfigDAO.deleteByAssignmentTaskId(assignmentTaskEntity.getId());
+    assignmentConfigDAO.insert(assignmentConfigEntity);
 
-		Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-		DatabaseConnectionEntity entity = databaseConnectionDAO.getById(targetConnectionId);
-		if (ProductTypeEnum.SQLITE3 == entity.getType()) {
-			if (ProductTypeEnum.isUnsupportedTargetSqlite(entity.getUrl())) {
-				throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
-						"不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
-			}
-		}
-	}
+    Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+    DatabaseConnectionEntity entity = databaseConnectionDAO.getById(targetConnectionId);
+    if (ProductTypeEnum.SQLITE3 == entity.getType()) {
+      if (ProductTypeEnum.isUnsupportedTargetSqlite(entity.getUrl())) {
+        throw new DbswitchException(ResultCode.ERROR_INVALID_ASSIGNMENT_CONFIG,
+            "不支持目的端数据源为远程服务器上的SQLite或内存方式下的SQLite");
+      }
+    }
+  }
 
-	public PageResult<AssignmentInfoResponse> listAll(AssignmentSearchRequest request) {
-		Supplier<List<AssignmentInfoResponse>> method = () -> {
-			List<AssignmentInfoResponse> assignmentInfoResponseList = ConverterFactory.getConverter(AssignmentInfoConverter.class)
-					.convert(assignmentTaskDAO.listAll(request.getSearchText()));
-			assignmentInfoResponseList.forEach((e) -> {
-				AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(e.getId());
+  public PageResult<AssignmentInfoResponse> listAll(AssignmentSearchRequest request) {
+    Supplier<List<AssignmentInfoResponse>> method = () -> {
+      List<AssignmentInfoResponse> assignmentInfoResponseList = ConverterFactory.getConverter(
+              AssignmentInfoConverter.class)
+          .convert(assignmentTaskDAO.listAll(request.getSearchText()));
+      assignmentInfoResponseList.forEach((e) -> {
+        AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(e.getId());
 
-				Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
-				DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
-				String sourceSchema = assignmentConfigEntity.getSourceSchema();
-				e.setSourceSchema(sourceSchema);
-				String sourceType = databaseConnectionEntity.getType().getName();
-				e.setSourceType(sourceType);
+        Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+        DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
+        String sourceSchema = assignmentConfigEntity.getSourceSchema();
+        e.setSourceSchema(sourceSchema);
+        String sourceType = databaseConnectionEntity.getType().getName();
+        e.setSourceType(sourceType);
 
-				Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-				DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
-				String targetSchema = assignmentConfigEntity.getTargetSchema();
-				e.setTargetSchema(targetSchema);
-				String targetType = databaseConnectionEntity1.getType().getName();
-				e.setTargetType(targetType);
+        Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+        DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
+        String targetSchema = assignmentConfigEntity.getTargetSchema();
+        e.setTargetSchema(targetSchema);
+        String targetType = databaseConnectionEntity1.getType().getName();
+        e.setTargetType(targetType);
 
-				AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
-						new LambdaQueryWrapper<AssignmentJobEntity>()
-								.eq(AssignmentJobEntity::getAssignmentId, e.getId()).orderByDesc(AssignmentJobEntity::getCreateTime)
-								.last(" limit 1 "));
-				Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
-						JobStatusEnum.INIT.getValue() :
-						assignmentJobEntity.getStatus();
-				e.setRunStatus(JobStatusEnum.of(status).getName());
+        AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
+            new LambdaQueryWrapper<AssignmentJobEntity>()
+                .eq(AssignmentJobEntity::getAssignmentId, e.getId()).orderByDesc(AssignmentJobEntity::getCreateTime)
+                .last(" limit 1 "));
+        Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
+            JobStatusEnum.INIT.getValue() :
+            assignmentJobEntity.getStatus();
+        e.setRunStatus(JobStatusEnum.of(status).getName());
 
-			});
-			return assignmentInfoResponseList;
-		};
-		return PageUtils.getPage(method, request.getPage(), request.getSize());
-	}
+      });
+      return assignmentInfoResponseList;
+    };
+    return PageUtils.getPage(method, request.getPage(), request.getSize());
+  }
 
-	public Result<AssignmentDetailResponse> detailAssignment(Long id) {
-		AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-		if (Objects.isNull(assignmentTaskEntity)) {
-			return Result.failed(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
-		}
+  public Result<AssignmentDetailResponse> detailAssignment(Long id) {
+    AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+    if (Objects.isNull(assignmentTaskEntity)) {
+      return Result.failed(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
+    }
 
-		AssignmentDetailResponse detailResponse = ConverterFactory
-				.getConverter(AssignmentDetailConverter.class).convert(assignmentTaskEntity);
-		return Result.success(detailResponse);
-	}
+    AssignmentDetailResponse detailResponse = ConverterFactory
+        .getConverter(AssignmentDetailConverter.class).convert(assignmentTaskEntity);
+    return Result.success(detailResponse);
+  }
 
-	@Transactional(rollbackFor = Exception.class)
-	public void deployAssignments(List<Long> ids) {
-		checkAssignmentAllExist(ids);
-		ids.forEach(id -> {
-			AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-			if (assignmentTaskEntity.getPublished()) {
-				throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY, "ID=" + id);
-			}
-		});
+  @Transactional(rollbackFor = Exception.class)
+  public void deployAssignments(List<Long> ids) {
+    checkAssignmentAllExist(ids);
+    ids.forEach(id -> {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      if (assignmentTaskEntity.getPublished()) {
+        throw new DbswitchException(ResultCode.ERROR_RESOURCE_HAS_DEPLOY, "ID=" + id);
+      }
+    });
 
-		for (Long id : ids) {
-			AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-			AssignmentConfigEntity assignmentConfigEntity = assignmentConfigDAO.getByAssignmentTaskId(id);
+    for (Long id : ids) {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      AssignmentConfigEntity assignmentConfigEntity = assignmentConfigDAO.getByAssignmentTaskId(id);
 
-			DbswichPropertiesConfiguration properties = new DbswichPropertiesConfiguration();
-			properties.setSource(this.getSourceDataSourceProperties(assignmentConfigEntity));
-			properties.setTarget(this.getTargetDataSourceProperties(assignmentConfigEntity));
-			properties.setConfig(this.getGlobalParamConfigProperties(assignmentConfigEntity));
+      DbswichPropertiesConfiguration properties = new DbswichPropertiesConfiguration();
+      properties.setSource(this.getSourceDataSourceProperties(assignmentConfigEntity));
+      properties.setTarget(this.getTargetDataSourceProperties(assignmentConfigEntity));
+      properties.setConfig(this.getGlobalParamConfigProperties(assignmentConfigEntity));
 
-			assignmentTaskEntity.setPublished(Boolean.TRUE);
-			assignmentTaskEntity.setContent(JsonUtils.toJsonString(properties));
-			assignmentTaskDAO.updateById(assignmentTaskEntity);
+      assignmentTaskEntity.setPublished(Boolean.TRUE);
+      assignmentTaskEntity.setContent(JsonUtils.toJsonString(properties));
+      assignmentTaskDAO.updateById(assignmentTaskEntity);
 
-			ScheduleModeEnum systemScheduled = ScheduleModeEnum.SYSTEM_SCHEDULED;
-			if (assignmentTaskEntity.getScheduleMode() == systemScheduled) {
-				scheduleService.scheduleTask(assignmentTaskEntity.getId(), systemScheduled);
-			}
-		}
+      ScheduleModeEnum systemScheduled = ScheduleModeEnum.SYSTEM_SCHEDULED;
+      if (assignmentTaskEntity.getScheduleMode() == systemScheduled) {
+        scheduleService.scheduleTask(assignmentTaskEntity.getId(), systemScheduled);
+      }
+    }
 
-	}
+  }
 
-	@Transactional(rollbackFor = Exception.class)
-	public void runAssignments(List<Long> ids) {
-		checkAssignmentAllExist(ids);
-		List<AssignmentTaskEntity> tasks = new ArrayList<>();
-		for (Long id : ids) {
-			AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-			if (assignmentTaskEntity.getPublished()) {
-				tasks.add(assignmentTaskEntity);
-			} else {
-				throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_DEPLOY, assignmentTaskEntity.getName());
-			}
-		}
+  @Transactional(rollbackFor = Exception.class)
+  public void runAssignments(List<Long> ids) {
+    checkAssignmentAllExist(ids);
+    List<AssignmentTaskEntity> tasks = new ArrayList<>();
+    for (Long id : ids) {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      if (assignmentTaskEntity.getPublished()) {
+        tasks.add(assignmentTaskEntity);
+      } else {
+        throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_DEPLOY, assignmentTaskEntity.getName());
+      }
+    }
 
-		tasks.forEach(assignmentTask -> {
-			scheduleService.scheduleTask(assignmentTask.getId(), ScheduleModeEnum.MANUAL);
-		});
+    tasks.forEach(assignmentTask -> {
+      scheduleService.scheduleTask(assignmentTask.getId(), ScheduleModeEnum.MANUAL);
+    });
 
-	}
+  }
 
-	@Transactional(rollbackFor = Exception.class)
-	public void retireAssignments(List<Long> ids) {
-		checkAssignmentAllExist(ids);
-		for (Long id : ids) {
-			AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-			if (Objects.nonNull(assignmentTaskEntity.getPublished())
-					&& assignmentTaskEntity.getPublished()) {
-				String jobKey = assignmentTaskEntity.getJobKey();
-				scheduleService.cancelByJobKey(jobKey);
-				scheduleService.cancelManualJob(id);
-				assignmentTaskEntity.setPublished(Boolean.FALSE);
-				assignmentTaskEntity.setContent("{}");
-				assignmentTaskEntity.setJobKey("");
-				assignmentTaskDAO.updateById(assignmentTaskEntity);
-			}
-		}
-	}
+  @Transactional(rollbackFor = Exception.class)
+  public void retireAssignments(List<Long> ids) {
+    checkAssignmentAllExist(ids);
+    for (Long id : ids) {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      if (Objects.nonNull(assignmentTaskEntity.getPublished())
+          && assignmentTaskEntity.getPublished()) {
+        String jobKey = assignmentTaskEntity.getJobKey();
+        scheduleService.cancelByJobKey(jobKey);
+        scheduleService.cancelManualJob(id);
+        assignmentTaskEntity.setPublished(Boolean.FALSE);
+        assignmentTaskEntity.setContent("{}");
+        assignmentTaskEntity.setJobKey("");
+        assignmentTaskDAO.updateById(assignmentTaskEntity);
+      }
+    }
+  }
 
-	private void checkAssignmentAllExist(List<Long> ids) {
-		for (Long id : ids) {
-			if (Objects.isNull(assignmentTaskDAO.getById(id))) {
-				throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
-			}
-		}
-	}
+  private void checkAssignmentAllExist(List<Long> ids) {
+    for (Long id : ids) {
+      if (Objects.isNull(assignmentTaskDAO.getById(id))) {
+        throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
+      }
+    }
+  }
 
-	private SourceDataSourceProperties getSourceDataSourceProperties(
-			AssignmentConfigEntity assignmentConfigEntity) {
-		SourceDataSourceProperties sourceDataSourceProperties = new SourceDataSourceProperties();
-		DatabaseConnectionEntity sourceDatabaseConnectionEntity = databaseConnectionDAO.getById(
-				assignmentConfigEntity.getSourceConnectionId()
-		);
-		File driverVersionFile = driverLoadService.getVersionDriverFile(
-				sourceDatabaseConnectionEntity.getType(),
-				sourceDatabaseConnectionEntity.getVersion());
-		sourceDataSourceProperties.setUrl(sourceDatabaseConnectionEntity.getUrl());
-		sourceDataSourceProperties.setDriverClassName(sourceDatabaseConnectionEntity.getDriver());
-		sourceDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
-		sourceDataSourceProperties.setUsername(sourceDatabaseConnectionEntity.getUsername());
-		sourceDataSourceProperties.setPassword(sourceDatabaseConnectionEntity.getPassword());
+  private SourceDataSourceProperties getSourceDataSourceProperties(
+      AssignmentConfigEntity assignmentConfigEntity) {
+    SourceDataSourceProperties sourceDataSourceProperties = new SourceDataSourceProperties();
+    DatabaseConnectionEntity sourceDatabaseConnectionEntity = databaseConnectionDAO.getById(
+        assignmentConfigEntity.getSourceConnectionId()
+    );
+    File driverVersionFile = driverLoadService.getVersionDriverFile(
+        sourceDatabaseConnectionEntity.getType(),
+        sourceDatabaseConnectionEntity.getVersion());
+    sourceDataSourceProperties.setUrl(sourceDatabaseConnectionEntity.getUrl());
+    sourceDataSourceProperties.setDriverClassName(sourceDatabaseConnectionEntity.getDriver());
+    sourceDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
+    sourceDataSourceProperties.setUsername(sourceDatabaseConnectionEntity.getUsername());
+    sourceDataSourceProperties.setPassword(sourceDatabaseConnectionEntity.getPassword());
 
-		String sourceSchema = assignmentConfigEntity.getSourceSchema();
-		if (assignmentConfigEntity.getExcluded()) {
-			if (CollectionUtils.isEmpty(assignmentConfigEntity.getSourceTables())) {
-				sourceDataSourceProperties.setSourceExcludes("");
-			} else {
-				sourceDataSourceProperties.setSourceExcludes(
-						assignmentConfigEntity.getSourceTables()
-								.stream().collect(Collectors.joining(","))
-				);
-			}
-		} else {
-			if (CollectionUtils.isEmpty(assignmentConfigEntity.getSourceTables())) {
-				sourceDataSourceProperties.setSourceIncludes("");
-			} else {
-				sourceDataSourceProperties.setSourceIncludes(
-						assignmentConfigEntity.getSourceTables()
-								.stream().collect(Collectors.joining(","))
-				);
-			}
-		}
-		sourceDataSourceProperties.setSourceSchema(sourceSchema);
-		sourceDataSourceProperties.setRegexTableMapper(assignmentConfigEntity.getTableNameMap());
-		sourceDataSourceProperties.setRegexColumnMapper(assignmentConfigEntity.getColumnNameMap());
-		sourceDataSourceProperties.setFetchSize(assignmentConfigEntity.getBatchSize());
-		sourceDataSourceProperties.setTableType(assignmentConfigEntity.getTableType().name());
-		return sourceDataSourceProperties;
-	}
+    String sourceSchema = assignmentConfigEntity.getSourceSchema();
+    if (assignmentConfigEntity.getExcluded()) {
+      if (CollectionUtils.isEmpty(assignmentConfigEntity.getSourceTables())) {
+        sourceDataSourceProperties.setSourceExcludes("");
+      } else {
+        sourceDataSourceProperties.setSourceExcludes(
+            assignmentConfigEntity.getSourceTables()
+                .stream().collect(Collectors.joining(","))
+        );
+      }
+    } else {
+      if (CollectionUtils.isEmpty(assignmentConfigEntity.getSourceTables())) {
+        sourceDataSourceProperties.setSourceIncludes("");
+      } else {
+        sourceDataSourceProperties.setSourceIncludes(
+            assignmentConfigEntity.getSourceTables()
+                .stream().collect(Collectors.joining(","))
+        );
+      }
+    }
+    sourceDataSourceProperties.setSourceSchema(sourceSchema);
+    sourceDataSourceProperties.setRegexTableMapper(assignmentConfigEntity.getTableNameMap());
+    sourceDataSourceProperties.setRegexColumnMapper(assignmentConfigEntity.getColumnNameMap());
+    sourceDataSourceProperties.setFetchSize(assignmentConfigEntity.getBatchSize());
+    sourceDataSourceProperties.setTableType(assignmentConfigEntity.getTableType().name());
+    return sourceDataSourceProperties;
+  }
 
-	private TargetDataSourceProperties getTargetDataSourceProperties(
-			AssignmentConfigEntity assignmentConfigEntity) {
-		TargetDataSourceProperties targetDataSourceProperties = new TargetDataSourceProperties();
-		DatabaseConnectionEntity targetDatabaseConnectionEntity = databaseConnectionDAO
-				.getById(assignmentConfigEntity.getTargetConnectionId());
-		File driverVersionFile = driverLoadService.getVersionDriverFile(
-				targetDatabaseConnectionEntity.getType(),
-				targetDatabaseConnectionEntity.getVersion());
-		targetDataSourceProperties.setUrl(targetDatabaseConnectionEntity.getUrl());
-		targetDataSourceProperties.setDriverClassName(targetDatabaseConnectionEntity.getDriver());
-		targetDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
-		targetDataSourceProperties.setUsername(targetDatabaseConnectionEntity.getUsername());
-		targetDataSourceProperties.setPassword(targetDatabaseConnectionEntity.getPassword());
-		targetDataSourceProperties.setTargetSchema(assignmentConfigEntity.getTargetSchema());
-		if (assignmentConfigEntity.getTargetDropTable()) {
-			targetDataSourceProperties.setTargetDrop(Boolean.TRUE);
-			targetDataSourceProperties.setChangeDataSync(Boolean.FALSE);
-		} else {
-			targetDataSourceProperties.setTargetDrop(Boolean.FALSE);
-			targetDataSourceProperties.setChangeDataSync(Boolean.TRUE);
-		}
-		if (assignmentConfigEntity.getTargetOnlyCreate()) {
-			targetDataSourceProperties.setOnlyCreate(Boolean.TRUE);
-		}
-		if (assignmentConfigEntity.getTargetAutoIncrement()) {
-			targetDataSourceProperties.setCreateTableAutoIncrement(Boolean.TRUE);
-		}
-		targetDataSourceProperties.setTableNameCase(assignmentConfigEntity.getTableNameCase());
-		targetDataSourceProperties.setColumnNameCase(assignmentConfigEntity.getColumnNameCase());
-		targetDataSourceProperties.setTargetSyncOption(assignmentConfigEntity.getTargetSyncOption());
-		targetDataSourceProperties.setBeforeSqlScripts(assignmentConfigEntity.getBeforeSqlScripts());
-		targetDataSourceProperties.setAfterSqlScripts(assignmentConfigEntity.getAfterSqlScripts());
+  private TargetDataSourceProperties getTargetDataSourceProperties(
+      AssignmentConfigEntity assignmentConfigEntity) {
+    TargetDataSourceProperties targetDataSourceProperties = new TargetDataSourceProperties();
+    DatabaseConnectionEntity targetDatabaseConnectionEntity = databaseConnectionDAO
+        .getById(assignmentConfigEntity.getTargetConnectionId());
+    File driverVersionFile = driverLoadService.getVersionDriverFile(
+        targetDatabaseConnectionEntity.getType(),
+        targetDatabaseConnectionEntity.getVersion());
+    targetDataSourceProperties.setUrl(targetDatabaseConnectionEntity.getUrl());
+    targetDataSourceProperties.setDriverClassName(targetDatabaseConnectionEntity.getDriver());
+    targetDataSourceProperties.setDriverPath(driverVersionFile.getAbsolutePath());
+    targetDataSourceProperties.setUsername(targetDatabaseConnectionEntity.getUsername());
+    targetDataSourceProperties.setPassword(targetDatabaseConnectionEntity.getPassword());
+    targetDataSourceProperties.setTargetSchema(assignmentConfigEntity.getTargetSchema());
+    if (assignmentConfigEntity.getTargetDropTable()) {
+      targetDataSourceProperties.setTargetDrop(Boolean.TRUE);
+      targetDataSourceProperties.setChangeDataSync(Boolean.FALSE);
+    } else {
+      targetDataSourceProperties.setTargetDrop(Boolean.FALSE);
+      targetDataSourceProperties.setChangeDataSync(Boolean.TRUE);
+    }
+    if (assignmentConfigEntity.getTargetOnlyCreate()) {
+      targetDataSourceProperties.setOnlyCreate(Boolean.TRUE);
+    }
+    if (assignmentConfigEntity.getTargetAutoIncrement()) {
+      targetDataSourceProperties.setCreateTableAutoIncrement(Boolean.TRUE);
+    }
+    targetDataSourceProperties.setTableNameCase(assignmentConfigEntity.getTableNameCase());
+    targetDataSourceProperties.setColumnNameCase(assignmentConfigEntity.getColumnNameCase());
+    targetDataSourceProperties.setTargetSyncOption(assignmentConfigEntity.getTargetSyncOption());
+    targetDataSourceProperties.setBeforeSqlScripts(assignmentConfigEntity.getBeforeSqlScripts());
+    targetDataSourceProperties.setAfterSqlScripts(assignmentConfigEntity.getAfterSqlScripts());
 
-		return targetDataSourceProperties;
-	}
+    return targetDataSourceProperties;
+  }
 
-	private GlobalParamConfigProperties getGlobalParamConfigProperties(
-			AssignmentConfigEntity assignmentConfigEntity) {
-		GlobalParamConfigProperties configProperties = new GlobalParamConfigProperties();
-		configProperties.setChannelQueueSize(assignmentConfigEntity.getChannelSize());
-		return configProperties;
-	}
+  private GlobalParamConfigProperties getGlobalParamConfigProperties(
+      AssignmentConfigEntity assignmentConfigEntity) {
+    GlobalParamConfigProperties configProperties = new GlobalParamConfigProperties();
+    configProperties.setChannelQueueSize(assignmentConfigEntity.getChannelSize());
+    return configProperties;
+  }
 
-	public void exportAssignments(List<Long> ids, HttpServletResponse response) {
-		checkAssignmentAllExist(ids);
-		List<AssignmentsDataResponse> assignmentsDataResponses = new ArrayList<>();
-		for (Long id : ids) {
-			AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
-			AssignmentsDataResponse assignmentsDataResponse = ConverterFactory.getConverter(AssignmentsConverter.class)
-					.convert(assignmentTaskEntity);
+  public void exportAssignments(List<Long> ids, HttpServletResponse response) {
+    checkAssignmentAllExist(ids);
+    List<AssignmentsDataResponse> assignmentsDataResponses = new ArrayList<>();
+    for (Long id : ids) {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      AssignmentsDataResponse assignmentsDataResponse = ConverterFactory.getConverter(AssignmentsConverter.class)
+          .convert(assignmentTaskEntity);
 
-			AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(id);
+      AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(id);
 
-			Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
-			DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
-			String sourceSchema = assignmentConfigEntity.getSourceSchema();
-			assignmentsDataResponse.setSourceSchema(sourceSchema);
-			String sourceType = databaseConnectionEntity.getType().getName();
-			assignmentsDataResponse.setSourceType(sourceType);
+      Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+      DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
+      String sourceSchema = assignmentConfigEntity.getSourceSchema();
+      assignmentsDataResponse.setSourceSchema(sourceSchema);
+      String sourceType = databaseConnectionEntity.getType().getName();
+      assignmentsDataResponse.setSourceType(sourceType);
 
-			Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-			DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
-			String targetSchema = assignmentConfigEntity.getTargetSchema();
-			assignmentsDataResponse.setTargetSchema(targetSchema);
-			String targetType = databaseConnectionEntity1.getType().getName();
-			assignmentsDataResponse.setTargetType(targetType);
+      Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+      DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
+      String targetSchema = assignmentConfigEntity.getTargetSchema();
+      assignmentsDataResponse.setTargetSchema(targetSchema);
+      String targetType = databaseConnectionEntity1.getType().getName();
+      assignmentsDataResponse.setTargetType(targetType);
 
-			AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
-					new LambdaQueryWrapper<AssignmentJobEntity>()
-							.eq(AssignmentJobEntity::getAssignmentId, assignmentsDataResponse.getId()).orderByDesc(AssignmentJobEntity::getCreateTime)
-							.last(" limit 1 "));
-			Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
-					JobStatusEnum.INIT.getValue() :
-					assignmentJobEntity.getStatus();
-			assignmentsDataResponse.setRunStatus(JobStatusEnum.of(status).getName());
-			assignmentsDataResponses.add(assignmentsDataResponse);
-		}
-		EasyexcelUtils.write(response,AssignmentsDataResponse.class,assignmentsDataResponses,"任务管理","任务管理列表");
-	}
+      AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
+          new LambdaQueryWrapper<AssignmentJobEntity>()
+              .eq(AssignmentJobEntity::getAssignmentId, assignmentsDataResponse.getId())
+              .orderByDesc(AssignmentJobEntity::getCreateTime)
+              .last(" limit 1 "));
+      Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
+          JobStatusEnum.INIT.getValue() :
+          assignmentJobEntity.getStatus();
+      assignmentsDataResponse.setRunStatus(JobStatusEnum.of(status).getName());
+      assignmentsDataResponses.add(assignmentsDataResponse);
+    }
+    EasyexcelUtils.write(response, AssignmentsDataResponse.class, assignmentsDataResponses, "任务管理", "任务管理列表");
+  }
 }
