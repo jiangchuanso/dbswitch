@@ -94,7 +94,7 @@ public class ConnectionService {
       detail.setDriver(type.getDriver());
       detail.setSample(type.getSample());
       detail.setName(type.getName());
-      detail.setUrl(type.getUrl()[0]);
+      detail.setUrl(JdbcUrlUtils.getTemplateUrl(type.getUrl()[0]));
       lists.add(detail);
     }
 

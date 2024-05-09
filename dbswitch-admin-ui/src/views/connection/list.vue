@@ -55,7 +55,7 @@
                          label="创建时间"
                          min-width="18%"></el-table-column>
         <el-table-column prop="username"
-                         label="创建账号"
+                         label="用户名"
                          show-overflow-tooltip
                          min-width="10%"></el-table-column>
         <el-table-column label="操作"

@@ -53,7 +53,7 @@
                 </el-radio-group>
               </el-form-item>
 
-              <el-form-item prop="address" label="连接地址">
+              <el-form-item v-if="isShowUrlAndPort()" prop="address" label="连接地址">
                 <el-input v-model="createform.address" auto-complete="off" @blur="changeUrl()" style="width:20%"
                           placeholder="请输入数据源连接地址"></el-input>
                 /
@@ -61,7 +61,7 @@
                           placeholder="Port"></el-input>
               </el-form-item>
 
-              <el-form-item prop="databaseName" label="数据库名" style="width:24%">
+              <el-form-item v-if="isShowDatabaseName()" prop="databaseName" label="数据库名" style="width:24%">
                 <el-input v-model="createform.databaseName" auto-complete="off" @blur="changeUrl()"
                           placeholder="请输入数据库名"></el-input>
               </el-form-item>
@@ -145,7 +145,7 @@ export default {
         password: "",
         sample: "",
         url: "",
-        oldUrl: "",
+        templateUrl: "",
       },
       rules: {
         name: [
@@ -237,7 +237,57 @@ export default {
       });
     },
     changeUrl: function () {
-      console.log('')
+      var params = this.createform.url.split("?");
+      var turl = this.createform.templateUrl
+      var flag = false
+      if (Object.keys(this.createform.address).length > 0){
+        // address
+        var address = this.createform.address
+        turl = turl.replaceAll("{host}",address)
+        flag = true
+      }
+      if (Object.keys(this.createform.port).length > 0){
+        // port
+        var port = this.createform.port
+        turl = turl.replaceAll("{port}",port)
+        flag = true
+      }
+      if (Object.keys(this.createform.databaseName).length > 0){
+        // databaseName or filePath
+        var databaseName = this.createform.databaseName
+        turl = turl.replaceAll("{database}",databaseName)
+        turl = turl.replaceAll("{file}",databaseName)
+        flag = true
+      }
+      if (flag){
+        if (Object.keys(params).length > 1){
+          this.createform.url = turl + "?" + params[1]
+        }else{
+          this.createform.url = turl
+        }
+      } else{
+        if (Object.keys(params).length > 1){
+          this.createform.url = this.selectedDataSource.sample.split("?")[0] + "?" + params[1]
+        }else{
+          this.createform.url = this.selectedDataSource.sample
+        }
+      }
+    },
+    isShowDatabaseName: function () {
+      var type = this.selectedDataSource.type
+      var flag = true;
+      if (type === "ELASTICSEARCH"){
+        flag = false
+      }
+      return flag;
+    },
+    isShowUrlAndPort: function () {
+      var type = this.selectedDataSource.type
+      var flag = true;
+      if (type === "SQLITE3"){
+        flag = false
+      }
+      return flag;
     },
     startTest: function () {
       let driverClass = "";
@@ -331,6 +381,7 @@ export default {
   created() {
     this.selectedDataSource = this.$route.query;
     this.createform.url = this.selectedDataSource.sample;
+    this.createform.templateUrl = this.selectedDataSource.url.replace("[\\?{params}]","");
     this.selectChangedDriverVersion(this.selectedDataSource.type);
   }
 }

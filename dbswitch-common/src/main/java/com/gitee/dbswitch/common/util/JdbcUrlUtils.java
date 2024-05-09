@@ -84,6 +84,11 @@ public final class JdbcUrlUtils {
     return true;
   }
 
+  public static String getTemplateUrl(String url){
+    return url.replaceAll("\\[(\\?|;|:)\\{params}\\]|\\[|\\]", "")
+            .replace("\\?{params}","");
+  }
+
   /**
    * 测试代码
    *
