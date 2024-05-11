@@ -1,56 +1,57 @@
 <template>
-  <div>
-    <el-container>
-      <el-aside width="134px"></el-aside>
-
-      <el-container>
-        <el-header>
-          <h3 style="font-family: 楷体" class=".h-title">请选择数据源类型</h3>
-        </el-header>
-        <el-main>
-
-          <el-collapse v-model="activeNames">
-            <el-collapse-item name="1">
-              <template slot="title">
-                <span class="sub-title">数据库</span>
-              </template>
-              <div>
-                <el-row>
-                  <el-col :span="4" v-for="(o, index) of databaseType" :key="index" :offset="1">
-                    <div style="margin-top:20px;cursor: pointer">
-                      <el-card :body-style="{ padding: '0px'}" shadow="hover"
-                               @click.native="selectDbDriver(o)"
-                               :class="selectedIndex === index ? 'active':''">
-                        <div style="display: inline-block;float: left">
-                          <img title="" :src="require('@/assets/icons/' + o.name +'.png')" class="image">
-                        </div>
-                        <div style="display: inline-block;float: left;padding: 10px 0px 0px 10px">
-                          <span>{{ o.name }}</span><br>
-                          <span class="tag-mdi">MDI</span>
-                        </div>
-                      </el-card>
+  <el-card>
+    <el-header>
+      <h3 class=".h-title">请选择数据源类型</h3>
+    </el-header>
+    <el-main>
+      <el-collapse v-model="activeNames">
+        <el-collapse-item name="1">
+          <template slot="title">
+            <span class="sub-title">数据库</span>
+          </template>
+          <div>
+            <el-row>
+              <el-col :span="4"
+                      v-for="(o, index) of databaseType"
+                      :key="index"
+                      :offset="1">
+                <div style="margin-top:20px;cursor: pointer">
+                  <el-card class="card-item"
+                           :body-style="{ padding: '0px'}"
+                           shadow="hover"
+                           @click.native="selectDbDriver(o)"
+                           :class="selectedIndex === index ? 'active':''">
+                    <div style="display: inline-block;float: left">
+                      <img title=""
+                           :src="require('@/assets/icons/' + o.name +'.png')"
+                           class="image">
                     </div>
-                  </el-col>
-                </el-row>
-
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-        </el-main>
-        <el-footer>
-          <el-row>
-            <el-button type="primary" class="next" @click="next">下一步</el-button>
-            <el-button class="cancel" @click="cancel">取消</el-button>
-          </el-row>
-        </el-footer>
-      </el-container>
-    </el-container>
-  </div>
+                    <div style="display: inline-block;float: left;padding: 10px 0px 0px 10px">
+                      <span>{{ o.name }}</span><br>
+                    </div>
+                  </el-card>
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+    </el-main>
+    <el-footer>
+      <el-row>
+        <el-button type="primary"
+                   class="next"
+                   @click="next">下一步</el-button>
+        <el-button class="cancel"
+                   @click="cancel">取消</el-button>
+      </el-row>
+    </el-footer>
+  </el-card>
 </template>
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       activeNames: ['1'],
       currentDate: new Date(),
@@ -67,29 +68,29 @@ export default {
         method: "GET",
         url: "/dbswitch/admin/api/v1/connection/types"
       }).then(
-          res => {
-            if (0 === res.data.code) {
-              this.databaseType = res.data.data;
-            } else {
-              alert("加载任务列表失败:" + res.data.message);
-            }
-          },
-          function () {
-            console.log("failed");
+        res => {
+          if (0 === res.data.code) {
+            this.databaseType = res.data.data;
+          } else {
+            alert("加载任务列表失败:" + res.data.message);
           }
+        },
+        function () {
+          console.log("failed");
+        }
       );
     },
     selectChangedDriverVersion: function (value) {
       this.connectionDriver = [];
       this.$http.get(
-          "/dbswitch/admin/api/v1/connection/" + value + "/drivers"
+        "/dbswitch/admin/api/v1/connection/" + value + "/drivers"
       ).then(res => {
         if (0 === res.data.code) {
           this.connectionDriver = res.data.data;
           let varDatabaseType = this.databaseType.find(
-              (item) => {
-                return item.type === value;
-              });
+            (item) => {
+              return item.type === value;
+            });
           if (varDatabaseType) {
             this.createform.sample = varDatabaseType.sample;
           }
@@ -109,7 +110,7 @@ export default {
       } else {
         this.$router.push({
           path: "/connection/list/addDataSource2", query:
-          this.selectedDataSource
+            this.selectedDataSource
         });
       }
     },
@@ -117,14 +118,26 @@ export default {
       this.$router.push("/connection/list");
     },
   },
-  created() {
+  created () {
     this.loadDatabaseTypes();
   }
 }
 </script>
 
 <style scoped>
-.el-header, .el-main, .el-footer {
+.el-card {
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.card-item {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.el-header,
+.el-main,
+.el-footer {
   background-color: white;
 }
 
@@ -136,7 +149,6 @@ export default {
 .sub-title {
   flex: 1 0 90%;
   order: 1;
-  font-family: 楷体;
   font-weight: bolder;
   font-size: 18px;
 }
@@ -174,7 +186,6 @@ export default {
 }
 
 .image {
-  //width: 100%;
   display: inline-block;
   width: 60px;
   height: 60px;
@@ -188,12 +199,12 @@ export default {
 }
 
 .clearfix:after {
-  clear: both
+  clear: both;
 }
 
 .active {
   background-color: #ffffff !important;
-  border: 1px solid #409EFF;
+  border: 1px solid #409eff;
 }
 
 .tag-mdi {
@@ -218,8 +229,7 @@ export default {
   padding: 6px 14px;
   border: none;
   color: white;
-  background-color: #409EFF;
+  background-color: #409eff;
   cursor: pointer;
 }
-
 </style>

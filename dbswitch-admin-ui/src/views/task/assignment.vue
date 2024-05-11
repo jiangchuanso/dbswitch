@@ -2,33 +2,47 @@
   <div>
     <el-card>
       <el-row>
-        <el-button size="mini" icon="el-icon-switch-button" :disabled=isSelected plain @click="batchStart()">启动
+        <el-button size="mini"
+                   icon="el-icon-switch-button"
+                   :disabled=isSelected
+                   plain
+                   @click="batchStart()">启动
         </el-button>
-        <el-button size="mini" icon="el-icon-video-pause" :disabled=isSelected plain @click="batchStop()">停止</el-button>
+        <el-button size="mini"
+                   icon="el-icon-video-pause"
+                   :disabled=isSelected
+                   plain
+                   @click="batchStop()">停用</el-button>
         <span style="color:#e9e9f3;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-        <el-button size="mini" plain @click="batchImport()">导入任务</el-button>
-        <el-button size="mini" :disabled=isSelected plain @click="batchExport()">导出任务</el-button>
-        <!--        <div class="right-add-button-group">-->
-        <el-button class="right-add-button-group" type="primary"
+        <el-button size="mini"
+                   plain
+                   @click="batchImport()">导入</el-button>
+        <el-button size="mini"
+                   :disabled=isSelected
+                   plain
+                   @click="batchExport()">导出</el-button>
+        <el-button class="right-add-button-group"
+                   type="primary"
                    size="mini"
                    icon="el-icon-document-add"
-                   @click="handleCreate">创建任务
+                   @click="handleCreate">创建
         </el-button>
-        <!--        </div>-->
       </el-row>
       <div class="assignment-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input size="mini" placeholder="请输入任务名称关键字搜索"
+            <el-input size="mini"
+                      placeholder="请输入任务名称关键字搜索"
                       v-model="keyword"
                       :clearable=true
                       @change="searchByKeyword"
                       style="width:100%">
-              <el-button @click="searchByKeyword" slot="append" icon="el-icon-search"></el-button>
+              <el-button @click="searchByKeyword"
+                         slot="append"
+                         icon="el-icon-search"></el-button>
             </el-input>
           </div>
         </div>
-
       </div>
 
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
@@ -40,56 +54,63 @@
                          label="编号"
                          type="selection"
                          min-width="6%"></el-table-column>
-        <el-table-column
-                         label="任务名称"
-                         min-width="10%">
+        <el-table-column label="任务名称"
+                         :show-overflow-tooltip="true"
+                         min-width="15%">
           <template slot-scope="scope">
-            <span @click="handleDetail(scope.$index, scope.row)" class="task-name">{{scope.row.name}}</span>
+            <span @click="handleDetail(scope.$index, scope.row)"
+                  class="task-name">{{scope.row.name}}</span>
           </template>
         </el-table-column>
         <el-table-column prop="scheduleMode"
-                         label="集成模式"
+                         label="模式"
                          sortable
                          :formatter="stringFormatSchedule"
                          min-width="8%"></el-table-column>
-        <el-table-column
-            label="源端数据源"
-            min-width="10%">
+        <el-table-column label="源端"
+                         min-width="10%">
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p>源端数据源：{{ scope.row.sourceSchema }}</p>
+            <el-popover trigger="hover"
+                        placement="top">
               <p>源端数据源类型：{{ scope.row.sourceType }}</p>
-              <div slot="reference" class="name-wrapper">
+              <p>源端模式名：{{ scope.row.sourceSchema }}</p>
+              <div slot="reference"
+                   class="name-wrapper">
                 <el-tag size="medium">{{ scope.row.sourceSchema }}</el-tag>
               </div>
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column
-            label="目标端数据源"
-            min-width="10%">
+        <el-table-column label="目标端"
+                         min-width="10%">
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p>目标端数据源：{{ scope.row.targetSchema }}</p>
+            <el-popover trigger="hover"
+                        placement="top">
               <p>目标端数据源类型：{{ scope.row.targetType }}</p>
-              <div slot="reference" class="name-wrapper">
+              <p>目标端模式名：{{ scope.row.targetSchema }}</p>
+              <div slot="reference"
+                   class="name-wrapper">
                 <el-tag size="medium">{{ scope.row.targetSchema }}</el-tag>
               </div>
             </el-popover>
           </template>
         </el-table-column>
 
-        <el-table-column
-            label="运行状态"
-            show-overflow-tooltip
-            sortable
-            min-width="10%">
+        <el-table-column label="运行状态"
+                         show-overflow-tooltip
+                         sortable
+                         min-width="10%">
           <template slot-scope="scope">
-            <el-icon class="el-icon-success color-success" v-if="scope.row.runStatus == '执行成功'"></el-icon>
-            <el-icon class="el-icon-error color-error" v-if="scope.row.runStatus == '执行异常'"></el-icon>
-            <el-icon class="el-icon-remove color-cancel" v-if="scope.row.runStatus == '任务取消'"></el-icon>
-            <el-icon class="el-icon-video-play color-running" v-if="scope.row.runStatus == '执行中'"></el-icon>
-            <el-icon class="el-icon-loading color-await" v-if="scope.row.runStatus == '待执行'"></el-icon>
+            <el-icon class="el-icon-success color-success"
+                     v-if="scope.row.runStatus == '执行成功'"></el-icon>
+            <el-icon class="el-icon-error color-error"
+                     v-if="scope.row.runStatus == '执行异常'"></el-icon>
+            <el-icon class="el-icon-remove color-cancel"
+                     v-if="scope.row.runStatus == '任务取消'"></el-icon>
+            <el-icon class="el-icon-video-play color-running"
+                     v-if="scope.row.runStatus == '执行中'"></el-icon>
+            <el-icon class="el-icon-loading color-await"
+                     v-if="scope.row.runStatus == '待执行'"></el-icon>
             <span>{{ scope.row.runStatus }}</span>
           </template>
         </el-table-column>
@@ -99,20 +120,24 @@
                          sortable
                          :formatter="boolFormatPublish"
                          :show-overflow-tooltip="true"
-                         min-width="8%"></el-table-column>
-        <el-table-column prop="createTime"
-                         label="开始调度时间"
-                         min-width="12%"></el-table-column>
+                         min-width="10%"></el-table-column>
+        <el-table-column prop="scheduleTime"
+                         label="调度时间"
+                         min-width="15%"></el-table-column>
         <el-table-column label="操作"
-                         min-width="40%">
+                         min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
-              <el-button size="small"
-                         type="primary"
-                         icon="el-icon-timer"
-                         @click="schedulingLog(scope.$index, scope.row)"
-                         round>调度日志
-              </el-button>
+              <el-tooltip content="跳转到调度监控"
+                          placement="top">
+                <el-button size="small"
+                           type="primary"
+                           icon="el-icon-timer"
+                           v-if="scope.row.isPublished===true"
+                           @click="schedulingLog(scope.$index, scope.row)"
+                           round>日志
+                </el-button>
+              </el-tooltip>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-timer"
@@ -125,23 +150,29 @@
                          icon="el-icon-delete-location"
                          v-if="scope.row.isPublished===true"
                          @click="handleRetireTask(scope.$index, scope.row)"
-                         round>停止
+                         round>停用
               </el-button>
-              <el-button size="small"
-                         type="danger"
-                         icon="el-icon-video-play"
-                         @click="handleRunTask(scope.$index, scope.row)"
-                         round>手工调度
-              </el-button>
+              <el-tooltip content="人工触发调度执行"
+                          placement="top">
+                <el-button size="small"
+                           type="danger"
+                           icon="el-icon-video-play"
+                           v-if="scope.row.isPublished===true"
+                           @click="handleRunTask(scope.$index, scope.row)"
+                           round>执行
+                </el-button>
+              </el-tooltip>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
+                         v-if="scope.row.isPublished===false"
                          @click="handleUpdate(scope.$index, scope.row)"
                          round>修改
               </el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-document"
+                         v-if="scope.row.isPublished===true"
                          @click="handleDetail(scope.$index, scope.row)"
                          round>详情
               </el-button>
@@ -173,7 +204,7 @@
 <script>
 export default {
 
-  data() {
+  data () {
     return {
       loading: true,
       currentPage: 1,
@@ -182,7 +213,7 @@ export default {
       keyword: null,
       tableData: [],
       isSelected: true,
-      idsSelected:[]
+      idsSelected: []
     };
   },
   methods: {
@@ -199,48 +230,48 @@ export default {
           size: this.pageSize
         })
       }).then(res => {
-            if (0 === res.data.code) {
-              this.currentPage = res.data.pagination.page;
-              this.pageSize = res.data.pagination.size;
-              this.totalCount = res.data.pagination.total;
-              this.tableData = res.data.data;
-            } else {
-              alert("加载任务列表失败:" + res.data.message);
-            }
-          },
-          function () {
-            console.log("load assignments list failed");
-          }
+        if (0 === res.data.code) {
+          this.currentPage = res.data.pagination.page;
+          this.pageSize = res.data.pagination.size;
+          this.totalCount = res.data.pagination.total;
+          this.tableData = res.data.data;
+        } else {
+          alert("加载任务列表失败:" + res.data.message);
+        }
+      },
+        function () {
+          console.log("load assignments list failed");
+        }
       );
     },
     searchByKeyword: function () {
       this.currentPage = 1;
       this.loadData();
     },
-    boolFormatPublish(row, column) {
+    boolFormatPublish (row, column) {
       if (row.isPublished === true) {
-        return "启动";
+        return "已启动";
       } else {
-        return "停止";
+        return "已停止";
       }
     },
-    stringFormatSchedule(row, column) {
+    stringFormatSchedule (row, column) {
       if (row.scheduleMode == "MANUAL") {
         return "手动";
       } else {
         return "定时";
       }
     },
-    handleSelectionChange(val) {
+    handleSelectionChange (val) {
       if (val.length > 0) {
         this.isSelected = false;
         this.idsSelected.push(val.map(item => item.id));
-      }else {
+      } else {
         this.isSelected = true;
         this.idsSelected = []
       }
     },
-    batchStart(){
+    batchStart () {
       console.log(this.idsSelected)
       this.$http({
         method: "POST",
@@ -262,7 +293,7 @@ export default {
         }
       });
     },
-    batchStop(){
+    batchStop () {
       this.$http({
         method: "POST",
         headers: {
@@ -283,7 +314,7 @@ export default {
         }
       });
     },
-    batchExport(){
+    batchExport () {
       this.$http({
         method: "POST",
         headers: {
@@ -306,15 +337,10 @@ export default {
         }
       });
     },
-    batchImport(){
+    batchImport () {
       this.$message({
         message: '功能暂未开放，敬请期待！',
         center: true
-      });
-    },
-    schedulingLog(){
-      this.$router.push({
-        path: "/task/schedule"
       });
     },
     downloadFile: function (resp) {
@@ -359,23 +385,23 @@ export default {
       this.$router.push('/task/create')
     },
     handleDetail: function (index, row) {
-      this.$router.push({path: '/task/detail', query: {id: row.id}})
+      this.$router.push({ path: '/task/detail', query: { id: row.id } })
     },
     handleUpdate: function (index, row) {
-      this.$router.push({path: '/task/update', query: {id: row.id}})
+      this.$router.push({ path: '/task/update', query: { id: row.id } })
     },
     handleDelete: function (index, row) {
       this.$confirm(
-          "是否确定删除任务【"+row.name+"】?",
-          "提示",
-          {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning"
-          }
+        "是否确定删除任务【" + row.name + "】?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
       ).then(() => {
         this.$http.delete(
-            "/dbswitch/admin/api/v1/assignment/delete/" + row.id
+          "/dbswitch/admin/api/v1/assignment/delete/" + row.id
         ).then(res => {
           if (0 === res.data.code) {
             this.loadData();
@@ -385,6 +411,11 @@ export default {
             }
           }
         });
+      });
+    },
+    schedulingLog: function (index, row) {
+      this.$router.push({
+        path: "/task/schedule?id=" + row.id
       });
     },
     handlePublish: function (index, row) {
@@ -463,7 +494,7 @@ export default {
       this.loadData();
     }
   },
-  created() {
+  created () {
     this.loadData();
   },
 };

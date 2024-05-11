@@ -13,8 +13,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.mapper.DatabaseConnectionMapper;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -30,6 +32,13 @@ public class DatabaseConnectionDAO {
 
   public DatabaseConnectionEntity getById(Long id) {
     return databaseConnectionMapper.selectById(id);
+  }
+
+  public List<DatabaseConnectionEntity> getByIds(List<Long> ids) {
+    if (CollectionUtils.isEmpty(ids)) {
+      return Collections.emptyList();
+    }
+    return databaseConnectionMapper.selectBatchIds(ids);
   }
 
   public DatabaseConnectionEntity getByName(String name) {

@@ -9,23 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
@@ -59,6 +42,18 @@ import com.gitee.dbswitch.data.entity.GlobalParamConfigProperties;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
 import com.gitee.dbswitch.data.entity.TargetDataSourceProperties;
 import com.gitee.dbswitch.data.util.JsonUtils;
+import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AssignmentService {
@@ -146,39 +141,9 @@ public class AssignmentService {
   }
 
   public PageResult<AssignmentInfoResponse> listAll(AssignmentSearchRequest request) {
-    Supplier<List<AssignmentInfoResponse>> method = () -> {
-      List<AssignmentInfoResponse> assignmentInfoResponseList = ConverterFactory.getConverter(
-              AssignmentInfoConverter.class)
-          .convert(assignmentTaskDAO.listAll(request.getSearchText()));
-      assignmentInfoResponseList.forEach((e) -> {
-        AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(e.getId());
-
-        Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
-        DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
-        String sourceSchema = assignmentConfigEntity.getSourceSchema();
-        e.setSourceSchema(sourceSchema);
-        String sourceType = databaseConnectionEntity.getType().getName();
-        e.setSourceType(sourceType);
-
-        Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-        DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
-        String targetSchema = assignmentConfigEntity.getTargetSchema();
-        e.setTargetSchema(targetSchema);
-        String targetType = databaseConnectionEntity1.getType().getName();
-        e.setTargetType(targetType);
-
-        AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
-            new LambdaQueryWrapper<AssignmentJobEntity>()
-                .eq(AssignmentJobEntity::getAssignmentId, e.getId()).orderByDesc(AssignmentJobEntity::getCreateTime)
-                .last(" limit 1 "));
-        Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
-            JobStatusEnum.INIT.getValue() :
-            assignmentJobEntity.getStatus();
-        e.setRunStatus(JobStatusEnum.of(status).getName());
-
-      });
-      return assignmentInfoResponseList;
-    };
+    Supplier<List<AssignmentInfoResponse>> method = () ->
+        ConverterFactory.getConverter(AssignmentInfoConverter.class)
+            .convert(assignmentTaskDAO.listAll(request.getSearchText()));
     return PageUtils.getPage(method, request.getPage(), request.getSize());
   }
 
@@ -263,8 +228,18 @@ public class AssignmentService {
 
   private void checkAssignmentAllExist(List<Long> ids) {
     for (Long id : ids) {
-      if (Objects.isNull(assignmentTaskDAO.getById(id))) {
+      AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+      if (Objects.isNull(assignmentTaskEntity)) {
         throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
+      }
+      AssignmentConfigEntity assignmentConfigEntity = assignmentConfigDAO.getByAssignmentTaskId(id);
+      Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
+      Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
+      // 检查任务对应的源端和目标端连接是否还存在
+      List<Long> connectionIds = Lists.newArrayList(sourceConnectionId, targetConnectionId);
+      if (databaseConnectionDAO.getByIds(connectionIds).size() != connectionIds.size()) {
+        throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS,
+            "ConnectionID=" + connectionIds);
       }
     }
   }

@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.admin.model.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -63,4 +62,8 @@ public class AssignmentInfoResponse {
 
   @ApiModelProperty("运行状态")
   private String runStatus;
+
+  @ApiModelProperty("最近一次调度开始时间")
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+  private Timestamp scheduleTime;
 }

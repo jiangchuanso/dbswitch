@@ -32,13 +32,13 @@ npm -v
 
 ### 2. Windows下安装Nodejs
 
-可参考[博文教程](https://zhuanlan.zhihu.com/p/572795586)
+可参考[博文教程](https://blog.csdn.net/inrgihc/article/details/138013024)
 
 ## 二、构建
 
 ``` bash
 # install dependencies
-npm install
+npm install --force
 
 # serve with hot reload at localhost:8080
 npm run dev

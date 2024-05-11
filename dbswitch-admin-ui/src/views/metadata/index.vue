@@ -4,13 +4,23 @@
       <div class="flex-between">
         <div class="tree-container">
           <el-scrollbar style="height:100%">
-            <el-tree class="scroller"
+            <el-select placeholder="请选择数据源"
+                       v-model="dataSourceId"
+                       @change="loadTreeData">
+              <el-option v-for="(item,index) in connectionList"
+                         :key="index"
+                         :label="`[${item.id}]${item.name}`"
+                         :value="item.id"></el-option>
+            </el-select>
+            <el-tree ref="metadataTree"
+                     empty-text="请选择数据源后查看"
+                     :indent=6
+                     :data="treeData"
                      :props="props"
-                     :load="loadNode"
+                     :load="loadTreeNode"
                      :expand-on-click-node="true"
                      :highlight-current="true"
                      :render-content="renderContent"
-                     @check-change="handleCheckChange"
                      @node-click="handleNodeClick"
                      lazy>
             </el-tree>
@@ -163,6 +173,9 @@ export default {
         disabled: false,
         isLeaf: false
       },
+      dataSourceId: null,
+      connectionList: [],
+      treeData: [],
       currentNode: {
         tableName: '-',
         schemaName: '-'
@@ -182,6 +195,159 @@ export default {
     };
   },
   methods: {
+    loadConnections: function () {
+      this.connectionList = [];
+      this.$http({
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/dbswitch/admin/api/v1/connection/list/name",
+      }).then(
+        res => {
+          if (0 === res.data.code) {
+            this.connectionList = res.data.data;
+          } else {
+            if (res.data.message) {
+              alert("加载数据失败:" + res.data.message);
+              this.connectionList = [];
+            }
+          }
+        }
+      );
+    },
+    loadTreeData: function () {
+      if (this.dataSourceId && this.dataSourceId > 0) {
+        this.treeData = []
+        setTimeout(() => {
+          this.$http({
+            method: "GET",
+            url: "/dbswitch/admin/api/v1/connection/schemas/get/" + this.dataSourceId
+          }).then(
+            res => {
+              if (0 === res.data.code) {
+                for (let element of res.data.data) {
+                  let obj = new Object();
+                  obj['dataSourceId'] = this.dataSourceId;
+                  obj['label'] = element;
+                  obj['parent'] = this.dataSourceId;
+                  obj['value'] = element;
+                  obj['hasChild'] = true;
+                  obj['type'] = 'DATABASE';
+                  this.treeData.push(obj);
+                }
+              } else {
+                alert("加载失败，原因：" + res.data.message);
+              }
+            }
+          );
+        }, 500);
+      }
+    },
+    loadTreeNode: function (node, resolve) {
+      setTimeout(() => {
+        if (node.level === 1) {
+          let tableView = [
+            {
+              'dataSourceId': this.dataSourceId,
+              'label': '表',
+              'parent': this.dataSourceId,
+              'value': node.label,
+              'hasChild': true,
+              'type': 'TABLE',
+            },
+            {
+              'dataSourceId': this.dataSourceId,
+              'label': '视图',
+              'parent': this.dataSourceId,
+              'value': node.label,
+              'hasChild': true,
+              'type': 'VIEW',
+            }
+          ]
+          resolve(tableView);
+        } else if (node.level === 2) {
+          this.loadTablesList(resolve, this.dataSourceId, node.data.value, node.data.type)
+        } else {
+          resolve([]);
+        }
+      }, 500);
+    },
+    loadTablesList: function (resolve, dataSourceId, schema, type) {
+      var tableType = 'VIEW' === type ? 'views' : 'tables'
+      this.$http({
+        method: "GET",
+        url: "/dbswitch/admin/api/v1/connection/" + tableType + "/get/" + dataSourceId + "?schema=" + urlencode(schema)
+      }).then(
+        res => {
+          if (0 === res.data.code) {
+            let tableList = []
+            for (let element of res.data.data) {
+              let obj = new Object();
+              obj['dataSourceId'] = dataSourceId;
+              obj['label'] = element;
+              obj['parent'] = dataSourceId;
+              obj['value'] = schema;
+              obj['hasChild'] = false;
+              obj['type'] = type;
+              tableList.push(obj);
+            }
+            return resolve(tableList);
+          } else {
+            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
+          }
+        }
+      );
+    },
+    renderContent (h, { node, data, store }) {
+      // https://www.cnblogs.com/zhoushuang0426/p/11059989.html
+      if (node.level === 1) {
+        return (
+          <div class="custom-tree-node">
+            <i class="iconfont icon-shujuku1"></i>
+            <el-tooltip class="item" effect="light" placement="left">
+              <div slot="content">{node.label}</div>
+              <span>{data.label}</span>
+            </el-tooltip>
+          </div>
+        );
+      } else if (node.level === 2) {
+        var icon_pic = "iconfont icon-shitu_biaoge";
+        if (data.type === 'VIEW') {
+          icon_pic = "iconfont icon-viewList"
+        }
+        return (
+          <div class="custom-tree-node">
+            <i class={icon_pic}></i>
+            <span>{data.label}</span>
+          </div>
+        );
+      } else if (node.level === 3) {
+        var icon_pic = "iconfont icon-shitu_biaoge";
+        if (data.type === 'VIEW') {
+          icon_pic = "iconfont icon-viewList"
+        }
+        return (
+          <div class="custom-tree-node">
+            <i class={icon_pic}></i>
+            <el-tooltip class="item" effect="light" placement="left">
+              <div slot="content">{node.label}</div>
+              <span>{data.label}</span>
+            </el-tooltip>
+          </div>
+        );
+      } else {
+        return (
+          <div class="custom-tree-node">
+            <i class="el-icon-set-up"></i>
+            <el-tooltip class="item" effect="light" placement="left">
+              <div slot="content">{data.type}</div>
+              <span>{data.label}({data.type})</span>
+            </el-tooltip>
+          </div>
+        );
+      }
+    },
     formatIndexFields (row, column) {
       let list = row.indexFields;
       let fields = list.map(
@@ -196,40 +362,18 @@ export default {
         })
       return fields.join(";");
     },
-    handleCheckChange (data, checked, indeterminate) {
-      //console.log(data, checked, indeterminate);
-    },
     handleNodeClick (data) {
-      //console.log(data);
-      var id = data.id;
-      var schema = data.schemaName;
-      var table = data.tableName;
-      if (!data.hasChild && id && schema && table) {
-        this.activeName = 'first';
-        this.getTableMeta(id, schema, table);
-        this.getTableData(id, schema, table);
-      }
-    },
-    loadNode (node, resolve) {
-      if (node.level === 0) {
-        const rootNode = [{ label: '数据源导航树', value: 0, hasChild: true, children: 'child' }]
-        return resolve(rootNode);
-      }
-
-      setTimeout(() => {
-        if (node.level === 1) {
-          this.loadConnectionList(resolve);
-        } else if (node.level === 2) {
-          this.loadSchemasList(resolve, node.data.value)
-        } else if (node.level === 3) {
-          this.loadTablesList(resolve, node.data.parent, node.data.label)
-        } else if (node.level == 4) {
-          resolve([]);
-          //this.loadColumnList(resolve, node.data.id, node.data.parent, node.data.label)
-        } else {
-          resolve([]);
+      var type = data.type;
+      if (type === 'VIEW' || type === 'TABLE') {
+        var datasourceId = data.dataSourceId;
+        var schema = data.value;
+        var table = data.label;
+        if (!data.hasChild && datasourceId && schema && table) {
+          this.activeName = 'first';
+          this.getTableMeta(datasourceId, schema, table);
+          this.getTableData(datasourceId, schema, table);
         }
-      }, 500);
+      }
     },
     clearDataSet () {
       this.tableData = [];
@@ -278,80 +422,6 @@ export default {
         }
       );
     },
-    loadConnectionList (resolve) {
-      this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/connection/list/name"
-      }).then(
-        res => {
-          if (0 === res.data.code) {
-            //console.log("list1:" + JSON.stringify(res.data.data))
-            res.data.data.forEach(function (element) {
-              element['label'] = element.name;
-              element['parent'] = 0;
-              element['value'] = element.id;
-              element['hasChild'] = true;
-              element['children'] = 'child';
-            });
-            return resolve(res.data.data);
-          } else {
-            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
-            this.clearDataSet();
-          }
-        }
-      );
-    },
-    loadSchemasList (resolve, id) {
-      //console.log("id=" + id);
-      this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/metadata/schemas/" + id + "/1/0"
-      }).then(
-        res => {
-          if (0 === res.data.code) {
-            //console.log("list2:" + JSON.stringify(res.data.data))
-            res.data.data.forEach(function (element) {
-              element['label'] = element.schema;
-              element['parent'] = id;
-              element['value'] = element.connection;
-              element['hasChild'] = true;
-              element['children'] = 'child';
-            });
-            //this.tableData = res.data.data;
-            return resolve(res.data.data);
-          } else {
-            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
-            this.clearDataSet();
-          }
-        }
-      );
-    },
-    loadTablesList (resolve, id, schema) {
-      //console.log("id=" + id + ",schema=" + schema);
-      this.$http({
-        method: "GET",
-        url: "/dbswitch/admin/api/v1/metadata/tables/" + id + "/1/0?schema=" + urlencode(schema)
-      }).then(
-        res => {
-          if (0 === res.data.code) {
-            //console.log("list3:" + JSON.stringify(res.data.data))
-            res.data.data.forEach(function (element) {
-              element['label'] = element.tableName;
-              element['parent'] = schema;
-              element['id'] = id;
-              element['value'] = element.type;
-              element['hasChild'] = false;
-              element['children'] = 'child';
-            });
-            //this.tableData = res.data.data;
-            return resolve(res.data.data);
-          } else {
-            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
-            this.clearDataSet();
-          }
-        }
-      );
-    },
     loadColumnList (resolve, id, schema, table) {
       //console.log("id=" + id);
       this.$http({
@@ -377,48 +447,11 @@ export default {
         }
       );
     },
-    // https://www.cnblogs.com/zhoushuang0426/p/11059989.html
-    renderContent (h, { node, data, store }) {
-      if (node.level === 1) {
-        return (
-          <div class="custom-tree-node">
-            <i class="el-icon-takeaway-box"></i>
-            <span>{data.label}</span>
-          </div>
-        );
-      } else if (node.level === 2) {
-        return (
-          <div class="custom-tree-node">
-            <i class="el-icon-folder-opened"></i>
-            <span>{data.label}</span>
-          </div>
-        );
-      } else if (node.level === 3) {
-        return (
-          <div class="custom-tree-node">
-            <i class="iconfont icon-shujuku1"></i>
-            <span>{data.label}</span>
-          </div>
-        );
-      } else {
-        var icon_pic = "iconfont icon-shitu_biaoge";
-        if (data.value === 'VIEW') {
-          icon_pic = "iconfont icon-viewList"
-        }
-
-        return (
-          <div class="custom-tree-node">
-            <i class={icon_pic}></i>
-            <el-tooltip class="item" effect="light" placement="left">
-              <div slot="content">{node.label}</div>
-              <span>{data.label}</span>
-            </el-tooltip>
-          </div>
-        );
-      }
-
-    }
-  }
+  },
+  created () {
+    this.loadConnections();
+    this.loadTreeData();
+  },
 }
 </script>
 

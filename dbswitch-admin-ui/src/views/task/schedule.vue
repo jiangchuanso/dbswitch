@@ -331,6 +331,10 @@ export default {
   },
   created () {
     this.loadPageTaskAssignments();
+    if (this.$route.query.id) {
+      this.taskId = this.$route.query.id
+      this.loadJobsData();
+    }
   },
   beforeDestroy () {
     if (this.timer) {

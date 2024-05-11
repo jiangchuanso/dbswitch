@@ -104,7 +104,7 @@ public abstract class AbstractMetadataProvider
   public TableDescription queryTableMeta(Connection connection, String schemaName,
       String tableName) {
     try (ResultSet tables = connection.getMetaData()
-        .getTables(catalogName, schemaName, tableName, new String[]{"TABLE"})) {
+        .getTables(catalogName, schemaName, tableName, new String[]{"TABLE","VIEW"})) {
       if (tables.next()) {
         TableDescription td = new TableDescription();
         td.setSchemaName(schemaName);

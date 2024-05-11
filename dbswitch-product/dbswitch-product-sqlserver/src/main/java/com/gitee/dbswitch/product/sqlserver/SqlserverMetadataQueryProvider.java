@@ -10,12 +10,12 @@
 package com.gitee.dbswitch.product.sqlserver;
 
 import com.gitee.dbswitch.common.consts.Constants;
+import com.gitee.dbswitch.common.util.DDLFormatterUtils;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
 import com.gitee.dbswitch.schema.ColumnDescription;
 import com.gitee.dbswitch.schema.ColumnMetaData;
 import com.gitee.dbswitch.schema.TableDescription;
-import com.gitee.dbswitch.common.util.DDLFormatterUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,9 +86,16 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
 
     List<TableDescription> ret = new ArrayList<>();
     String sql = String.format(
-        "SELECT DISTINCT t.TABLE_SCHEMA as TABLE_SCHEMA, t.TABLE_NAME as TABLE_NAME, t.TABLE_TYPE as TABLE_TYPE, CONVERT(nvarchar(50),ISNULL(g.[value], '')) as COMMENTS \r\n"
-            + "FROM INFORMATION_SCHEMA.TABLES t LEFT JOIN sysobjects d on t.TABLE_NAME = d.name \r\n"
-            + "LEFT JOIN sys.extended_properties g on g.major_id=d.id and g.minor_id='0' where t.TABLE_SCHEMA='%s'",
+        "SELECT DISTINCT "
+            + "  t.TABLE_SCHEMA as TABLE_SCHEMA, "
+            + "  t.TABLE_NAME as TABLE_NAME, "
+            + "  t.TABLE_TYPE as TABLE_TYPE, "
+            + "  CONVERT(nvarchar(50),ISNULL(g.[value], '')) as COMMENTS "
+            + " FROM INFORMATION_SCHEMA.TABLES t "
+            + " LEFT JOIN sysobjects d on t.TABLE_NAME = d.name "
+            + " LEFT JOIN sys.extended_properties g on g.major_id=d.id and g.minor_id='0' "
+            + " LEFT JOIN sys.schemas s on s.name = t.TABLE_SCHEMA "
+            + " WHERE t.TABLE_SCHEMA='%s'",
         schemaName);
     try (PreparedStatement ps = connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();) {
@@ -108,6 +115,24 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
       }
 
       return ret;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public TableDescription queryTableMeta(Connection connection, String schemaName, String tableName) {
+    try (ResultSet tables = connection.getMetaData()
+        .getTables(connection.getCatalog(), schemaName, tableName, new String[]{"TABLE", "VIEW"})) {
+      if (tables.next()) {
+        TableDescription td = new TableDescription();
+        td.setSchemaName(schemaName);
+        td.setTableName(tableName);
+        td.setRemarks(tables.getString("REMARKS"));
+        td.setTableType(tables.getString("TABLE_TYPE").toUpperCase());
+        return td;
+      }
+      return null;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -256,6 +281,8 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
             }
           } else {
             if (precision > 0 && length > 0) {
+              length = (length > 38) ? 38 : length;
+              precision = (precision > length) ? Math.min(precision, length) : precision;
               retval += "DECIMAL(" + length + "," + precision + ")";
             } else {
               retval += "FLOAT(53)";

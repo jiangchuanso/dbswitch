@@ -45,8 +45,16 @@ public class AssignmentJobDAO {
   public List<AssignmentJobEntity> getByAssignmentId(Long assignmentId) {
     QueryWrapper<AssignmentJobEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(AssignmentJobEntity::getAssignmentId, assignmentId)
-        .orderByDesc(AssignmentJobEntity::getCreateTime);
+        .orderByDesc(AssignmentJobEntity::getId);
     return assignmentJobMapper.selectList(queryWrapper);
+  }
+
+  public AssignmentJobEntity getLatestJobEntity(Long assignmentId) {
+    QueryWrapper<AssignmentJobEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AssignmentJobEntity::getAssignmentId, assignmentId)
+        .orderByDesc(AssignmentJobEntity::getId)
+        .last(" limit 1 ");
+    return assignmentJobMapper.selectOne(queryWrapper);
   }
 
   public void updateSelective(AssignmentJobEntity assignmentJobEntity) {
