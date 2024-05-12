@@ -4,10 +4,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gitee.dbswitch</groupId>
   <artifactId>dbswitch-parent</artifactId>
-  <version>1.9.6</version>
+  <version>1.9.7</version>
   <packaging>pom</packaging>
   <name>dbswitch</name>
   <description>database switch project</description>
+  <url>https://gitee.com/inrgihc/dbswitch</url>
 
   <properties>
     <java.version>1.8</java.version>
@@ -23,7 +24,27 @@
     <developer>
       <name>tang</name>
       <email>inrgihc@126.com</email>
-      <url>https://gitee.com/inrgihc/dbswitch</url>
+      <url>https://gitee.com/inrgihc</url>
+    </developer>
+    <developer>
+      <name>lizemin</name>
+      <email>lizemin@chinasofti.com</email>
+      <url>https://gitee.com/benbenyezi</url>
+    </developer>
+    <developer>
+      <name>geekyouth</name>
+      <email>keliang@algolaser.cn</email>
+      <url>https://gitee.com/geekyouth</url>
+    </developer>
+    <developer>
+      <name>wewelove</name>
+      <email>wewelove88@gmail.com</email>
+      <url>https://gitee.com/wewelove</url>
+    </developer>
+    <developer>
+      <name>xiaomizhou2</name>
+      <email>937031323@qq.com</email>
+      <url>https://gitee.com/xiaomizhou2</url>
     </developer>
   </developers>
 
