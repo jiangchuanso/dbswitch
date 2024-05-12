@@ -6,13 +6,10 @@ body:
     attributes:
       label: dbswitch版本
       options:
+        - "1.9.7"
         - "1.9.6"
         - "1.9.5"
         - "1.9.4"
-        - "1.9.3"
-        - "1.9.2"
-        - "1.9.1"
-        - "1.9.0"
         - "其他版本已不维护，勿提issue"
     validations:
       required: true
