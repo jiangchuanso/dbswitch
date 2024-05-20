@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.common.util;
 
+import cn.hutool.log.StaticLog;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,6 +41,7 @@ public final class DatabaseAwareUtils {
     productNameMap.put("KingbaseES", ProductTypeEnum.KINGBASE);
     productNameMap.put("Apache Hive", ProductTypeEnum.HIVE);
     productNameMap.put("MySQL", ProductTypeEnum.MYSQL);
+//    productNameMap.put("StarRocks", ProductTypeEnum.STARROCKS);
     productNameMap.put("MariaDB", ProductTypeEnum.MARIADB);
     productNameMap.put("Oracle", ProductTypeEnum.ORACLE);
     productNameMap.put("PostgreSQL", ProductTypeEnum.POSTGRESQL);
@@ -90,7 +92,16 @@ public final class DatabaseAwareUtils {
         }
         return productType;
       }
-
+      boolean haveStarRocks = false;
+      try{
+         // 此查询语句是Starrocks查询be节点是否存活，可以用来判断是否是Starrocks数据源
+         haveStarRocks = connection.createStatement().execute("show backends");
+      }catch (SQLException sqlException){
+        StaticLog.info("执行show backends失败，代表不是MySQL数据源");
+      }
+      if (haveStarRocks) {
+        return ProductTypeEnum.STARROCKS;
+      }
       ProductTypeEnum type = productNameMap.get(productName);
       if (null != type) {
         return type;

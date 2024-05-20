@@ -82,6 +82,23 @@ public final class GenerateSqlUtils {
     sb.append(provider.getQuotedSchemaTableCombination(schemaName, tableName));
     sb.append("(");
 
+    // starrocks 当中，字段主键的情况下，必须将字段放在最前面，并且顺序一致。
+    if (type.isLikeStarRocks()) {
+      List<ColumnDescription> copyFieldNames = new ArrayList<>();
+      Integer fieldIndex = 0;
+      for (int i = 0; i < fieldNames.size(); i++) {
+        ColumnDescription cd = fieldNames.get(i);
+        if (primaryKeys.contains(cd.getFieldName())){
+          copyFieldNames.add(fieldIndex,cd);
+          fieldIndex = fieldIndex +1;
+        }else{
+          copyFieldNames.add(cd);
+        }
+      }
+      fieldNames = copyFieldNames;
+    }
+
+
     for (int i = 0; i < fieldNames.size(); i++) {
       if (i > 0) {
         sb.append(", ");
@@ -93,7 +110,7 @@ public final class GenerateSqlUtils {
       sb.append(provider.getFieldDefinition(v, pks, autoIncr, false, withRemarks));
     }
 
-    if (!pks.isEmpty() && !type.isLikeHive()) {
+    if (!pks.isEmpty() && !type.isLikeHive() && !type.isLikeStarRocks()) {
       String pk = provider.getPrimaryKeyAsString(pks);
       sb.append(", PRIMARY KEY (").append(pk).append(")");
     }
@@ -133,6 +150,10 @@ public final class GenerateSqlUtils {
         //sb.append(Constants.CR);
         //sb.append(String.format("COMMENT='%s' ", tableRemarks.replace("'", "\\'")));
       }
+    }else if (type.isLikeStarRocks()){
+      String pk = provider.getPrimaryKeyAsString(pks);
+      sb.append("PRIMARY KEY (").append(pk).append(")");
+      sb.append("\n DISTRIBUTED BY HASH(").append(pk).append(")");
     }
 
     return DDLFormatterUtils.format(sb.toString());
