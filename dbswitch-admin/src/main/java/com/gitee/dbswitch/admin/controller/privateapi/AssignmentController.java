@@ -25,7 +25,6 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,6 +83,14 @@ public class AssignmentController {
   public Result<AssignmentDetailResponse> detailAssignment(
       @PathVariable("id") Long id) {
     return assignmentService.detailAssignment(id);
+  }
+
+  @TokenCheck
+  @ApiOperation(value = "任务信息")
+  @GetMapping(value = "/info/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Result<AssignmentInfoResponse> infoAssignment(
+      @PathVariable("id") Long id) {
+    return assignmentService.infoAssignment(id);
   }
 
   @TokenCheck

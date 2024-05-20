@@ -3,25 +3,36 @@ package com.gitee.dbswitch.admin.service;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
+import com.gitee.dbswitch.admin.model.request.OnlineSqlDataRequest;
 import com.gitee.dbswitch.admin.model.response.MetadataColumnDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataSchemaDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataTableDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataTableInfoResponse;
+import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse;
+import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.ColumnItem;
+import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.SqlInput;
+import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.SqlResult;
 import com.gitee.dbswitch.admin.model.response.SchemaTableDataResponse;
+import com.gitee.dbswitch.admin.util.ExecuteSqlUtils;
+import com.gitee.dbswitch.admin.util.ExecuteSqlUtils.ScriptExecuteResult;
 import com.gitee.dbswitch.admin.util.PageUtils;
+import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.schema.SchemaTableData;
 import com.gitee.dbswitch.schema.SchemaTableMeta;
 import com.gitee.dbswitch.schema.TableDescription;
 import com.gitee.dbswitch.service.MetadataService;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,8 +57,7 @@ public class MetaDataService {
 
   public PageResult<MetadataTableInfoResponse> allTables(Long id, String schema, Integer page,
       Integer size) {
-    DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(id);
     try {
       List<TableDescription> tables = metaDataService.queryTableList(schema);
       List<MetadataTableInfoResponse> responses = tables.stream()
@@ -65,8 +75,7 @@ public class MetaDataService {
   }
 
   public Result<MetadataTableDetailResponse> tableDetail(Long id, String schema, String table) {
-    DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(id);
     try {
       SchemaTableMeta tableMeta = metaDataService.queryTableMeta(schema, table);
       List<String> pks = tableMeta.getPrimaryKeys();
@@ -104,13 +113,11 @@ public class MetaDataService {
   }
 
   public Result<SchemaTableDataResponse> tableData(Long id, String schema, String table) {
-    DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(id);
-    MetadataService metaDataService = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = connectionService.getMetaDataCoreService(id);
     try {
       SchemaTableData data = metaDataService.queryTableData(schema, table, 10);
-      // el-table问题：https://www.cnblogs.com/LanTianYou/p/9649735.html
       List<String> headers = data.getColumns().stream()
-          .map(one -> one.replaceAll("\\.", "_"))
+          .map(one -> specialReplace(one))
           .collect(Collectors.toList());
       return Result.success(SchemaTableDataResponse.builder()
           .schemaName(data.getSchemaName())
@@ -122,6 +129,69 @@ public class MetaDataService {
     } finally {
       metaDataService.close();
     }
+  }
+
+  public Result<OnlineSqlDataResponse> sqlData(Long id, OnlineSqlDataRequest request) {
+    List<String> statements = new ArrayList<>();
+    ScriptUtils.splitSqlScript(
+        null,
+        request.getScript(),
+        ScriptUtils.DEFAULT_STATEMENT_SEPARATOR,
+        ScriptUtils.DEFAULT_COMMENT_PREFIX,
+        ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+        ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER,
+        statements);
+    Integer page = Optional.ofNullable(request.getPage()).orElse(1);
+    Integer size = Optional.ofNullable(request.getSize()).orElse(100);
+    try (CloseableDataSource dataSource = connectionService.getDataSource(id)) {
+      try (Connection connection = dataSource.getConnection()) {
+        List<SqlInput> summaries = new ArrayList<>(statements.size());
+        List<SqlResult> results = new ArrayList<>(statements.size());
+        for (String sql : statements) {
+          try {
+            ScriptExecuteResult result = ExecuteSqlUtils.execute(connection, sql, page, size);
+            summaries.add(SqlInput.builder().sql(sql).summary(result.getResultSummary()).build());
+            results.add(
+                SqlResult.builder()
+                    .columns(result.getResultHeader().stream()
+                        .map(one ->
+                            ColumnItem.builder()
+                                .columnName(specialReplace(one.getKey()))
+                                .columnType(one.getValue())
+                                .build()
+                        ).collect(Collectors.toList()))
+                    .rows(result.getResultData())
+                    .build());
+          } catch (Exception e) {
+            summaries.add(
+                SqlInput.builder()
+                    .sql(sql)
+                    .summary(e.getMessage())
+                    .build());
+            results.add(
+                SqlResult.builder()
+                    .columns(Collections.emptyList())
+                    .rows(Collections.emptyList())
+                    .build());
+          }
+        }
+        return Result.success(
+            OnlineSqlDataResponse.builder()
+                .summaries(summaries)
+                .results(results)
+                .build());
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // el-table问题：https://www.cnblogs.com/LanTianYou/p/9649735.html
+  private String specialReplace(String str) {
+    if (null == str || str.isEmpty()) {
+      return str;
+    }
+    return str.replaceAll("\\.", "_");
   }
 
   private List<Map<String, Object>> convertRows(List<String> columns, List<List<Object>> rows) {

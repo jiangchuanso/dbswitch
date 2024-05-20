@@ -52,7 +52,11 @@ public class ConnectionService {
   @Resource
   private DatabaseConnectionDAO databaseConnectionDAO;
 
-  public MetadataService getMetaDataCoreService(DatabaseConnectionEntity dbConn) {
+  public CloseableDataSource getDataSource(Long id) {
+    return getDataSource(getDatabaseConnectionById(id));
+  }
+
+  public CloseableDataSource getDataSource(DatabaseConnectionEntity dbConn) {
     String typeName = dbConn.getType().getName().toUpperCase();
     ProductTypeEnum supportDbType = ProductTypeEnum.valueOf(typeName);
     if (supportDbType.hasAddress()) {
@@ -79,8 +83,16 @@ public class ConnectionService {
     }
     File driverVersionFile = driverLoadService.getVersionDriverFile(dbConn.getType(), dbConn.getVersion());
     String driverPath = driverVersionFile.getAbsolutePath();
-    CloseableDataSource dataSource = DataSourceUtils.createCommonDataSource(dbConn.getUrl(), dbConn.getDriver(),
+    return DataSourceUtils.createCommonDataSource(dbConn.getUrl(), dbConn.getDriver(),
         driverPath, dbConn.getUsername(), dbConn.getPassword());
+  }
+
+  public MetadataService getMetaDataCoreService(Long id) {
+    return getMetaDataCoreService(getDatabaseConnectionById(id));
+  }
+
+  public MetadataService getMetaDataCoreService(DatabaseConnectionEntity dbConn) {
+    CloseableDataSource dataSource = getDataSource(dbConn);
     MetadataService metaDataService = new DefaultMetadataService(dataSource);
     return metaDataService;
   }
@@ -149,8 +161,7 @@ public class ConnectionService {
   }
 
   public Result<List<String>> getSchemas(Long id) {
-    DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    MetadataService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(id);
     try {
       List<String> schemas = metaDataService.querySchemaList();
       return Result.success(schemas);
@@ -160,11 +171,10 @@ public class ConnectionService {
   }
 
   public Result<List<String>> getSchemaTables(Long id, String schema) {
-    DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    MetadataService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(id);
     try {
       List<String> tables = Optional.ofNullable(
-              metaDataService.queryTableList(schema))
+          metaDataService.queryTableList(schema))
           .orElseGet(ArrayList::new).stream()
           .filter(t -> !t.isViewTable())
           .map(t -> t.getTableName())
@@ -176,11 +186,10 @@ public class ConnectionService {
   }
 
   public Result<List<String>> getSchemaViews(Long id, String schema) {
-    DatabaseConnectionEntity dbConn = getDatabaseConnectionById(id);
-    MetadataService metaDataService = getMetaDataCoreService(dbConn);
+    MetadataService metaDataService = getMetaDataCoreService(id);
     try {
       List<String> tables = Optional.ofNullable(
-              metaDataService.queryTableList(schema))
+          metaDataService.queryTableList(schema))
           .orElseGet(ArrayList::new).stream()
           .filter(t -> t.isViewTable())
           .map(t -> t.getTableName())

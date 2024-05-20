@@ -27,131 +27,141 @@
           </el-scrollbar>
         </div>
         <div class="table-container">
-          <span>当前表：{{currentNode.schemaName}} / {{currentNode.tableName}}</span>
-          <el-tabs v-model="activeName">
-            <el-tab-pane label="基本信息"
-                         name="first">
-              <el-descriptions title="元数据"
-                               size="small"
-                               :column="1"
-                               colon
-                               border>
-                <el-descriptions-item label="表名称">{{tableMeta.tableName}}</el-descriptions-item>
-                <el-descriptions-item label="表类型">{{tableMeta.type}}</el-descriptions-item>
-                <el-descriptions-item label="模式名">{{tableMeta.schemaName}}</el-descriptions-item>
-                <el-descriptions-item label="表注释">
-                  <el-input type="textarea"
-                            :rows="2"
-                            v-model="tableMeta.remarks"
-                            auto-complete="off"
-                            :readonly=true></el-input>
-                </el-descriptions-item>
-                <el-descriptions-item label="建表DDL">
-                  <el-input type="textarea"
-                            :rows="16"
-                            v-model="tableMeta.createSql"
-                            auto-complete="off"
-                            :readonly=true></el-input>
-                </el-descriptions-item>
-              </el-descriptions>
+          <el-tabs v-model="tabActiveTabName"
+                   type="border-card">
+            <el-tab-pane label="元数据"
+                         name="metadata">
+              <el-tag size="medium">当前表：{{currentNode.schemaName}} / {{currentNode.tableName}}</el-tag>
+              <el-tabs v-model="metadataActiveTabName">
+                <el-tab-pane label="基本信息"
+                             name="first">
+                  <el-descriptions title="元数据"
+                                   size="small"
+                                   :column="1"
+                                   colon
+                                   border>
+                    <el-descriptions-item label="表名称">{{tableMeta.tableName}}</el-descriptions-item>
+                    <el-descriptions-item label="表类型">{{tableMeta.type}}</el-descriptions-item>
+                    <el-descriptions-item label="模式名">{{tableMeta.schemaName}}</el-descriptions-item>
+                    <el-descriptions-item label="表注释">
+                      <el-input type="textarea"
+                                :rows="2"
+                                v-model="tableMeta.remarks"
+                                auto-complete="off"
+                                :readonly=true></el-input>
+                    </el-descriptions-item>
+                    <el-descriptions-item label="建表DDL">
+                      <el-input type="textarea"
+                                :rows="16"
+                                v-model="tableMeta.createSql"
+                                auto-complete="off"
+                                :readonly=true></el-input>
+                    </el-descriptions-item>
+                  </el-descriptions>
+                </el-tab-pane>
+                <el-tab-pane label="字段信息"
+                             name="seconde">
+                  <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                            :data="tableMeta.columns"
+                            size="small"
+                            border
+                            style="width: 100%">
+                    <template slot="empty">
+                      <span>单击左侧展开"数据源导航树"来查看表的元数据记录</span>
+                    </template>
+                    <el-table-column prop="fieldName"
+                                     min-width="20%"
+                                     show-overflow-tooltip
+                                     label="名称">
+                    </el-table-column>
+                    <el-table-column prop="typeName"
+                                     min-width="20%"
+                                     label="类型">
+                    </el-table-column>
+                    <el-table-column prop="fieldType"
+                                     min-width="7%"
+                                     label="jdbcType">
+                    </el-table-column>
+                    <el-table-column prop="displaySize"
+                                     min-width="7%"
+                                     label="长度">
+                    </el-table-column>
+                    <el-table-column prop="precision"
+                                     min-width="5%"
+                                     label="精度">
+                    </el-table-column>
+                    <el-table-column prop="scale"
+                                     min-width="5%"
+                                     label="位数">
+                    </el-table-column>
+                    <el-table-column prop="isPrimaryKey"
+                                     min-width="5%"
+                                     label="主键">
+                    </el-table-column>
+                    <el-table-column prop="isAutoIncrement"
+                                     min-width="5%"
+                                     label="自增">
+                    </el-table-column>
+                    <el-table-column prop="isNullable"
+                                     min-width="5%"
+                                     label="可空">
+                    </el-table-column>
+                    <el-table-column prop="remarks"
+                                     min-width="20%"
+                                     show-overflow-tooltip
+                                     label="注释">
+                    </el-table-column>
+                  </el-table>
+                </el-tab-pane>
+                <el-tab-pane label="索引信息"
+                             name="third">
+                  <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                            :data="tableMeta.indexes"
+                            size="small"
+                            border
+                            style="width: 100%">
+                    <template slot="empty">
+                      <span>单击左侧展开"数据源导航树"来查看表的元数据记录</span>
+                    </template>
+                    <el-table-column prop="indexType"
+                                     min-width="20%"
+                                     label="索引类型">
+                    </el-table-column>
+                    <el-table-column prop="indexName"
+                                     min-width="20%"
+                                     label="索引名称">
+                    </el-table-column>
+                    <el-table-column prop="indexFields"
+                                     :formatter="formatIndexFields"
+                                     show-overflow-tooltip
+                                     min-width="60%"
+                                     label="索引字段">
+                    </el-table-column>
+                  </el-table>
+                </el-tab-pane>
+                <el-tab-pane class="table-container-data-table"
+                             label="取样数据"
+                             name="fourth">
+                  <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                            :data="sampleData.rows"
+                            border>
+                    <template slot="empty">
+                      <span>单击左侧展开"数据源导航树"来查看表的数据记录</span>
+                    </template>
+                    <el-table-column v-for="(item,index) in sampleData.columns"
+                                     :prop="item"
+                                     :label="item"
+                                     :key="index"
+                                     show-overflow-tooltip>
+                    </el-table-column>
+                  </el-table>
+                </el-tab-pane>
+              </el-tabs>
             </el-tab-pane>
-            <el-tab-pane label="字段信息"
-                         name="seconde">
-              <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
-                        :data="tableMeta.columns"
-                        size="small"
-                        border
-                        style="width: 100%">
-                <template slot="empty">
-                  <span>单击左侧展开"数据源导航树"来查看表的元数据记录</span>
-                </template>
-                <el-table-column prop="fieldName"
-                                 min-width="20%"
-                                 show-overflow-tooltip
-                                 label="名称">
-                </el-table-column>
-                <el-table-column prop="typeName"
-                                 min-width="20%"
-                                 label="类型">
-                </el-table-column>
-                <el-table-column prop="fieldType"
-                                 min-width="7%"
-                                 label="jdbcType">
-                </el-table-column>
-                <el-table-column prop="displaySize"
-                                 min-width="7%"
-                                 label="长度">
-                </el-table-column>
-                <el-table-column prop="precision"
-                                 min-width="5%"
-                                 label="精度">
-                </el-table-column>
-                <el-table-column prop="scale"
-                                 min-width="5%"
-                                 label="位数">
-                </el-table-column>
-                <el-table-column prop="isPrimaryKey"
-                                 min-width="5%"
-                                 label="主键">
-                </el-table-column>
-                <el-table-column prop="isAutoIncrement"
-                                 min-width="5%"
-                                 label="自增">
-                </el-table-column>
-                <el-table-column prop="isNullable"
-                                 min-width="5%"
-                                 label="可空">
-                </el-table-column>
-                <el-table-column prop="remarks"
-                                 min-width="20%"
-                                 show-overflow-tooltip
-                                 label="注释">
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
-            <el-tab-pane label="索引信息"
-                         name="third">
-              <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
-                        :data="tableMeta.indexes"
-                        size="small"
-                        border
-                        style="width: 100%">
-                <template slot="empty">
-                  <span>单击左侧展开"数据源导航树"来查看表的元数据记录</span>
-                </template>
-                <el-table-column prop="indexType"
-                                 min-width="20%"
-                                 label="索引类型">
-                </el-table-column>
-                <el-table-column prop="indexName"
-                                 min-width="20%"
-                                 label="索引名称">
-                </el-table-column>
-                <el-table-column prop="indexFields"
-                                 :formatter="formatIndexFields"
-                                 show-overflow-tooltip
-                                 min-width="60%"
-                                 label="索引字段">
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
-            <el-tab-pane class="table-container-data-table"
-                         label="取样数据"
-                         name="fourth">
-              <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
-                        :data="sampleData.rows"
-                        border>
-                <template slot="empty">
-                  <span>单击左侧展开"数据源导航树"来查看表的数据记录</span>
-                </template>
-                <el-table-column v-for="(item,index) in sampleData.columns"
-                                 :prop="item"
-                                 :label="item"
-                                 :key="index"
-                                 show-overflow-tooltip>
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
+            <!-- <el-tab-pane label="SQL在线"
+                         name="sqlQuery">
+              <multi-sql-editor ref="sqlEditors"></multi-sql-editor>
+            </el-tab-pane> -->
           </el-tabs>
         </div>
       </div>
@@ -161,10 +171,13 @@
 
 <script>
 import urlencode from "urlencode";
+import multiSqlEditor from '@/views/metadata/sqlEditor'
 
 // 参考文章：https://blog.csdn.net/m0_50255772/article/details/109484828
 export default {
-  components: {},
+  components: {
+    multiSqlEditor
+  },
   data () {
     return {
       props: {
@@ -180,7 +193,8 @@ export default {
         tableName: '-',
         schemaName: '-'
       },
-      activeName: 'first',
+      tabActiveTabName: 'metadata',
+      metadataActiveTabName: 'first',
       tableMeta: {
         tableName: '-',
         schemaName: '-',
@@ -369,7 +383,8 @@ export default {
         var schema = data.value;
         var table = data.label;
         if (!data.hasChild && datasourceId && schema && table) {
-          this.activeName = 'first';
+          this.tabActiveTabName = 'metadata';
+          this.metadataActiveTabName = 'first';
           this.getTableMeta(datasourceId, schema, table);
           this.getTableData(datasourceId, schema, table);
         }
@@ -477,21 +492,49 @@ export default {
   min-width: 350px;
   position: relative;
   cursor: default;
+  color: black;
 }
+.el-tree-node__content {
+  font-size: small;
+  height: 16px;
+  background-color: blanchedalmond;
+}
+.custom-tree-node {
+  font-size: 16px;
+  background-size: 16px;
+}
+
 .scroller {
   min-width: 200px;
   max-height: calc(90vh);
+}
+.el-select {
+  display: inline;
 }
 .tree-container .tree {
   overflow: auto;
 }
 .table-container {
-  width: 80%;
-  padding: 10px;
+  width: 100%;
 }
 .table-container-data-table {
   height: 90%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+el-tabs--border-card > .el-tabs__header .el-tabs__item {
+  margin-left: 8px;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  background-color: #f3f7fe;
+  padding: 4px 20px;
+  color: #0065d5;
+  line-height: 22px;
+  height: 30px;
+}
+.el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+  background-color: #0065d5;
+  color: #ffffff;
 }
 </style>

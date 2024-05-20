@@ -13,7 +13,6 @@
 
   <modules>
     <module>dbswitch-product-mysql</module>
-    <module>dbswitch-product-starrocks</module>
     <module>dbswitch-product-oracle</module>
     <module>dbswitch-product-postgresql</module>
     <module>dbswitch-product-sqlserver</module>
@@ -32,6 +31,7 @@
     <module>dbswitch-product-clickhouse</module>
     <module>dbswitch-product-elasticsearch</module>
     <module>dbswitch-product-highgo</module>
+    <module>dbswitch-product-starrocks</module>
   </modules>
 
 </project>

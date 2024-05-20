@@ -33,6 +33,7 @@
         </el-card>
 
         <div class="contentBox">
+          <el-tag v-if="taskId && taskId>0">当前任务：[{{taskId}}]{{taskName}}</el-tag>
           <div class="right-refresh-button">
             <el-button type="primary"
                        plain
@@ -165,6 +166,7 @@ export default {
       pageTaskAssignments: [],
       pageTaskAssignmentsTotalCount: 0,
       taskId: 0,
+      taskName: "",
       jobTableData: [],
       jobScheduleTime: '',
       isActive: -1,
@@ -225,25 +227,43 @@ export default {
       this.currentPage = currentPage;
       this.loadJobsData();
     },
-    loadJobsData: function () {
-      this.$http.get(
-        "/dbswitch/admin/api/v1/ops/jobs/list/" + this.currentPage + "/" + this.pageSize + "?id=" + this.taskId
-      ).then(res => {
-        if (0 === res.data.code) {
-          this.currentPage = res.data.pagination.page;
-          this.pageSize = res.data.pagination.size;
-          this.totalCount = res.data.pagination.total;
-          this.jobTableData = res.data.data;
-        } else {
-          if (res.data.message) {
-            alert("查询JOB执行历史纪录失败," + res.data.message);
+    loadTaskInfo: function () {
+      if (this.taskId && this.taskId > 0) {
+        this.$http.get(
+          "/dbswitch/admin/api/v1/assignment/info/id/" + this.taskId
+        ).then(res => {
+          if (0 === res.data.code) {
+            this.taskName = res.data.data.name;
+          } else {
+            if (res.data.message) {
+              alert("查询任务详情失败," + res.data.message);
+            }
           }
-        }
-      });
+        });
+      }
+    },
+    loadJobsData: function () {
+      if (this.taskId && this.taskId > 0) {
+        this.$http.get(
+          "/dbswitch/admin/api/v1/ops/jobs/list/" + this.currentPage + "/" + this.pageSize + "?id=" + this.taskId
+        ).then(res => {
+          if (0 === res.data.code) {
+            this.currentPage = res.data.pagination.page;
+            this.pageSize = res.data.pagination.size;
+            this.totalCount = res.data.pagination.total;
+            this.jobTableData = res.data.data;
+          } else {
+            if (res.data.message) {
+              alert("查询JOB执行历史纪录失败," + res.data.message);
+            }
+          }
+        });
+      }
     },
     handleChooseClick: function (taskId, index) {
       this.isActive = index;
       this.taskId = taskId;
+      this.loadTaskInfo();
       this.loadJobsData();
     },
     handleClickRefresh () {
@@ -251,6 +271,7 @@ export default {
         alert("请先在左侧选择一个任务来");
         return;
       }
+      this.loadTaskInfo();
       this.loadJobsData();
     },
     handleCancelJob: function (jobId) {
@@ -333,6 +354,7 @@ export default {
     this.loadPageTaskAssignments();
     if (this.$route.query.id) {
       this.taskId = this.$route.query.id
+      this.loadTaskInfo();
       this.loadJobsData();
     }
   },

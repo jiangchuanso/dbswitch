@@ -4,9 +4,11 @@ import com.gitee.dbswitch.admin.common.annotation.TokenCheck;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.config.SwaggerConfig;
+import com.gitee.dbswitch.admin.model.request.OnlineSqlDataRequest;
 import com.gitee.dbswitch.admin.model.response.MetadataSchemaDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataTableDetailResponse;
 import com.gitee.dbswitch.admin.model.response.MetadataTableInfoResponse;
+import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse;
 import com.gitee.dbswitch.admin.model.response.SchemaTableDataResponse;
 import com.gitee.dbswitch.admin.service.MetaDataService;
 import io.swagger.annotations.Api;
@@ -15,6 +17,8 @@ import javax.annotation.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +70,15 @@ public class MetaDataController {
       @RequestParam("schema") String schema,
       @RequestParam("table") String table) {
     return metaDataService.tableData(id, schema, table);
+  }
+
+  @TokenCheck
+  @ApiOperation(value = "SQL脚本结果集数据内容")
+  @PostMapping(value = "/data/sql/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Result<OnlineSqlDataResponse> sqlData(
+      @PathVariable("id") Long id,
+      @RequestBody OnlineSqlDataRequest request) {
+    return metaDataService.sqlData(id, request);
   }
 
 }

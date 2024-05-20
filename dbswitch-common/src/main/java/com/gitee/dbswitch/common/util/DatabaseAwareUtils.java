@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.common.util;
 
-import cn.hutool.log.StaticLog;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,12 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 数据库类型识别工具类
  *
  * @author tang
  */
+@Slf4j
 @UtilityClass
 public final class DatabaseAwareUtils {
 
@@ -41,7 +42,6 @@ public final class DatabaseAwareUtils {
     productNameMap.put("KingbaseES", ProductTypeEnum.KINGBASE);
     productNameMap.put("Apache Hive", ProductTypeEnum.HIVE);
     productNameMap.put("MySQL", ProductTypeEnum.MYSQL);
-//    productNameMap.put("StarRocks", ProductTypeEnum.STARROCKS);
     productNameMap.put("MariaDB", ProductTypeEnum.MARIADB);
     productNameMap.put("Oracle", ProductTypeEnum.ORACLE);
     productNameMap.put("PostgreSQL", ProductTypeEnum.POSTGRESQL);
@@ -93,11 +93,11 @@ public final class DatabaseAwareUtils {
         return productType;
       }
       boolean haveStarRocks = false;
-      try{
-         // 此查询语句是Starrocks查询be节点是否存活，可以用来判断是否是Starrocks数据源
-         haveStarRocks = connection.createStatement().execute("show backends");
-      }catch (SQLException sqlException){
-        StaticLog.info("执行show backends失败，代表不是MySQL数据源");
+      try {
+        // 此查询语句是Starrocks查询be节点是否存活，可以用来判断是否是Starrocks数据源
+        haveStarRocks = connection.createStatement().execute("show backends");
+      } catch (Exception sqlException) {
+        log.info("Failed to execute sql :show backends, so guesses it is mysql datasource!");
       }
       if (haveStarRocks) {
         return ProductTypeEnum.STARROCKS;

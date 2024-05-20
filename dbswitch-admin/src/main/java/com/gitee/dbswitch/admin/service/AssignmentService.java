@@ -158,6 +158,17 @@ public class AssignmentService {
     return Result.success(detailResponse);
   }
 
+  public Result<AssignmentInfoResponse> infoAssignment(Long id) {
+    AssignmentTaskEntity assignmentTaskEntity = assignmentTaskDAO.getById(id);
+    if (Objects.isNull(assignmentTaskEntity)) {
+      return Result.failed(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "ID=" + id);
+    }
+
+    AssignmentInfoResponse infoResponse = ConverterFactory
+        .getConverter(AssignmentInfoConverter.class).convert(assignmentTaskEntity);
+    return Result.success(infoResponse);
+  }
+
   @Transactional(rollbackFor = Exception.class)
   public void deployAssignments(List<Long> ids) {
     checkAssignmentAllExist(ids);

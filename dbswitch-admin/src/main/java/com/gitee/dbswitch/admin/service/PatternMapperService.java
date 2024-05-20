@@ -3,7 +3,6 @@ package com.gitee.dbswitch.admin.service;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
-import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.model.request.PreviewColumnNameMapperRequest;
 import com.gitee.dbswitch.admin.model.request.PreviewTableNameMapperRequest;
 import com.gitee.dbswitch.admin.model.response.PreviewNameMapperResponse;
@@ -83,12 +82,7 @@ public class PatternMapperService {
     }
 
     List<PreviewNameMapperResponse> result = new ArrayList<>();
-    Long connectionId = request.getId();
-    DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(connectionId);
-    if (null == dbConn) {
-      throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
-    }
-    MetadataService service = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService service = connectionService.getMetaDataCoreService(request.getId());
     try {
       List<ColumnDescription> tables = service.queryTableColumnMeta(request.getSchemaName(),
           request.getTableName());
@@ -120,14 +114,7 @@ public class PatternMapperService {
     if (null == request.getId() || StringUtils.isBlank(request.getSchemaName())) {
       throw new DbswitchException(ResultCode.ERROR_INVALID_ARGUMENT, "id or schemaName");
     }
-
-    Long connectionId = request.getId();
-    DatabaseConnectionEntity dbConn = connectionService.getDatabaseConnectionById(connectionId);
-    if (null == dbConn) {
-      throw new DbswitchException(ResultCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
-    }
-
-    MetadataService service = connectionService.getMetaDataCoreService(dbConn);
+    MetadataService service = connectionService.getMetaDataCoreService(request.getId());
     try {
       return service.queryTableList(request.getSchemaName()).stream().filter(td -> !td.isViewTable())
           .collect(Collectors.toList());

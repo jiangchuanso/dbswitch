@@ -24,16 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 public enum ProductTypeEnum {
 
   /**
-   * StarRocks数据库类型
-   */
-  STARROCKS(19, "`", "StarRocks", "com.mysql.cj.jdbc.Driver", 9030,
-          "/* ping */ SELECT 1",
-          "jdbc:mysql://",
-          new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
-          "jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true"),
-
-
-  /**
    * MySQL数据库类型
    */
   MYSQL(1, "`", "MySQL", "com.mysql.jdbc.Driver", 3306,
@@ -196,6 +186,16 @@ public enum ProductTypeEnum {
       "jdbc:jest://",
       new String[]{"jdbc:jest://{host}[:{port}][\\?{params}]"},
       "jdbc:jest://172.17.2.12:9200?useHttps=false"),
+
+  /**
+   * StarRocks数据库类型
+   */
+  STARROCKS(19, "`", "StarRocks", "com.mysql.cj.jdbc.Driver", 9030,
+      "/* ping */ SELECT 1",
+      "jdbc:mysql://",
+      new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
+      "jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true"),
+
   ;
 
   private int id;
@@ -256,6 +256,7 @@ public enum ProductTypeEnum {
   public boolean isLikeStarRocks() {
     return this == STARROCKS;
   }
+
   /**
    * 类似于MySQL系列的数据库类型
    *

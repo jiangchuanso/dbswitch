@@ -14,11 +14,6 @@
   <dependencies>
     <dependency>
       <groupId>com.gitee.dbswitch</groupId>
-      <artifactId>dbswitch-product-starrocks</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.gitee.dbswitch</groupId>
       <artifactId>dbswitch-product-mysql</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -106,6 +101,11 @@
     <dependency>
       <groupId>com.gitee.dbswitch</groupId>
       <artifactId>dbswitch-product-elasticsearch</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.gitee.dbswitch</groupId>
+      <artifactId>dbswitch-product-starrocks</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
