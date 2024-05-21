@@ -3,15 +3,15 @@
     <el-card>
       <div class="flex-between">
         <div class="tree-container">
-          <el-scrollbar style="height:100%">
-            <el-select placeholder="请选择数据源"
-                       v-model="dataSourceId"
-                       @change="loadTreeData">
-              <el-option v-for="(item,index) in connectionList"
-                         :key="index"
-                         :label="`[${item.id}]${item.name}`"
-                         :value="item.id"></el-option>
-            </el-select>
+          <el-select placeholder="请选择数据源"
+                     v-model="dataSourceId"
+                     @change="loadTreeData">
+            <el-option v-for="(item,index) in connectionList"
+                       :key="index"
+                       :label="`[${item.id}]${item.name}`"
+                       :value="item.id"></el-option>
+          </el-select>
+          <el-scrollbar style="height: 800px;">
             <el-tree ref="metadataTree"
                      empty-text="请选择数据源后查看"
                      :indent=6
@@ -31,33 +31,30 @@
                    type="border-card">
             <el-tab-pane label="元数据"
                          name="metadata">
-              <el-tag size="medium">当前表：{{currentNode.schemaName}} / {{currentNode.tableName}}</el-tag>
+              当前表：<el-tag size="medium">{{currentNode.schemaName}} / {{currentNode.tableName}}</el-tag>
               <el-tabs v-model="metadataActiveTabName">
                 <el-tab-pane label="基本信息"
                              name="first">
-                  <el-descriptions title="元数据"
-                                   size="small"
-                                   :column="1"
+                  <el-descriptions size="small"
+                                   :column="2"
                                    colon
                                    border>
-                    <el-descriptions-item label="表名称">{{tableMeta.tableName}}</el-descriptions-item>
-                    <el-descriptions-item label="表类型">{{tableMeta.type}}</el-descriptions-item>
-                    <el-descriptions-item label="模式名">{{tableMeta.schemaName}}</el-descriptions-item>
-                    <el-descriptions-item label="表注释">
-                      <el-input type="textarea"
-                                :rows="2"
-                                v-model="tableMeta.remarks"
-                                auto-complete="off"
-                                :readonly=true></el-input>
-                    </el-descriptions-item>
+                    <el-descriptions-item label="模式名"><el-tag size="small">{{tableMeta.schemaName}}</el-tag></el-descriptions-item>
+                    <el-descriptions-item label="表名称"><el-tag size="small">{{tableMeta.tableName}}</el-tag></el-descriptions-item>
+                    <el-descriptions-item label="表类型"><el-tag size="small">{{tableMeta.type}}</el-tag></el-descriptions-item>
+                    <el-descriptions-item label="表注释"><span class="long-text">{{tableMeta.remarks}}</span></el-descriptions-item>
                     <el-descriptions-item label="建表DDL">
-                      <el-input type="textarea"
-                                :rows="16"
-                                v-model="tableMeta.createSql"
-                                auto-complete="off"
-                                :readonly=true></el-input>
                     </el-descriptions-item>
                   </el-descriptions>
+                  <ace ref="ddlEditor"
+                       :value="tableMeta.createSql"
+                       @init="initEditor"
+                       lang="sql"
+                       height="500"
+                       theme="chrome"
+                       :options="editorOption"
+                       width="100%">
+                  </ace>
                 </el-tab-pane>
                 <el-tab-pane label="字段信息"
                              name="seconde">
@@ -80,7 +77,7 @@
                     </el-table-column>
                     <el-table-column prop="fieldType"
                                      min-width="7%"
-                                     label="jdbcType">
+                                     label="枚举值">
                     </el-table-column>
                     <el-table-column prop="displaySize"
                                      min-width="7%"
@@ -171,12 +168,12 @@
 
 <script>
 import urlencode from "urlencode";
-import multiSqlEditor from '@/views/metadata/sqlEditor'
+import ace from 'vue2-ace-editor'
 
 // 参考文章：https://blog.csdn.net/m0_50255772/article/details/109484828
 export default {
   components: {
-    multiSqlEditor
+    ace
   },
   data () {
     return {
@@ -185,6 +182,14 @@ export default {
         children: 'children',
         disabled: false,
         isLeaf: false
+      },
+      editorOption: {
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        showPrintMargin: false,
+        fontSize: 16,
+        readOnly: true
       },
       dataSourceId: null,
       connectionList: [],
@@ -209,6 +214,16 @@ export default {
     };
   },
   methods: {
+    initEditor (editor) {
+      require('brace/ext/language_tools')
+      // 设置语言
+      require('brace/mode/sql')
+      require('brace/snippets/sql')
+      // 设置主题 按需加载
+      require('brace/theme/monokai')
+      require('brace/theme/chrome')
+      require('brace/theme/crimson_editor')
+    },
     loadConnections: function () {
       this.connectionList = [];
       this.$http({
@@ -485,28 +500,20 @@ export default {
 .flex-between {
   display: flex;
 }
-.el-scrollbar .el-scrollbar__wrap {
-  overflow-x: hidden;
-}
-.tree-container .el-tree {
-  min-width: 350px;
+.tree-container {
+  min-width: calc(25%);
   position: relative;
   cursor: default;
   color: black;
-}
-.el-tree-node__content {
-  font-size: small;
-  height: 16px;
-  background-color: blanchedalmond;
-}
-.custom-tree-node {
-  font-size: 16px;
+  font-size: 14px;
   background-size: 16px;
 }
-
-.scroller {
-  min-width: 200px;
-  max-height: calc(90vh);
+.custom-tree-node {
+  font-size: 8px;
+  background-size: 16px;
+}
+.el-scrollbar {
+  overflow-x: auto;
 }
 .el-select {
   display: inline;
@@ -522,7 +529,14 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
 }
-
+.long-text {
+  display: -webkit-box;
+  width: 300px; /* 定义长文本的显示宽度 */
+  white-space: normal !important;
+  overflow: hidden; /* 超出部分隐藏 */
+  text-overflow: ellipsis; /* 显示省略号 */
+  text-align: left;
+}
 el-tabs--border-card > .el-tabs__header .el-tabs__item {
   margin-left: 8px;
   border: none;
