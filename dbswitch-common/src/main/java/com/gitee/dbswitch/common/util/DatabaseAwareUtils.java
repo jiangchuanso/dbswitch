@@ -56,6 +56,7 @@ public final class DatabaseAwareUtils {
     productNameMap.put("GBase", ProductTypeEnum.GBASE8A);
     productNameMap.put("Adaptive Server Enterprise", ProductTypeEnum.SYBASE);
     productNameMap.put("ClickHouse", ProductTypeEnum.CLICKHOUSE);
+    productNameMap.put("Mongo DB", ProductTypeEnum.MONGODB);
 
     driverNameMap.put("MySQL Connector Java", ProductTypeEnum.MYSQL);
     driverNameMap.put("MariaDB Connector/J", ProductTypeEnum.MARIADB);
@@ -70,6 +71,8 @@ public final class DatabaseAwareUtils {
     driverNameMap.put("GBase JDBC Driver", ProductTypeEnum.GBASE8A);
     driverNameMap.put("jConnect (TM) for JDBC (TM)", ProductTypeEnum.SYBASE);
     driverNameMap.put("ClickHouse JDBC Driver", ProductTypeEnum.CLICKHOUSE);
+    driverNameMap.put("MongoDB JDBC Driver", ProductTypeEnum.MONGODB);
+    driverNameMap.put("esJestDriver", ProductTypeEnum.ELASTICSEARCH);
   }
 
   /**
@@ -104,6 +107,12 @@ public final class DatabaseAwareUtils {
         return type;
       }
       String url = connection.getMetaData().getURL();
+      if (null != url && url.contains("mongodb://")) {
+        return ProductTypeEnum.MONGODB;
+      }
+      if (null != url && url.contains("jest://")) {
+        return ProductTypeEnum.ELASTICSEARCH;
+      }
       type = ProductTypeEnum.getProductType(url);
       if (null != type) {
         return type;
