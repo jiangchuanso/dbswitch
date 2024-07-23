@@ -13,8 +13,8 @@ import cn.hutool.core.util.ClassLoaderUtil;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.entity.InvisibleDataSource;
 import com.gitee.dbswitch.common.entity.JarClassLoader;
-import com.gitee.dbswitch.common.util.DataSourceTypeUtils;
 import com.gitee.dbswitch.common.util.ExamineUtils;
+import com.gitee.dbswitch.common.util.ProductTypeUtils;
 import com.gitee.dbswitch.data.domain.WrapCommonDataSource;
 import com.gitee.dbswitch.data.domain.WrapHikariDataSource;
 import com.gitee.dbswitch.data.entity.SourceDataSourceProperties;
@@ -22,13 +22,10 @@ import com.gitee.dbswitch.data.entity.TargetDataSourceProperties;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URLClassLoader;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.DataSource;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -135,7 +132,7 @@ public final class DataSourceUtils {
     // 如果是Greenplum数据库，这里需要关闭会话的查询优化器
     if (properties.getDriverClassName().contains("postgresql")) {
       try (Connection connection = dataSource.getConnection()) {
-        if (DataSourceTypeUtils.isGreenplum(connection)) {
+        if (ProductTypeUtils.isGreenplum(connection)) {
           ds.setConnectionInitSql("set optimizer to 'off'");
           log.info("Greenplum: Close Optimizer now: set optimizer to 'off'");
         }
@@ -226,22 +223,6 @@ public final class DataSourceUtils {
       }
     }
     return urlClassLoader;
-  }
-
-  private static String executeStringReturnedSql(
-      DataSource dataSource, String sql) {
-    try (Connection connection = dataSource.getConnection()) {
-      try (Statement statement = connection.createStatement()) {
-        try (ResultSet resultSet = statement.executeQuery(sql)) {
-          if (resultSet.next()) {
-            return resultSet.getString(1);
-          }
-          return null;
-        }
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
   }
 
 }

@@ -12,6 +12,8 @@ package com.gitee.dbswitch.product.greenplum;
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.features.ProductFeatures;
+import com.gitee.dbswitch.product.postgresql.PostgresTableCopyWriteProvider;
+import com.gitee.dbswitch.product.postgresql.PostgresTableManageProvider;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.manage.TableManageProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
@@ -39,14 +41,14 @@ public class GreenplumFactoryProvider extends AbstractFactoryProvider {
 
   @Override
   public TableManageProvider createTableManageProvider() {
-    return new GreenplumTableManageProvider(this);
+    return new PostgresTableManageProvider(this);
   }
 
   @Override
   public TableDataWriteProvider createTableDataWriteProvider(boolean useInsert) {
     return useInsert
         ? new AutoCastTableDataWriteProvider(this)
-        : new GreenPlumTableCopyWriteProvider(this);
+        : new PostgresTableCopyWriteProvider(this);
   }
 
   @Override

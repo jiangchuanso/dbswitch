@@ -80,7 +80,7 @@ jdbc连接地址：jdbc:gbase://172.17.2.10:5258/gbase
 jdbc驱动名称：com.gbase.jdbc.Driver
 ```
 
-**翰高HighGo数据库(可按PostgreSQL使用)**
+**翰高HighGo数据库**
 
 ```
 jdbc连接地址：jdbc:highgo://172.17.2.10:5866/highgo

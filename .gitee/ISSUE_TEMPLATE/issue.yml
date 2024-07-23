@@ -6,6 +6,7 @@ body:
     attributes:
       label: dbswitch版本
       options:
+        - "1.9.8"
         - "1.9.7"
         - "1.9.6"
         - "1.9.5"
@@ -18,7 +19,7 @@ body:
     attributes:
       label: ISSUE类型
       options:
-        - "BUG反馈"
+        - "BUG"
         - "需求"
         - "咨询"
     validations:

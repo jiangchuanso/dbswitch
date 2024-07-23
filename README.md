@@ -51,6 +51,7 @@
         ├── dbswitch-product-sybase     	//  -> sybase方言实现类
         ├── dbswitch-product-hive       	//  -> hive方言实现类
         ├── dbswitch-product-sqlite     	//  -> sqlite方言实现类
+        ├── dbswitch-product-greenplum   	//  -> greenplum方言实现类
         ├── dbswitch-product-clickhouse 	//  -> clickhouse方言实现类
         ├── dbswitch-product-mongodb    	//  -> mongodb方言实现类
         ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类

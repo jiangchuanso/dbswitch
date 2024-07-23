@@ -29,7 +29,7 @@ cd ${DOCKER_DBSWITCH_DIR} \
 # clean project
 cd $PROJECT_ROOT_DIR && sh docker-maven-clean.sh && cd -
 
-# login and push docker image
-docker login -u inrgihc
-docker push inrgihc/dbswitch:${DBSWITCH_VERSION}
+# push docker image
+docker tag inrgihc/dbswitch:${DBSWITCH_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:${DBSWITCH_VERSION}
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:${DBSWITCH_VERSION}
 

@@ -10,13 +10,14 @@
 package com.gitee.dbswitch.common.util;
 
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.google.common.collect.Sets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.DataSource;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -87,17 +88,17 @@ public final class DatabaseAwareUtils {
       if (driverNameMap.containsKey(driverName)) {
         ProductTypeEnum productType = driverNameMap.get(driverName);
         if (productType == ProductTypeEnum.POSTGRESQL) {
-          // String url = connection.getMetaData().getURL();
-          // Set<ProductTypeEnum> excludes = Sets.immutableEnumSet(ProductTypeEnum.POSTGRESQL);
-          // ProductTypeEnum pgLikeType = ProductTypeEnum.getProductType(url, excludes);
-          // if (null != pgLikeType) {
-          //   return pgLikeType;
-          // }
-          if (DataSourceTypeUtils.isGreenplum(connection)) {
+          if (ProductTypeUtils.isGreenplum(connection)) {
             return ProductTypeEnum.GREENPLUM;
           }
+          String url = connection.getMetaData().getURL();
+          Set<ProductTypeEnum> excludes = Sets.immutableEnumSet(ProductTypeEnum.POSTGRESQL, ProductTypeEnum.GREENPLUM);
+          ProductTypeEnum pgLikeType = ProductTypeEnum.getProductType(url, excludes);
+          if (null != pgLikeType) {
+            return pgLikeType;
+          }
         } else if (productType == ProductTypeEnum.MYSQL) {
-          if (isStarRocks(connection)) {
+          if (ProductTypeUtils.isStarRocks(connection)) {
             return ProductTypeEnum.STARROCKS;
           }
         }
@@ -125,18 +126,6 @@ public final class DatabaseAwareUtils {
     }
   }
 
-  private static boolean isStarRocks(Connection connection) {
-    try (Statement statement = connection.createStatement()) {
-      // 此查询语句是Starrocks查询be节点是否存活，可以用来判断是否是Starrocks数据源
-      String sql = "SHOW BACKENDS";
-      return statement.execute(sql);
-    } catch (Exception sqlException) {
-      if (log.isDebugEnabled()) {
-        log.debug("Failed to execute sql :show backends, and guesses it is mysql datasource!");
-      }
-    }
-    return false;
-  }
 
   /**
    * 检查MySQL数据库表的存储引擎是否为Innodb
