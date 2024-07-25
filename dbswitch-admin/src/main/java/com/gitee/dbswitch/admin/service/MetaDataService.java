@@ -13,8 +13,8 @@ import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.ColumnItem;
 import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.SqlInput;
 import com.gitee.dbswitch.admin.model.response.OnlineSqlDataResponse.SqlResult;
 import com.gitee.dbswitch.admin.model.response.SchemaTableDataResponse;
-import com.gitee.dbswitch.admin.util.ExecuteSqlUtils;
-import com.gitee.dbswitch.admin.util.ExecuteSqlUtils.ScriptExecuteResult;
+import com.gitee.dbswitch.admin.util.DBSqlUtils;
+import com.gitee.dbswitch.admin.util.DBSqlUtils.ScriptExecuteResult;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.common.entity.CloseableDataSource;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
@@ -155,7 +155,7 @@ public class MetaDataService {
         List<SqlResult> results = new ArrayList<>(statements.size());
         for (String sql : statements) {
           try {
-            ScriptExecuteResult result = ExecuteSqlUtils.execute(connection, sql, page, size);
+            ScriptExecuteResult result = DBSqlUtils.execute(connection, sql, page, size);
             summaries.add(SqlInput.builder().sql(sql).summary(result.getResultSummary()).build());
             if (CollectionUtils.isNotEmpty(result.getResultHeader())) {
               results.add(

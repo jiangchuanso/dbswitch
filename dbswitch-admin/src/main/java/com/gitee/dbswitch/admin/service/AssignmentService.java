@@ -33,7 +33,7 @@ import com.gitee.dbswitch.admin.model.response.AssignmentInfoResponse;
 import com.gitee.dbswitch.admin.model.response.AssignmentsDataResponse;
 import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
-import com.gitee.dbswitch.admin.util.EasyexcelUtils;
+import com.gitee.dbswitch.admin.util.ExcelUtils;
 import com.gitee.dbswitch.admin.util.PageUtils;
 import com.gitee.dbswitch.common.converter.ConverterFactory;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
@@ -376,6 +376,6 @@ public class AssignmentService {
       assignmentsDataResponse.setRunStatus(JobStatusEnum.of(status).getName());
       assignmentsDataResponses.add(assignmentsDataResponse);
     }
-    EasyexcelUtils.write(response, AssignmentsDataResponse.class, assignmentsDataResponses, "任务管理", "任务管理列表");
+    ExcelUtils.write(response, AssignmentsDataResponse.class, assignmentsDataResponses, "任务管理", "任务管理列表");
   }
 }

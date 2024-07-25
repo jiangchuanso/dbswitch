@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.highgo;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.product.postgresql.PostgresMetadataQueryProvider;
 import com.gitee.dbswitch.product.postgresql.PostgresTableManageProvider;
@@ -31,7 +32,7 @@ public class HighgoFactoryProvider extends AbstractFactoryProvider {
   }
 
   public ProductFeatures getProductFeatures() {
-    return new HighgoFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

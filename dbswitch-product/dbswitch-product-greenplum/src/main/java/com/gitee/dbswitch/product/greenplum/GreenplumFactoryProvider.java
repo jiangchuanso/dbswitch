@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.greenplum;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.product.postgresql.PostgresTableCopyWriteProvider;
 import com.gitee.dbswitch.product.postgresql.PostgresTableManageProvider;
@@ -31,7 +32,7 @@ public class GreenplumFactoryProvider extends AbstractFactoryProvider {
   }
 
   public ProductFeatures getProductFeatures() {
-    return new GreenplumFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

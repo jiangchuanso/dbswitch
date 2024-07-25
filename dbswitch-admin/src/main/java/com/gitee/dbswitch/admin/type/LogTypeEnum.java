@@ -18,7 +18,7 @@ import lombok.Getter;
 public enum LogTypeEnum {
 
   ACCESS_LOG(1, "访问日志"),
-  OPERRATE_LOG(2, "操作日志"),
+  OPERATE_LOG(2, "操作日志"),
   ;
 
   private int value;

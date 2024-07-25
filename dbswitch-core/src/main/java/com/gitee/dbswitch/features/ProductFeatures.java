@@ -20,8 +20,6 @@ public interface ProductFeatures {
    * @param fetchSize
    * @return 转换后的fetchSize
    */
-  default int convertFetchSize(int fetchSize) {
-    return fetchSize;
-  }
+  int convertFetchSize(int fetchSize);
 
 }

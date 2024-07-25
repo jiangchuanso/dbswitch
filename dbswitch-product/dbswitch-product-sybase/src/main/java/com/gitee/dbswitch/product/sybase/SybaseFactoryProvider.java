@@ -11,11 +11,12 @@ package com.gitee.dbswitch.product.sybase;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
-import com.gitee.dbswitch.provider.meta.MetadataProvider;
 import com.gitee.dbswitch.provider.manage.DefaultTableManageProvider;
 import com.gitee.dbswitch.provider.manage.TableManageProvider;
+import com.gitee.dbswitch.provider.meta.MetadataProvider;
 import com.gitee.dbswitch.provider.sync.AutoCastTableDataSynchronizeProvider;
 import com.gitee.dbswitch.provider.sync.TableDataSynchronizeProvider;
 import com.gitee.dbswitch.provider.write.AutoCastTableDataWriteProvider;
@@ -29,8 +30,9 @@ public class SybaseFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
-    return new SybaseFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

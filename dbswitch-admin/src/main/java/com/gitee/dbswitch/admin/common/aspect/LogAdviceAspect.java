@@ -165,7 +165,7 @@ public class LogAdviceAspect {
     String description = getParsedDescription(logAnnotation.description(), ctx);
     if (null == throwable) {
       SystemLogEntity systemLogEntity = SystemLogEntity.builder()
-          .type(LogTypeEnum.OPERRATE_LOG.getValue())
+          .type(LogTypeEnum.OPERATE_LOG.getValue())
           .username(this.getUsernameFromToken())
           .ipAddress(ServletUtils.getIpAddr())
           .moduleName(moduleName)
@@ -179,7 +179,7 @@ public class LogAdviceAspect {
       systemLogDAO.insert(systemLogEntity);
     } else {
       SystemLogEntity systemLogEntity = SystemLogEntity.builder()
-          .type(LogTypeEnum.OPERRATE_LOG.getValue())
+          .type(LogTypeEnum.OPERATE_LOG.getValue())
           .username(this.getUsernameFromToken())
           .ipAddress(ServletUtils.getIpAddr())
           .moduleName(moduleName)

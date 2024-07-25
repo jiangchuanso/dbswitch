@@ -11,29 +11,24 @@ package com.gitee.dbswitch.common.event;
 
 import com.google.common.base.Preconditions;
 import java.util.Arrays;
-import java.util.Collections;
 import lombok.Getter;
 
 @Getter
 public class ListenedEvent extends java.util.EventObject {
 
-  private String name;
+  private String identifier;
   private Object[] args;
 
-  public ListenedEvent(Object source, String event) {
-    this(source, event, Collections.emptyList().toArray());
-  }
-
-  public ListenedEvent(Object source, String event, Object... args) {
+  public ListenedEvent(Object source, String identifier, Object... args) {
     super(source);
-    this.name = event;
+    this.identifier = identifier;
     this.args = args;
   }
 
   public void checkArgs(Class<?>... classes) throws IllegalArgumentException {
     Preconditions.checkArgument(this.args.length == classes.length,
         "The args count of event '%s' should be %s(actual %s)",
-        this.name, classes.length, this.args.length);
+        this.identifier, classes.length, this.args.length);
     int i = 0;
     for (Class<?> c : classes) {
       Object arg = this.args[i++];
@@ -48,7 +43,7 @@ public class ListenedEvent extends java.util.EventObject {
 
   @Override
   public String toString() {
-    return String.format("Event{name='%s', args=%s}",
-        this.name, Arrays.asList(this.args));
+    return String.format("Event{identifier='%s', args=%s}",
+        this.identifier, Arrays.asList(this.args));
   }
 }

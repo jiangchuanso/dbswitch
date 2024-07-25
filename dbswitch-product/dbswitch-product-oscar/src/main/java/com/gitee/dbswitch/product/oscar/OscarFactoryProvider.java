@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.oscar;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
@@ -29,7 +30,7 @@ public class OscarFactoryProvider extends AbstractFactoryProvider {
   }
 
   public ProductFeatures getProductFeatures() {
-    return new OscarFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

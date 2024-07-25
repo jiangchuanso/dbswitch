@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.product.hive;
 
-import com.gitee.dbswitch.features.ProductFeatures;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 
-public class HiveFeatures implements ProductFeatures {
+public class HiveFeatures extends DefaultProductFeatures {
 
   /**
    * 是否使用CreateTableAs方式建表

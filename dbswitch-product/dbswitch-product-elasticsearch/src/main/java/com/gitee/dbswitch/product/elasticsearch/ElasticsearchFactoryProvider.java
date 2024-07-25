@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.elasticsearch;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.manage.TableManageProvider;
@@ -29,7 +30,7 @@ public class ElasticsearchFactoryProvider extends AbstractFactoryProvider {
 
   @Override
   public ProductFeatures getProductFeatures() {
-    return new ElasticsearchFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

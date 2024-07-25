@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.dm;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.product.oracle.OracleTableManageProvider;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
@@ -29,7 +30,7 @@ public class DmFactoryProvider extends AbstractFactoryProvider {
   }
 
   public ProductFeatures getProductFeatures() {
-    return new DmFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

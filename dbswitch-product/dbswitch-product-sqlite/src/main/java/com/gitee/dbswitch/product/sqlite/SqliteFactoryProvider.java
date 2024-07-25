@@ -11,6 +11,7 @@ package com.gitee.dbswitch.product.sqlite;
 
 import com.gitee.dbswitch.annotation.Product;
 import com.gitee.dbswitch.common.type.ProductTypeEnum;
+import com.gitee.dbswitch.features.DefaultProductFeatures;
 import com.gitee.dbswitch.features.ProductFeatures;
 import com.gitee.dbswitch.provider.AbstractFactoryProvider;
 import com.gitee.dbswitch.provider.meta.MetadataProvider;
@@ -27,7 +28,7 @@ public class SqliteFactoryProvider extends AbstractFactoryProvider {
   }
 
   public ProductFeatures getProductFeatures() {
-    return new SqliteFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override
