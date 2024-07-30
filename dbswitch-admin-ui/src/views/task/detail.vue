@@ -7,8 +7,8 @@
                        :column="1"
                        label-class-name="el-descriptions-item-label-class"
                        border>
-        <el-descriptions-item label="任务名称">{{updateform.name}}</el-descriptions-item>
-        <el-descriptions-item label="任务描述">{{updateform.description}}</el-descriptions-item>
+        <el-descriptions-item label="任务名称">{{ updateform.name }}</el-descriptions-item>
+        <el-descriptions-item label="任务描述">{{ updateform.description }}</el-descriptions-item>
         <el-descriptions-item label="集成模式">
           <span v-if="updateform.scheduleMode == 'MANUAL'">
             手动
@@ -18,10 +18,13 @@
           </span>
         </el-descriptions-item>
         <el-descriptions-item v-if="updateform.scheduleMode == 'SYSTEM_SCHEDULED'"
-                              label="CRON表达式">{{updateform.cronExpression}}</el-descriptions-item>
-        <el-descriptions-item label="源端数据源">[{{updateform.sourceConnectionId}}] {{updateform.sourceConnectionName}}</el-descriptions-item>
-        <el-descriptions-item label="源端schema">{{updateform.sourceSchema}}</el-descriptions-item>
-        <el-descriptions-item label="源端表类型">{{updateform.tableType}}</el-descriptions-item>
+                              label="CRON表达式">{{ updateform.cronExpression }}
+        </el-descriptions-item>
+        <el-descriptions-item label="源端数据源">[{{ updateform.sourceConnectionId }}]
+          {{ updateform.sourceConnectionName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="源端schema">{{ updateform.sourceSchema }}</el-descriptions-item>
+        <el-descriptions-item label="源端表类型">{{ updateform.tableType }}</el-descriptions-item>
         <el-descriptions-item label="源端表选择方式">
           <span v-if="updateform.includeOrExclude == 'INCLUDE'">
             包含表
@@ -31,12 +34,15 @@
           </span>
         </el-descriptions-item>
         <el-descriptions-item label="源端表名列表">
-          <span v-show="updateform.includeOrExclude == 'INCLUDE' && (!updateform.sourceTables || updateform.sourceTables.length==0)"><b>所有物理表</b></span>
+          <span
+              v-show="updateform.includeOrExclude == 'INCLUDE' && (!updateform.sourceTables || updateform.sourceTables.length==0)"><b>所有物理表</b></span>
           <p v-for="item in updateform.sourceTables"
-             v-bind:key="item">{{item}}</p>
+             v-bind:key="item">{{ item }}</p>
         </el-descriptions-item>
-        <el-descriptions-item label="目地端数据源">[{{updateform.targetConnectionId}}] {{updateform.targetConnectionName}}</el-descriptions-item>
-        <el-descriptions-item label="目地端schema">{{updateform.targetSchema}}</el-descriptions-item>
+        <el-descriptions-item label="目地端数据源">[{{ updateform.targetConnectionId }}]
+          {{ updateform.targetConnectionName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="目地端schema">{{ updateform.targetSchema }}</el-descriptions-item>
         <el-descriptions-item label="自动同步模式">
           <span v-if="updateform.autoSyncMode == 2">
             目标端建表并同步数据
@@ -49,7 +55,8 @@
           </span>
         </el-descriptions-item>
         <el-descriptions-item label="建表字段自增"
-                              v-if=" updateform.autoSyncMode!==0 ">{{updateform.targetAutoIncrement}}</el-descriptions-item>
+                              v-if=" updateform.autoSyncMode!==0 ">{{ updateform.targetAutoIncrement }}
+        </el-descriptions-item>
         <el-descriptions-item label="表名大小写转换"
                               v-if=" updateform.autoSyncMode!==0 ">
           <span v-if="updateform.tableNameCase == 'NONE'">
@@ -60,6 +67,12 @@
           </span>
           <span v-if="updateform.tableNameCase == 'LOWER'">
             转小写
+          </span>
+          <span v-if="updateform.tableNameCase == 'CAMEL'">
+            下划线转驼峰
+          </span>
+          <span v-if="updateform.tableNameCase == 'SNAKE'">
+            驼峰转下换线
           </span>
         </el-descriptions-item>
         <el-descriptions-item label="列名大小写转换"
@@ -73,22 +86,33 @@
           <span v-if="updateform.columnNameCase == 'LOWER'">
             转小写
           </span>
+          <span v-if="updateform.columnNameCase == 'CAMEL'">
+            下划线转驼峰
+          </span>
+          <span v-if="updateform.columnNameCase == 'SNAKE'">
+            驼峰转下换线
+          </span>
         </el-descriptions-item>
         <el-descriptions-item label="数据批次大小"
-                              v-if=" updateform.autoSyncMode!==1 ">{{updateform.batchSize}}</el-descriptions-item>
+                              v-if=" updateform.autoSyncMode!==1 ">{{ updateform.batchSize }}
+        </el-descriptions-item>
         <el-descriptions-item label="通道队列大小"
-                              v-if=" updateform.autoSyncMode!==1 ">{{updateform.channelSize}}</el-descriptions-item>
+                              v-if=" updateform.autoSyncMode!==1 ">{{ updateform.channelSize }}
+        </el-descriptions-item>
         <el-descriptions-item label="同步操作方法"
-                              v-if=" updateform.autoSyncMode!==1 ">{{updateform.targetSyncOption}}</el-descriptions-item>
+                              v-if=" updateform.autoSyncMode!==1 ">{{ updateform.targetSyncOption }}
+        </el-descriptions-item>
         <el-descriptions-item label="同步前置执行SQL脚本"
                               v-if=" updateform.autoSyncMode!==1 ">
           <span v-show="!updateform.beforeSqlScripts || updateform.beforeSqlScripts.length==0">[SQL脚本内容为空]</span>
-          <span v-show="updateform.beforeSqlScripts && updateform.beforeSqlScripts.length>0">{{updateform.beforeSqlScripts}}</span>
+          <span
+              v-show="updateform.beforeSqlScripts && updateform.beforeSqlScripts.length>0">{{ updateform.beforeSqlScripts }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="同步后置执行SQL脚本"
                               v-if=" updateform.autoSyncMode!==1 ">
           <span v-show="!updateform.afterSqlScripts || updateform.afterSqlScripts.length==0">[SQL脚本内容为空]</span>
-          <span v-show="updateform.afterSqlScripts && updateform.afterSqlScripts.length>0">{{updateform.afterSqlScripts}}</span>
+          <span
+              v-show="updateform.afterSqlScripts && updateform.afterSqlScripts.length>0">{{ updateform.afterSqlScripts }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="表名映射规则">
           <span v-show="!updateform.tableNameMapper || updateform.tableNameMapper.length==0">[映射关系为空]</span>
@@ -100,8 +124,8 @@
             </tr>
             <tr v-for='(item,index) in updateform.tableNameMapper'
                 :key="index">
-              <td>{{item['fromPattern']}}</td>
-              <td>{{item['toValue']}}</td>
+              <td>{{ item['fromPattern'] }}</td>
+              <td>{{ item['toValue'] }}</td>
             </tr>
           </table>
         </el-descriptions-item>
@@ -115,8 +139,8 @@
             </tr>
             <tr v-for='(item,index) in updateform.columnNameMapper'
                 :key="index">
-              <td>{{item['fromPattern']}}</td>
-              <td>{{item['toValue']}}</td>
+              <td>{{ item['fromPattern'] }}</td>
+              <td>{{ item['toValue'] }}</td>
             </tr>
           </table>
         </el-descriptions-item>
@@ -136,7 +160,7 @@
 <script>
 export default {
 
-  data () {
+  data() {
     return {
       updateform: {
         id: 0,
@@ -174,7 +198,7 @@ export default {
   methods: {
     loadAssignmentDetail: function () {
       this.$http.get(
-        "/dbswitch/admin/api/v1/assignment/detail/id/" + this.$route.query.id
+          "/dbswitch/admin/api/v1/assignment/detail/id/" + this.$route.query.id
       ).then(res => {
         if (0 === res.data.code) {
           let detail = res.data.data;
@@ -227,13 +251,13 @@ export default {
     },
     selectChangedSourceConnection: function (value) {
       this.sourceConnection = this.connectionNameList.find(
-        (item) => {
-          return item.id === value;
-        });
+          (item) => {
+            return item.id === value;
+          });
 
       this.sourceConnectionSchemas = [];
       this.$http.get(
-        "/dbswitch/admin/api/v1/connection/schemas/get/" + value
+          "/dbswitch/admin/api/v1/connection/schemas/get/" + value
       ).then(res => {
         if (0 === res.data.code) {
           this.sourceConnectionSchemas = res.data.data;
@@ -247,7 +271,7 @@ export default {
       this.sourceSchemaTables = [];
       if ('TABLE' === this.updateform.tableType) {
         this.$http.get(
-          "/dbswitch/admin/api/v1/connection/tables/get/" + this.updateform.sourceConnectionId + "?schema=" + value
+            "/dbswitch/admin/api/v1/connection/tables/get/" + this.updateform.sourceConnectionId + "?schema=" + value
         ).then(res => {
           if (0 === res.data.code) {
             this.sourceSchemaTables = res.data.data;
@@ -258,7 +282,7 @@ export default {
         });
       } else {
         this.$http.get(
-          "/dbswitch/admin/api/v1/connection/views/get/" + this.updateform.sourceConnectionId + "?schema=" + value
+            "/dbswitch/admin/api/v1/connection/views/get/" + this.updateform.sourceConnectionId + "?schema=" + value
         ).then(res => {
           if (0 === res.data.code) {
             this.sourceSchemaTables = res.data.data;
@@ -271,13 +295,13 @@ export default {
     },
     selectChangedTargetConnection: function (value) {
       this.targetConnection = this.connectionNameList.find(
-        (item) => {
-          return item.id === value;
-        });
+          (item) => {
+            return item.id === value;
+          });
 
       this.targetConnectionSchemas = [];
       this.$http.get(
-        "/dbswitch/admin/api/v1/connection/schemas/get/" + value
+          "/dbswitch/admin/api/v1/connection/schemas/get/" + value
       ).then(res => {
         if (0 === res.data.code) {
           this.targetConnectionSchemas = res.data.data;
@@ -287,11 +311,11 @@ export default {
         }
       });
     },
-    handleGoBack () {
+    handleGoBack() {
       this.$router.go(-1);
     },
   },
-  created () {
+  created() {
     this.loadAssignmentDetail();
   },
 }
@@ -303,10 +327,11 @@ export default {
   height: 100%;
   overflow: auto;
 }
+
 .el-descriptions__body
-  .el-descriptions__table
-  .el-descriptions-row
-  .el-descriptions-item__label {
+.el-descriptions__table
+.el-descriptions-row
+.el-descriptions-item__label {
   min-width: 20px;
   max-width: 60px;
 }

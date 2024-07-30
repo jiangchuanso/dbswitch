@@ -248,6 +248,10 @@
                        value='UPPER'></el-option>
             <el-option label='转小写'
                        value='LOWER'></el-option>
+            <el-option label='下划线转驼峰'
+                       value='CAMEL'></el-option>
+            <el-option label='驼峰转下划线'
+                       value='SNAKE'></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="列名大小写转换"
@@ -268,6 +272,10 @@
                        value='UPPER'></el-option>
             <el-option label='转小写'
                        value='LOWER'></el-option>
+            <el-option label='下划线转驼峰'
+                       value='CAMEL'></el-option>
+            <el-option label='驼峰转下划线'
+                       value='SNAKE'></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="数据批次大小"
