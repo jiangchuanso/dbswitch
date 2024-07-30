@@ -230,14 +230,14 @@
                        :value=false></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="表名大小写转换"
+        <el-form-item label="表名转换方法"
                       label-width="130px"
                       :required=true
                       prop="tableNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
             <div slot="content">
-              表名大小写转换说明：先使用下面的表名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+              转换说明：先使用下面的表名映射，然后再使用这里的转换方法转换，对支持大小写敏感的数据库类型有效。
             </div>
             <i class="el-icon-question"></i>
           </el-tooltip>
@@ -254,14 +254,14 @@
                        value='SNAKE'></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="列名大小写转换"
+        <el-form-item label="列名转换方法"
                       label-width="130px"
                       :required=true
                       prop="columnNameCase"
                       style="width:45%">
           <el-tooltip placement="top">
             <div slot="content">
-              列名大小写转换说明：先使用下面的列名映射，然后再使用这里的大小写转换，对支持大小写敏感的数据库类型有效。
+              转换说明：先使用下面的列名映射，然后再使用这里的转换方法转换，对支持大小写敏感的数据库类型有效。
             </div>
             <i class="el-icon-question"></i>
           </el-tooltip>

@@ -57,7 +57,7 @@
         <el-descriptions-item label="建表字段自增"
                               v-if=" updateform.autoSyncMode!==0 ">{{ updateform.targetAutoIncrement }}
         </el-descriptions-item>
-        <el-descriptions-item label="表名大小写转换"
+        <el-descriptions-item label="表名转换方法"
                               v-if=" updateform.autoSyncMode!==0 ">
           <span v-if="updateform.tableNameCase == 'NONE'">
             无转换
@@ -75,7 +75,7 @@
             驼峰转下换线
           </span>
         </el-descriptions-item>
-        <el-descriptions-item label="列名大小写转换"
+        <el-descriptions-item label="列名转换方法"
                               v-if=" updateform.autoSyncMode!==0 ">
           <span v-if="updateform.columnNameCase == 'NONE'">
             无转换
