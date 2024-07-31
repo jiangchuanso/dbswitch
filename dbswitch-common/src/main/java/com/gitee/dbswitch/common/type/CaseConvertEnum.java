@@ -9,8 +9,10 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.common.type;
 
+import cn.hutool.core.util.StrUtil;
+
 /**
- * 处理大小写转换的枚举类
+ * 处理名称转换的枚举类
  *
  * @author tang
  */
@@ -30,33 +32,11 @@ public enum CaseConvertEnum {
   /**
    * 驼峰转下划线
    */
-  SNAKE(s -> {
-    StringBuilder snakeCaseString = new StringBuilder(s);
-    for (int i = 1; i < snakeCaseString.length(); i++) {
-      if (Character.isUpperCase(snakeCaseString.charAt(i))) {
-        snakeCaseString.insert(i, '_');
-        i++;
-      }
-    }
-    return snakeCaseString.toString().toLowerCase();
-  }),
+  SNAKE(StrUtil::toUnderlineCase),
   /**
    * 下划线转驼峰
    */
-  CAMEL(s -> {
-    String[] parts = s.split("_");
-    StringBuilder camelCaseString = new StringBuilder();
-    for (int i = 0; i < parts.length; i++) {
-      String part = parts[i];
-      if (i == 0) {
-        camelCaseString.append(part.toLowerCase());  // 第一个单词保持全小写
-      } else {
-        camelCaseString.append(Character.toUpperCase(part.charAt(0)));  // 其他单词首字母大写
-        camelCaseString.append(part.substring(1).toLowerCase());  // 其他部分小写
-      }
-    }
-    return camelCaseString.toString();
-  });
+  CAMEL(StrUtil::toCamelCase);
 
   private Converter function;
 

@@ -69,8 +69,7 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public List<TableDescription> queryTableList(Connection connection, String schemaName) {
     List<TableDescription> tableList = super.queryTableList(connection, schemaName);
-    Set<String> partitionedTable = getPartitionedTable(connection, schemaName,
-        SHOW_SUB_PARTITIONED_TABLE);
+    Set<String> partitionedTable = getPartitionedTable(connection, schemaName);
     return tableList.stream().filter(t -> !partitionedTable.contains(t.getTableName()))
         .collect(Collectors.toList());
   }
@@ -277,8 +276,8 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
     return results;
   }
 
-  protected Set<String> getPartitionedTable(Connection connection, String schemaName, String sql) {
-    String query = String.format(sql, schemaName);
+  protected Set<String> getPartitionedTable(Connection connection, String schemaName) {
+    String query = String.format(SHOW_SUB_PARTITIONED_TABLE, schemaName);
     Set<String> partitionedTable = new HashSet<>();
     try (Statement st = connection.createStatement()) {
       ResultSet resultSet = st.executeQuery(query);
