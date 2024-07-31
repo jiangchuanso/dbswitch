@@ -25,6 +25,7 @@ public final class PostgresUtils {
         provider, columnDescriptions, pks, schema, table, false);
   }
 
+
   private PostgresUtils() {
     throw new IllegalStateException();
   }

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GreenplumMetadataQueryProvider extends PostgresMetadataQueryProvider {
 
   static {
+    systemSchemas.add("pg_aoseg");
     systemSchemas.add("gp_toolkit");
   }
 

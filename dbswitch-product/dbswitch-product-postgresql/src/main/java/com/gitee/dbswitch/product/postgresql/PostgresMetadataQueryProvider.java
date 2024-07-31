@@ -40,13 +40,18 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
           + "where pg_namespace.nspname='%s' and pg_class.relname ='%s'),true) ";
   private static final String SHOW_CREATE_VIEW_SQL_2 =
       "select pg_get_viewdef('\"%s\".\"%s\"', true)";
+  private static final String SHOW_SUB_PARTITIONED_TABLE = "SELECT c.relname AS table_name \n"
+      + "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_inherits i ON c.oid = i.inhrelid \n"
+      + "WHERE n.nspname = '%s'";
 
   static {
     systemSchemas.add("pg_temp");
-    systemSchemas.add("pg_aoseg");
     systemSchemas.add("information_schema");
     systemSchemas.add("pg_catalog");
     systemSchemas.add("pg_bitmapindex");
+    systemSchemas.add("pg_toast");
+    systemSchemas.add("partman");
+    systemSchemas.add("repack");
   }
 
   public PostgresMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
@@ -58,6 +63,15 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
     List<String> schemas = super.querySchemaList(connection);
     return schemas.stream()
         .filter(s -> !systemSchemas.contains(s))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<TableDescription> queryTableList(Connection connection, String schemaName) {
+    List<TableDescription> tableList = super.queryTableList(connection, schemaName);
+    Set<String> partitionedTable = getPartitionedTable(connection, schemaName,
+        SHOW_SUB_PARTITIONED_TABLE);
+    return tableList.stream().filter(t -> !partitionedTable.contains(t.getTableName()))
         .collect(Collectors.toList());
   }
 
@@ -261,6 +275,20 @@ public class PostgresMetadataQueryProvider extends AbstractMetadataProvider {
     }
 
     return results;
+  }
+
+  protected Set<String> getPartitionedTable(Connection connection, String schemaName, String sql) {
+    String query = String.format(sql, schemaName);
+    Set<String> partitionedTable = new HashSet<>();
+    try (Statement st = connection.createStatement()) {
+      ResultSet resultSet = st.executeQuery(query);
+      while (resultSet.next()) {
+        partitionedTable.add(resultSet.getString(1));
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return partitionedTable;
   }
 
 }

@@ -47,6 +47,8 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
     excludesSchemaNames.add("db_backupoperator");
     excludesSchemaNames.add("db_datareader");
     excludesSchemaNames.add("db_owner");
+    excludesSchemaNames.add("sys");
+    excludesSchemaNames.add("INFORMATION_SCHEMA");
   }
 
   public SqlserverMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
