@@ -15,6 +15,15 @@ public class SourceProperties {
   private String schemaName;
   private String tableName;
   private List<String> columnNames;
+  private List<String> distributedKeys;
+
+  public List<String> getDistributedKeys() {
+    return distributedKeys;
+  }
+
+  public void setDistributedKeys(List<String> distributedKeys) {
+    this.distributedKeys = distributedKeys;
+  }
 
   public ProductTypeEnum getProductType() {
     return productType;
