@@ -9,12 +9,15 @@
             <span><b>数据库产品类型列表</b></span>
           </div>
           <div class="navsBox">
-            <ul>
-              <li v-for="(item,index) in connectionTypes"
-                  :key="index"
-                  @click="handleChooseClick(item.type,index)"
-                  :class="{active:index==isActive}">[{{item.id}}] {{item.type}}</li>
-            </ul>
+            <el-scrollbar style='height: 600px;'>
+              <ul>
+                <li v-for="(item,index) in connectionTypes"
+                    :key="index"
+                    @click="handleChooseClick(item.type,index)"
+                    :class="{active:index==isActive}">[{{ item.id }}] {{ item.name }}
+                </li>
+              </ul>
+            </el-scrollbar>
           </div>
         </el-card>
 
@@ -25,7 +28,8 @@
             <el-button type="primary"
                        size="mini"
                        icon="el-icon-document-add"
-                       @click="dialogVisible=true">添加</el-button>
+                       @click="dialogVisible=true">添加
+            </el-button>
           </div>
           <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                     :data="versionDrivers"
@@ -210,5 +214,9 @@ export default {
 .container .contentBox {
   padding: 10px;
   width: calc(100% - 250px);
+}
+
+/deep/ .el-scrollbar .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
 </style>

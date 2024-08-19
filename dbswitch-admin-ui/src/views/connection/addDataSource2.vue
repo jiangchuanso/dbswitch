@@ -401,7 +401,7 @@ export default {
             }
           });
         } else {
-          alert("请检查输入");
+          this.$message.error("请检查输入");
         }
       });
     },

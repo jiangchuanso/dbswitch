@@ -129,16 +129,6 @@
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
-              <el-tooltip content="跳转到调度监控"
-                          placement="top">
-                <el-button size="small"
-                           type="primary"
-                           icon="el-icon-timer"
-                           v-if="scope.row.isPublished===true"
-                           @click="schedulingLog(scope.$index, scope.row)"
-                           round>日志
-                </el-button>
-              </el-tooltip>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-timer"
@@ -183,6 +173,15 @@
                          @click="handleDelete(scope.$index, scope.row)"
                          round>删除
               </el-button>
+              <el-tooltip content="跳转到调度监控"
+                          placement="top">
+                <el-button size="small"
+                           type="primary"
+                           icon="el-icon-timer"
+                           @click="schedulingLog(scope.$index, scope.row)"
+                           round>日志
+                </el-button>
+              </el-tooltip>
             </el-button-group>
           </template>
         </el-table-column>

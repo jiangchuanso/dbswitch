@@ -93,7 +93,7 @@
                      placeholder="请选择">
             <el-option v-for="(item,index) in connectionNameList"
                        :key="index"
-                       :label="`[${item.id}]${item.name}`"
+                       :label="`[${item.id}] ${item.name}`"
                        :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -168,7 +168,7 @@
                      placeholder="请选择">
             <el-option v-for="(item,index) in connectionNameList"
                        :key="index"
-                       :label="`[${item.id}]${item.name}`"
+                       :label="`[${item.id}] ${item.name}`"
                        :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -304,7 +304,6 @@
             <el-option label=20000
                        :value=20000></el-option>
           </el-select>
-        </el-form-item>
         </el-form-item>
         <el-form-item label="通道队列大小"
                       label-width="120px"
