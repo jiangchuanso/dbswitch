@@ -360,8 +360,6 @@ bin/startup.sh
  
  ![admin_04.png](images/admin_04.png)
  
- ![admin_04_01.png](images/admin_04_01.png)
- 
  ![admin_05.png](images/admin_05.png)
  
  ![admin_06.png](images/admin_06.png)
@@ -370,6 +368,7 @@ bin/startup.sh
 
  ![admin_08.png](images/admin_08.png)
  
+ ![admin_09.png](images/admin_09.png)
 
 ### 3、两种方式的适用场景
 
