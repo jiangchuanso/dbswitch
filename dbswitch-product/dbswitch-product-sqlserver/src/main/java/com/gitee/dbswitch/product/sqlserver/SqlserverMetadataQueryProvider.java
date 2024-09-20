@@ -142,14 +142,15 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public String getTableDDL(Connection connection, String schemaName, String tableName) {
-    String sql = String.format(SQLServerConst.CREATE_TABLE_SQL_TPL, schemaName, tableName);
+    String dropTempTableSql = SQLServerConst.DROP_TEMPTABLE_SQL;
+    String createTempTableSql = String.format(SQLServerConst.CREATE_TEMPTABLE_SQL, schemaName, tableName);
+    String selectDdlSql = String.format(SQLServerConst.SELECT_DDL_SQL, schemaName, tableName);
     try (Statement st = connection.createStatement()) {
-      if (st.execute(sql)) {
-        try (ResultSet rs = st.getResultSet()) {
-          if (rs != null && rs.next()) {
-            return DDLFormatterUtils.format(rs.getString(1));
-          }
-        }
+      st.executeUpdate(dropTempTableSql);
+      st.executeUpdate(createTempTableSql);
+      ResultSet rs = st.executeQuery(selectDdlSql);
+      if (rs.next()) {
+        return DDLFormatterUtils.format(rs.getString("createTableStatement"));
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
