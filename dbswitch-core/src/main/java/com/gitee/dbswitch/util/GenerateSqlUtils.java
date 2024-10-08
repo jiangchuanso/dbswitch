@@ -104,7 +104,7 @@ public final class GenerateSqlUtils {
       sb.append(provider.getFieldDefinition(v, pks, autoIncr, false, withRemarks));
     }
 
-    if (type.isDoris()) {
+    if (type.isParenthesisBefore()) {
       sb.append(")");
       provider.appendPrimaryKeyForCreateTableSql(sb, pks);
     } else {

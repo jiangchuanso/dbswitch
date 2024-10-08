@@ -62,7 +62,7 @@
                 </li>
                 <li>PostgreSQL
                 </li>
-                <li>Greenplum(需使用PostgreSQL类型)
+                <li>Greenplum
                 </li>
                 <li>IBM的DB2
                 </li>
@@ -87,6 +87,8 @@
                 <li>ClickHouse
                 </li>
                 <li>StarRocks
+                </li>
+                <li>Doris
                 </li>
                 <li>MongoDB(只支持数据加载写入，不支持变化量同步)
                 </li>
@@ -130,7 +132,9 @@
                     ├── dbswitch-product-hive           //  -> hive方言实现类
                     ├── dbswitch-product-sqlite         //  -> sqlite方言实现类
                     ├── dbswitch-product-clickhouse     //  -> clickhouse方言实现类
+                    ├── dbswitch-product-greenplum      //  -> greenplum方言实现类
                     ├── dbswitch-product-starrocks      //  -> starrocks方言实现类
+                    ├── dbswitch-product-doris          //  -> doris方言实现类
                     ├── dbswitch-product-mongodb        //  -> mongodb方言实现类
                     ├── dbswitch-product-elasticsearch  //  -> elasticsearch方言实现类
                 ├── dbswitch-data                       // 工具入口模块，读取配置文件中的参数执行异构迁移同步

@@ -12,17 +12,24 @@ package com.gitee.dbswitch.product.doris;
 import com.gitee.dbswitch.common.consts.Constants;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
 import com.gitee.dbswitch.provider.meta.AbstractMetadataProvider;
-import com.gitee.dbswitch.schema.*;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.sql.*;
+import com.gitee.dbswitch.schema.ColumnDescription;
+import com.gitee.dbswitch.schema.ColumnMetaData;
+import com.gitee.dbswitch.schema.IndexDescription;
+import com.gitee.dbswitch.schema.SourceProperties;
+import com.gitee.dbswitch.schema.TableDescription;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
@@ -303,7 +310,7 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
           retval += "CHAR(" + newLength + ")";
         } else if (newLength < 65533) {
           retval += "VARCHAR(" + newLength + ")";
-        }  else {
+        } else {
           retval += "STRING";
         }
         break;
@@ -341,7 +348,6 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
       SourceProperties tblProperties) {
     if (CollectionUtils.isNotEmpty(primaryKeys)) {
       String primaryKeyAsString = getPrimaryKeyAsString(primaryKeys);
-//      builder.append("ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin");
       builder.append(" DISTRIBUTED BY HASH(").append(primaryKeyAsString).append(") BUCKETS AUTO");
       if (StringUtils.isNotBlank(tblComment)) {
         builder.append(String.format(" COMMENT='%s' ", tblComment.replace("'", "\\'")));

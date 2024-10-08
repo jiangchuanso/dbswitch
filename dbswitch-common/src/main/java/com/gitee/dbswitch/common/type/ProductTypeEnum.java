@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.common.type;
 
 import java.util.Arrays;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -206,17 +205,14 @@ public enum ProductTypeEnum {
       new String[]{"jdbc:postgresql://{host}[:{port}]/[{database}][\\?{params}]"},
       "jdbc:postgresql://127.0.0.1:5432/test"),
 
-
   /**
    * DORIS数据库类型
    */
   DORIS(21, "`", "Doris", "com.mysql.jdbc.Driver", 9030,
-          "/* ping */ SELECT 1",
-          "jdbc:mysql://",
-          new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
-        "jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true"),
-
-
+      "/* ping */ SELECT 1",
+      "jdbc:mysql://",
+      new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
+      "jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true"),
 
   ;
 
@@ -325,11 +321,11 @@ public enum ProductTypeEnum {
   }
 
   /**
-   * 是否为Doris数据库类型
+   * 是否拼接建表SQl时小括号在PK前面
    *
    * @return boolean
    */
-  public boolean isDoris() {
+  public boolean isParenthesisBefore() {
     return this == DORIS;
   }
 
@@ -340,15 +336,6 @@ public enum ProductTypeEnum {
    */
   public boolean isUseSql() {
     return this != MONGODB && this != ELASTICSEARCH;
-  }
-
-  /**
-   * 是否为ClickHouse数据库类型
-   *
-   * @return boolean
-   */
-  public boolean isClickHouse() {
-    return this == CLICKHOUSE;
   }
 
   /**
@@ -389,24 +376,6 @@ public enum ProductTypeEnum {
     String prefix1 = "jdbc:sqlite::resource:";
     //String prefix2 = "jdbc:sqlite::memory:";
     return url.startsWith(prefix1);
-  }
-
-  public static ProductTypeEnum getProductType(String url) {
-    return getProductType(url, null);
-  }
-
-  public static ProductTypeEnum getProductType(String url, Set<ProductTypeEnum> excludes) {
-    if (null != url) {
-      for (ProductTypeEnum productType : ProductTypeEnum.values()) {
-        if (null != excludes && excludes.contains(productType)) {
-          continue;
-        }
-        if (url.startsWith(productType.getUrlPrefix())) {
-          return productType;
-        }
-      }
-    }
-    return null;
   }
 
 }

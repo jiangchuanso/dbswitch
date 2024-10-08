@@ -53,8 +53,7 @@ public class TaskParamEntity {
    */
   @NonNull
   private ProductTypeEnum oldProductType;
-
-
+  
   /**
    * 新表的数据源
    */

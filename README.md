@@ -56,6 +56,7 @@
         ├── dbswitch-product-mongodb    	//  -> mongodb方言实现类
         ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类
         ├── dbswitch-product-starrocks 	    //  -> starrocks方言实现类
+        ├── dbswitch-product-doris 	        //  -> doris方言实现类
     ├── dbswitch-data                   	// 工具入口模块，读取配置文件中的参数执行异构迁移同步
     ├── dbswitch-admin                  	// 在以上模块的基础上引入Quartz的调度服务与接口
     ├── dbswitch-admin-ui               	// 基于Vue2的前段WEB交互页面
@@ -137,6 +138,7 @@ dbswitch:
   source:
     # source database connection information
     ## support multiple source database connection
+	type: ORACLE
     url: jdbc:oracle:thin:@172.17.2.10:1521:ORCL
     driver-class-name: 'oracle.jdbc.driver.OracleDriver'
     driver-path: D:/Workspace/dbswitch/driver/oracle/oracle-12c
@@ -163,6 +165,7 @@ dbswitch:
   target:
     # target database connection information
     ## Best support for Oracle/PostgreSQL/Greenplum/DM(But not is Hive) etc.
+	type: POSTGRESQL
     url: jdbc:postgresql://172.17.2.10:5432/test
     driver-class-name: org.postgresql.Driver
     driver-path: D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4
@@ -189,6 +192,7 @@ dbswitch:
 | 配置参数 | 配置说明 | 示例 | 备注 |
 | :------| :------ | :------ | :------ |
 | dbswitch.source.url | 来源端JDBC连接的URL | jdbc:oracle:thin:@10.17.1.158:1521:ORCL | 可为：oracle/mysql/mariadb/sqlserver/postgresql/db2/dm/kingbase8/highgo |
+| dbswitch.source.type | 来源端数据库类型 | ORACLE | 对应数据库的类型枚举值 |
 | dbswitch.source.driver-class-name | 来源端数据库的驱动类名称 | oracle.jdbc.driver.OracleDriver | 对应数据库的驱动类 |
 | dbswitch.source.driver-path | 来源端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/oracle/oracle-12c | 对应数据库的驱动JAR所在目录 |
 | dbswitch.source.username | 来源端连接帐号名 | test | 无 |
@@ -201,6 +205,7 @@ dbswitch:
 | dbswitch.source.regex-table-mapper | 基于正则表达式的表名称映射关系 | [{"from-pattern": "^","to-value": "T_"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.source.regex-column-mapper | 基于正则表达式的字段名映射关系 | [{"from-pattern": "$","to-value": "_x"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.target.url | 目的端JDBC连接的URL | jdbc:postgresql://10.17.1.90:5432/study | 可为：oracle/sqlserver/postgresql/greenplum,mysql/mariadb/db2/dm/kingbase8/highgo也支持，但字段类型兼容性问题比较多 |
+| dbswitch.target.type | 目的端数据库类型 | POSTGRESQL | 对应数据库的类型枚举值 |
 | dbswitch.target.driver-class-name |目的端数据库的驱动类名称 | org.postgresql.Driver | 对应数据库的驱动类 |
 | dbswitch.target.driver-path | 目的端数据库的驱动JAR所在目录 | D:/Workspace/dbswitch/driver/postgresql/postgresql-11.4 | 对应数据库的驱动JAR所在目录 |
 | dbswitch.target.username | 目的端连接帐号名 | test | 无 |

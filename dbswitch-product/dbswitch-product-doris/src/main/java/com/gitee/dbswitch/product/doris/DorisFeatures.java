@@ -13,6 +13,7 @@ import com.gitee.dbswitch.features.ProductFeatures;
 
 public class DorisFeatures implements ProductFeatures {
 
+  @Override
   public int convertFetchSize(int fetchSize) {
     return Integer.MIN_VALUE;
   }

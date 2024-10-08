@@ -27,6 +27,7 @@ public class DorisFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new DorisFeatures();
   }
