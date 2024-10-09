@@ -118,6 +118,11 @@
       <artifactId>dbswitch-product-doris</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.gitee.dbswitch</groupId>
+      <artifactId>dbswitch-product-oceanbase</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

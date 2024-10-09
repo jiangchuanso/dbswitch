@@ -214,6 +214,15 @@ public enum ProductTypeEnum {
       new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"},
       "jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true"),
 
+  /**
+   * OceanBase数据库类型
+   */
+  OCEANBASE(22, "`", "OceanBase", "com.oceanbase.jdbc.Driver", 2881,
+      "/* ping */ SELECT 1",
+      "jdbc:oceanbase://",
+      new String[]{"jdbc:oceanbase://{host}[:{port}]/[{database}][\\?{params}]"},
+      "jdbc:oceanbase://127.0.0.1:2881/test?pool=false&useUnicode=true&characterEncoding=utf-8&useSSL=false&"),
+
   ;
 
   private int id;

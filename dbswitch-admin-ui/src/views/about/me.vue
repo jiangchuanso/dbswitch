@@ -135,6 +135,7 @@
                     ├── dbswitch-product-greenplum      //  -> greenplum方言实现类
                     ├── dbswitch-product-starrocks      //  -> starrocks方言实现类
                     ├── dbswitch-product-doris          //  -> doris方言实现类
+                    ├── dbswitch-product-oceanbase 	    //  -> oceanbase方言实现类
                     ├── dbswitch-product-mongodb        //  -> mongodb方言实现类
                     ├── dbswitch-product-elasticsearch  //  -> elasticsearch方言实现类
                 ├── dbswitch-data                       // 工具入口模块，读取配置文件中的参数执行异构迁移同步

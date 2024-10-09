@@ -57,6 +57,7 @@
         ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类
         ├── dbswitch-product-starrocks 	    //  -> starrocks方言实现类
         ├── dbswitch-product-doris 	        //  -> doris方言实现类
+        ├── dbswitch-product-oceanbase 	    //  -> oceanbase方言实现类
     ├── dbswitch-data                   	// 工具入口模块，读取配置文件中的参数执行异构迁移同步
     ├── dbswitch-admin                  	// 在以上模块的基础上引入Quartz的调度服务与接口
     ├── dbswitch-admin-ui               	// 基于Vue2的前段WEB交互页面

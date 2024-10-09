@@ -42,11 +42,11 @@ public final class ProductTypeUtils {
   }
 
   public static boolean isStarRocks(Connection connection) {
+    // 此查询语句是StarRocks查询be节点是否存活，可以用来判断是否是StarRocks数据源
+    String sql = "SHOW BACKENDS";
     try (Statement statement = connection.createStatement()) {
-      // 此查询语句是Starrocks查询be节点是否存活，可以用来判断是否是Starrocks数据源
-      String sql = "SHOW BACKENDS";
       return statement.execute(sql);
-    } catch (Exception sqlException) {
+    } catch (SQLException sqlException) {
       if (log.isDebugEnabled()) {
         log.debug("Failed to execute sql :show backends, and guesses it is mysql datasource!");
       }
@@ -54,5 +54,31 @@ public final class ProductTypeUtils {
     return false;
   }
 
+  public static boolean isOceanBaseUseMysqlMode(Connection connection) {
+    String sql = "show global variables where variable_name = 'ob_compatibility_mode'";
+    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+      try (ResultSet resultSet = statement.executeQuery()) {
+        if (resultSet.next()) {
+          String value = resultSet.getString(2);
+          if (Objects.nonNull(value)) {
+            if (value.toUpperCase().contains("MYSQL")) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            throw new RuntimeException();
+          }
+        } else {
+          throw new RuntimeException();
+        }
+      }
+    } catch (SQLException sqlException) {
+      if (log.isDebugEnabled()) {
+        log.debug("Failed to execute sql :{}, and guesses OceanBase is MySQL Mode!", sql);
+      }
+    }
+    return true;
+  }
 
 }

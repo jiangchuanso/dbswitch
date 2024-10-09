@@ -103,6 +103,27 @@ jdbc连接地址：jdbc:opengauss://172.17.2.10:5866/test
 jdbc驱动名称：org.opengauss.Driver
 ```
 
+**StarRocks数据库**
+
+```
+jdbc连接地址：jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false
+jdbc驱动名称：com.mysql.jdbc.Driver
+```
+
+**Doris数据库**
+
+```
+jdbc连接地址：jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false
+jdbc驱动名称：com.mysql.jdbc.Driver
+```
+
+**OceanBase数据库**
+
+```
+jdbc连接地址：jdbc:oceanbase://127.0.0.1:2881/test?pool=false
+jdbc驱动名称：com.oceanbase.jdbc.Driver
+```
+
 **ClickHouse(>=21.0.0.0)数据库**
 
 ```

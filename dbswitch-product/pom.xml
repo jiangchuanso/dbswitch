@@ -12,6 +12,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>dbswitch-register-product</module>
     <module>dbswitch-product-mysql</module>
     <module>dbswitch-product-oracle</module>
     <module>dbswitch-product-postgresql</module>
@@ -27,13 +28,13 @@
     <module>dbswitch-product-gbase</module>
     <module>dbswitch-product-openguass</module>
     <module>dbswitch-product-mongodb</module>
-    <module>dbswitch-register-product</module>
     <module>dbswitch-product-clickhouse</module>
     <module>dbswitch-product-elasticsearch</module>
     <module>dbswitch-product-highgo</module>
     <module>dbswitch-product-starrocks</module>
     <module>dbswitch-product-greenplum</module>
     <module>dbswitch-product-doris</module>
+    <module>dbswitch-product-oceanbase</module>
   </modules>
 
 </project>
