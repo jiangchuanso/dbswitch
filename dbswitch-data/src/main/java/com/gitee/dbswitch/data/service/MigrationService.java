@@ -39,7 +39,7 @@ import org.springframework.util.StopWatch;
  */
 @Slf4j
 @Service
-public class MigrationService {
+public class MigrationService implements Runnable {
 
   /**
    * 性能统计记录表
@@ -93,6 +93,7 @@ public class MigrationService {
   /**
    * 执行入口
    */
+  @Override
   public void run() {
     if (Objects.nonNull(mdcKeyValue)) {
       Runnable runnable = new LoggingRunnable(this::doRun, this.mdcKeyValue);

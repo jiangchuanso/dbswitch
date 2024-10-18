@@ -23,11 +23,7 @@
 
 支持有主键表的 **增量变更同步** （变化数据计算Change Data Calculate）功能(千万级以上数据量的性能尚需在生产环境验证)
 
-### 2、功能设计
-
- ![function](images/function.PNG)
-
-### 3、结构设计
+### 2、结构设计
   
 - 模块结构功能 
 
@@ -53,11 +49,11 @@
         ├── dbswitch-product-sqlite     	//  -> sqlite方言实现类
         ├── dbswitch-product-greenplum   	//  -> greenplum方言实现类
         ├── dbswitch-product-clickhouse 	//  -> clickhouse方言实现类
-        ├── dbswitch-product-mongodb    	//  -> mongodb方言实现类
-        ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类
         ├── dbswitch-product-starrocks 	    //  -> starrocks方言实现类
         ├── dbswitch-product-doris 	        //  -> doris方言实现类
         ├── dbswitch-product-oceanbase 	    //  -> oceanbase方言实现类
+        ├── dbswitch-product-mongodb    	//  -> mongodb方言实现类
+        ├── dbswitch-product-elasticsearch 	//  -> elasticsearch方言实现类
     ├── dbswitch-data                   	// 工具入口模块，读取配置文件中的参数执行异构迁移同步
     ├── dbswitch-admin                  	// 在以上模块的基础上引入Quartz的调度服务与接口
     ├── dbswitch-admin-ui               	// 基于Vue2的前段WEB交互页面
@@ -107,14 +103,33 @@ sh ./docker-maven-build.sh
 
 (2) docker容器方式部署：
 
-假设已经部署好的MySQL数据库地址为192.168.31.57，端口为3306，账号为test，密码为123456
+- MYSQL做配置库部署
+
+假设已经部署好的MySQL(5.7+)数据库地址为192.168.31.57，端口为3306，账号为test，密码为123456
 ```
 docker run -d --name dbswitch \
+ -e DBTYPE=mysql \
  -e MYSQLDB_HOST=192.168.31.57 \
  -e MYSQLDB_PORT=3306 \
  -e MYSQLDB_USERNAME=test \
  -e MYSQLDB_PASSWORD='123456' \
  -e MYSQLDB_NAME='dbswitch' \
+ -v /tmp:/tmp \
+ -p 9088:9088 \
+ registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:latest
+```
+
+- PostgreSQL/OpenGauss做配置库部署
+
+假设已经部署好的PostgreSQL/OpenGauss数据库地址为192.168.31.57，端口为5432，账号为test，数据库为dbswitch(需先建好), 密码为123456
+```
+docker run -d --name dbswitch \
+ -e DBTYPE=postgres \
+ -e PGDB_HOST=192.168.31.57 \
+ -e PGDB_PORT=5432 \
+ -e PGDB_USERNAME=test \
+ -e PGDB_PASSWORD='123456' \
+ -e PGDB_NAME='dbswitch' \
  -v /tmp:/tmp \
  -p 9088:9088 \
  registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:latest
@@ -278,15 +293,16 @@ dbswitch.target.writer-engine-insert=true
 
 > dbswitch-admin模块后端同时支持MySQL、PostgreSQL、OpenGauss作为配置数据库。
 
-#### (2)、配置conf/application.yml(MySQL可参考application_sample_mysql.yml配置，PostgreSQL/OpenGauss可参考application_sample_postgresql.yml配置)
+#### (2)、配置conf/application.yml
 
-MySQL的application.yml配置内容示例如下：
+application.yml配置内容示例如下：
 
 ```
-server:
-  port: 9088
-
 spring:
+  profiles:
+    # 配置包含使用的配置库类型(可选值:mysql或postgres),对应在application-mysql.yml或application-postgres.yml中配置数据库信息
+    # 如果使用OpenGauss作为配置数据库，请配置为postgres类型,dbswitch会使用postgres的jdbc驱动连接OpenGauss
+    include: mysql
   application:
     name: dbswitch-admin
   tomcat:
@@ -295,25 +311,16 @@ spring:
   mvc:
     throw-exception-if-no-handler-found: false
     static-path-pattern: /statics/**
-  datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.31.57:3306/dbswitch?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF8&useSSL=false
-    username: test
-    password: 123456
-    validation-query: SELECT 1
-    test-on-borrow: true
-  flyway:
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    table: DBSWITCH_SCHEMA_HISTORY
-    enabled: true
+
+server:
+  port: 9088
 
 mybatis:
   configuration:
     lazy-loading-enabled: true
     aggressive-lazy-loading: false
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 dbswitch:
   configuration:
@@ -321,7 +328,18 @@ dbswitch:
     drivers-base-path: D:/Workspace/dbswitch/drivers
 ```
 
-按照上述配置，修改```conf/application.yml```配置文件中的```spring.datasource.url```和```spring.datasource.username```及```spring.datasource.password```及```dbswitch.configuration.drivers-base-path```四个字段值的配置。
+按照上述配置，只需修改```conf/application.yml```及```conf/application-???.yml```配置文件中的如下五个参数的配置:
+
+- ```spring.profiles.include```
+> 使用的数据库类型，可选值(单选): mysql,postgres
+- ```dbswitch.configuration.drivers-base-path```
+> 驱动JAR文件所在的目录位置
+- ```spring.datasource.url```
+> 对应数据库类型的jdbc连接串(只需修改IP地址和端口号即可)
+- ```spring.datasource.username```
+> 对应数据库认证的账号
+- ```spring.datasource.password```
+> 对应数据库认证的密码
 
 #### (3)、启动dbswitch-admin系统
 
@@ -434,11 +452,11 @@ cd dbswitch && mvn clean install
 
 ```
 // 构建并行读取任务执行的线程池
-AsyncTaskExecutor taskReadExecutor=new ThreadPoolTaskExecutor();
+AsyncTaskExecutor readExecutor = new ThreadPoolTaskExecutor();
 taskReadExecutor.setXXXX();
 
 // 构建并行写入任务执行的线程池
-AsyncTaskExecutor taskWriteExecutor=new ThreadPoolTaskExecutor();
+AsyncTaskExecutor writeExecutor = new ThreadPoolTaskExecutor();
 taskWriteExecutor.setXXXX();
 
 // 构造dbswitch所需的配置参数，参数说明请参考第三章第1小节
@@ -447,7 +465,7 @@ properties.setSource(XXX);
 properties.setTarget(YYY);
 
 // 将参数传递给dbswitch启动迁移同步方式执行
-MigrationService service = new MigrationService(properties, taskReadExecutor, taskWriteExecutor);
+MigrationService service = new MigrationService(properties, readExecutor, writeExecutor);
 service.run();
 ```
 

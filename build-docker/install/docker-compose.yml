@@ -5,6 +5,7 @@ services:
     volumes:
       - "/data/mysql:/var/lib/mysql"
     environment:
+      DBTYPE: mysql
       MYSQL_DATABASE: dbswitch
       MYSQL_USER: tangyibo
       MYSQL_PASSWORD: 123456
