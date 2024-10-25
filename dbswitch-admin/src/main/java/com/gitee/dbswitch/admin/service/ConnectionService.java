@@ -15,7 +15,11 @@ import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
 import com.gitee.dbswitch.admin.common.response.ResultCode;
 import com.gitee.dbswitch.admin.controller.converter.DbConnectionDetailConverter;
+import com.gitee.dbswitch.admin.dao.AssignmentConfigDAO;
+import com.gitee.dbswitch.admin.dao.AssignmentTaskDAO;
 import com.gitee.dbswitch.admin.dao.DatabaseConnectionDAO;
+import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
+import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
 import com.gitee.dbswitch.admin.model.request.DbConnectionCreateRequest;
 import com.gitee.dbswitch.admin.model.request.DbConnectionSearchRequest;
@@ -51,6 +55,10 @@ public class ConnectionService {
   private DriverLoadService driverLoadService;
   @Resource
   private DatabaseConnectionDAO databaseConnectionDAO;
+  @Resource
+  private AssignmentTaskDAO assignmentTaskDAO;
+  @Resource
+  private AssignmentConfigDAO assignmentConfigDAO;
 
   public CloseableDataSource getDataSource(Long id) {
     return getDataSource(getDatabaseConnectionById(id));
@@ -239,6 +247,14 @@ public class ConnectionService {
   }
 
   public void deleteDatabaseConnection(Long id) {
+    List<Long> assignmentIds = assignmentConfigDAO.getByConnectionId(id)
+        .stream()
+        .map(AssignmentConfigEntity::getAssignmentId)
+        .collect(Collectors.toList());
+    if (assignmentIds.size() > 0) {
+      AssignmentTaskEntity taskEntity = assignmentTaskDAO.getById(assignmentIds.get(0));
+      throw new DbswitchException(ResultCode.ERROR_RELATED_ASSIGNMENT, "[" + taskEntity.getName() + "]");
+    }
     databaseConnectionDAO.deleteById(id);
   }
 

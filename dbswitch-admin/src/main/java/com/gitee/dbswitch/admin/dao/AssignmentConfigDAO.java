@@ -12,6 +12,7 @@ package com.gitee.dbswitch.admin.dao;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
 import com.gitee.dbswitch.admin.mapper.AssignmentConfigMapper;
+import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +34,13 @@ public class AssignmentConfigDAO {
     QueryWrapper<AssignmentConfigEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(AssignmentConfigEntity::getAssignmentId, taskId);
     return assignmentConfigMapper.selectOne(queryWrapper);
+  }
+
+  public List<AssignmentConfigEntity> getByConnectionId(Long connId) {
+    QueryWrapper<AssignmentConfigEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AssignmentConfigEntity::getSourceConnectionId, connId)
+        .or().eq(AssignmentConfigEntity::getTargetConnectionId, connId);
+    return assignmentConfigMapper.selectList(queryWrapper);
   }
 
   public void updateSelective(AssignmentConfigEntity assignmentConfigEntity) {

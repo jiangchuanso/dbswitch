@@ -28,6 +28,7 @@ public enum ResultCode {
   ERROR_INVALID_JDBC_URL(9, "JDBC连接的URL格式不正确"),
   ERROR_CANNOT_CONNECT_REMOTE(10, "远程地址不可达"),
   ERROR_INVALID_ASSIGNMENT_CONFIG(11, "无效的任务参数配置"),
+  ERROR_RELATED_ASSIGNMENT(12, "存在关联的任务"),
 
   ERROR_ACCESS_FORBIDDEN(403, "无效的登陆凭证"),
   ERROR_TOKEN_EXPIRED(404, "登录凭证已失效"),
