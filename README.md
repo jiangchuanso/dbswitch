@@ -9,7 +9,7 @@
 
 ### 1、功能描述
 
-一句话，dbswitch工具提供源端数据库向目的端数据库的**批量**迁移同步功能，支持数据的全量和增量方式同步。包括：
+一句话，dbswitch工具提供源端数据库向目的端数据库的离线**批量**迁移同步功能，支持数据的全量和增量方式同步。包括：
 
 - **结构迁移**
 
@@ -19,7 +19,7 @@
 
 - **数据同步**。
 
-基于JDBC的分批次读取源端数据库数据，并基于insert/copy方式将数据分批次写入目的数据库。
+基于JDBC的分批次离线读取源端数据库数据，并基于insert/copy方式将数据分批次写入目的数据库。
 
 支持有主键表的 **增量变更同步** （变化数据计算Change Data Calculate）功能(千万级以上数据量的性能尚需在生产环境验证)
 
@@ -135,7 +135,12 @@ docker run -d --name dbswitch \
  registry.cn-hangzhou.aliyuncs.com/inrgihc/dbswitch:latest
 ```
 
-(3) 基于docker-compose提供linux联网环境下的**一键安装**，安装命令见 [发行版链接地址](https://gitee.com/inrgihc/dbswitch/releases)
+(3) 基于docker-compose提供linux联网环境下的**一键安装**，x86的CentOS系统下安装命令如下：
+
+```
+curl -k -sSL https://gitee.com/dromara/dbswitch/attach_files/1946254/download | bash
+```
+注：默认yum源不可用可用命令```curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo```安装阿里源。
 
 文档详见: [build-docker/install/README.md](build-docker/install) 
 
