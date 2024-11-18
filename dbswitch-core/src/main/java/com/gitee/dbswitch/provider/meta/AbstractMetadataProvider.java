@@ -10,7 +10,6 @@
 package com.gitee.dbswitch.provider.meta;
 
 import cn.hutool.core.text.StrPool;
-import com.gitee.dbswitch.common.type.ProductTypeEnum;
 import com.gitee.dbswitch.common.type.TableIndexEnum;
 import com.gitee.dbswitch.provider.AbstractCommonProvider;
 import com.gitee.dbswitch.provider.ProductFactoryProvider;
@@ -58,6 +57,15 @@ public abstract class AbstractMetadataProvider
 
   public void setCatalogName(String catalogName) {
     this.catalogName = catalogName;
+  }
+
+  @Override
+  public void testConnection(Connection connection, String pingSql) {
+    try (Statement st = connection.createStatement()) {
+      st.execute(pingSql);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

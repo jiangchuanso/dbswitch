@@ -103,9 +103,9 @@ public class OceanbaseMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public void testQuerySQL(Connection connection, String sql) {
     if (StringUtils.equals(ProductTypeEnum.OCEANBASE.getSql(), sql)) {
-      this.delegate.testQuerySQL(connection, this.dialect.getSql());
+      this.delegate.testConnection(connection, this.dialect.getSql());
     } else {
-      this.delegate.testQuerySQL(connection, sql);
+      this.delegate.testConnection(connection, sql);
     }
   }
 

@@ -31,6 +31,14 @@ public interface MetadataProvider {
   ProductTypeEnum getProductType();
 
   /**
+   * 测试连接（原始SQL语句）
+   *
+   * @param connection JDBC连接
+   * @param pingSql    测试连接的SQL语句
+   */
+  void testConnection(Connection connection, String pingSql);
+
+  /**
    * 获取数据库的模式schema列表
    *
    * @param connection JDBC连接
