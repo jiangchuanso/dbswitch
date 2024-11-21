@@ -64,8 +64,6 @@ public final class DataSourceUtils {
       ds.setConnectionTestQuery("SELECT 1 FROM SYSIBM.SYSDUMMY1");
     } else if (properties.getDriverClassName().contains("mongodb")) {
       ds.setConnectionTestQuery("use admin;");
-    } else if (!ds.getJdbcUrl().contains("jdbc:jest://")) {
-      ds.setConnectionTestQuery("SELECT 1");
     }
     ds.setMaximumPoolSize(MAX_THREAD_COUNT);
     ds.setMinimumIdle(MAX_THREAD_COUNT);
@@ -106,8 +104,6 @@ public final class DataSourceUtils {
       ds.setConnectionTestQuery("SELECT 1 FROM SYSIBM.SYSDUMMY1");
     } else if (properties.getDriverClassName().contains("mongodb")) {
       ds.setConnectionTestQuery("use admin;");
-    } else if (!ds.getJdbcUrl().contains("jdbc:jest://")) {
-      ds.setConnectionTestQuery("SELECT 1");
     }
     ds.setMaximumPoolSize(MAX_THREAD_COUNT);
     ds.setMinimumIdle(MAX_THREAD_COUNT);
