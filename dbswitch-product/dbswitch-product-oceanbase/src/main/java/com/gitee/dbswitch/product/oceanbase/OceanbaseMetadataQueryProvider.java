@@ -111,7 +111,7 @@ public class OceanbaseMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public String getQuotedSchemaTableCombination(String schemaName, String tableName) {
-    return this.delegate.getQuotedSchemaTableCombination(schemaName, tableName);
+    return quoteSchemaTableName(schemaName, tableName);
   }
 
   @Override

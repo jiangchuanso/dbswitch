@@ -264,7 +264,12 @@ public abstract class AbstractMetadataProvider
   @Override
   public String getPrimaryKeyAsString(List<String> pks) {
     if (!pks.isEmpty()) {
-      return quoteName(StringUtils.join(pks, quoteName(StrPool.COMMA)));
+      return quoteName(
+          StringUtils.join(
+              pks.stream().distinct().collect(Collectors.toList())
+              , quoteName(StrPool.COMMA)
+          )
+      );
     }
     return StringUtils.EMPTY;
   }

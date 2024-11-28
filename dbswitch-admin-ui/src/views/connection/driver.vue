@@ -41,17 +41,14 @@
             </template>
             <el-table-column property="driverVersion"
                              label="驱动版本号"
-                             min-width="15%"></el-table-column>
+                             min-width="30%"></el-table-column>
             <el-table-column property="driverClass"
                              label="驱动类名"
-                             min-width="20%"></el-table-column>
+                             min-width="30%"></el-table-column>
             <el-table-column property="jarFiles"
                              :formatter="formatJarFileList"
                              label="驱动JAR名称"
-                             min-width="30%"></el-table-column>
-            <el-table-column property="driverPath"
-                             label="驱动版本路径"
-                             min-width="50%"></el-table-column>
+                             min-width="40%"></el-table-column>
 
           </el-table>
         </div>

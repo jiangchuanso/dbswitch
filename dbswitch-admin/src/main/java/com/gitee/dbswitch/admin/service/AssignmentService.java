@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.dbswitch.admin.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gitee.dbswitch.admin.common.exception.DbswitchException;
 import com.gitee.dbswitch.admin.common.response.PageResult;
 import com.gitee.dbswitch.admin.common.response.Result;
@@ -18,13 +17,13 @@ import com.gitee.dbswitch.admin.controller.converter.AssignmentDetailConverter;
 import com.gitee.dbswitch.admin.controller.converter.AssignmentInfoConverter;
 import com.gitee.dbswitch.admin.controller.converter.AssignmentsConverter;
 import com.gitee.dbswitch.admin.dao.AssignmentConfigDAO;
+import com.gitee.dbswitch.admin.dao.AssignmentJobDAO;
 import com.gitee.dbswitch.admin.dao.AssignmentTaskDAO;
 import com.gitee.dbswitch.admin.dao.DatabaseConnectionDAO;
 import com.gitee.dbswitch.admin.entity.AssignmentConfigEntity;
 import com.gitee.dbswitch.admin.entity.AssignmentJobEntity;
 import com.gitee.dbswitch.admin.entity.AssignmentTaskEntity;
 import com.gitee.dbswitch.admin.entity.DatabaseConnectionEntity;
-import com.gitee.dbswitch.admin.mapper.AssignmentJobMapper;
 import com.gitee.dbswitch.admin.model.request.AssigmentCreateRequest;
 import com.gitee.dbswitch.admin.model.request.AssigmentUpdateRequest;
 import com.gitee.dbswitch.admin.model.request.AssignmentSearchRequest;
@@ -65,6 +64,9 @@ public class AssignmentService {
   private AssignmentConfigDAO assignmentConfigDAO;
 
   @Resource
+  private AssignmentJobDAO assignmentJobDAO;
+
+  @Resource
   private ScheduleService scheduleService;
 
   @Resource
@@ -72,9 +74,6 @@ public class AssignmentService {
 
   @Resource
   private DriverLoadService driverLoadService;
-
-  @Resource
-  private AssignmentJobMapper assignmentJobMapper;
 
   @Transactional(rollbackFor = Exception.class)
   public AssignmentInfoResponse createAssignment(AssigmentCreateRequest request) {
@@ -351,30 +350,26 @@ public class AssignmentService {
       AssignmentsDataResponse assignmentsDataResponse = ConverterFactory.getConverter(AssignmentsConverter.class)
           .convert(assignmentTaskEntity);
 
-      AssignmentConfigEntity assignmentConfigEntity = this.assignmentConfigDAO.getByAssignmentTaskId(id);
+      AssignmentConfigEntity assignmentConfigEntity = assignmentConfigDAO.getByAssignmentTaskId(id);
 
       Long sourceConnectionId = assignmentConfigEntity.getSourceConnectionId();
-      DatabaseConnectionEntity databaseConnectionEntity = this.databaseConnectionDAO.getById(sourceConnectionId);
+      DatabaseConnectionEntity databaseConnectionEntity = databaseConnectionDAO.getById(sourceConnectionId);
       String sourceSchema = assignmentConfigEntity.getSourceSchema();
       assignmentsDataResponse.setSourceSchema(sourceSchema);
       String sourceType = databaseConnectionEntity.getType().getName();
       assignmentsDataResponse.setSourceType(sourceType);
 
       Long targetConnectionId = assignmentConfigEntity.getTargetConnectionId();
-      DatabaseConnectionEntity databaseConnectionEntity1 = this.databaseConnectionDAO.getById(targetConnectionId);
+      DatabaseConnectionEntity databaseConnectionEntity1 = databaseConnectionDAO.getById(targetConnectionId);
       String targetSchema = assignmentConfigEntity.getTargetSchema();
       assignmentsDataResponse.setTargetSchema(targetSchema);
       String targetType = databaseConnectionEntity1.getType().getName();
       assignmentsDataResponse.setTargetType(targetType);
 
-      AssignmentJobEntity assignmentJobEntity = this.assignmentJobMapper.selectOne(
-          new LambdaQueryWrapper<AssignmentJobEntity>()
-              .eq(AssignmentJobEntity::getAssignmentId, assignmentsDataResponse.getId())
-              .orderByDesc(AssignmentJobEntity::getCreateTime)
-              .last(" limit 1 "));
-      Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null) ?
-          JobStatusEnum.INIT.getValue() :
-          assignmentJobEntity.getStatus();
+      AssignmentJobEntity assignmentJobEntity = assignmentJobDAO.getLatestJobEntity(id);
+      Integer status = (assignmentJobEntity == null || assignmentJobEntity.getStatus() == null)
+          ? JobStatusEnum.INIT.getValue()
+          : assignmentJobEntity.getStatus();
       assignmentsDataResponse.setRunStatus(JobStatusEnum.of(status).getName());
       assignmentsDataResponses.add(assignmentsDataResponse);
     }

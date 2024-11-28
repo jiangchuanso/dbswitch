@@ -34,10 +34,10 @@ public class OceanbaseUtils {
               return false;
             }
           } else {
-            throw new RuntimeException();
+            throw new RuntimeException("Execute SQL[" + sql + "] return null value");
           }
         } else {
-          throw new RuntimeException();
+          throw new RuntimeException("Execute SQL[" + sql + "] no result");
         }
       }
     } catch (SQLException sqlException) {

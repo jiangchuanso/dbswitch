@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -328,10 +329,10 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public String getPrimaryKeyAsString(List<String> pks) {
     if (null != pks && !pks.isEmpty()) {
-      return "[" + StringUtils.join(pks, "] , [") + "]";
+      return "[" + StringUtils.join(pks.stream().distinct().collect(Collectors.toList()), "] , [") + "]";
     }
 
-    return "";
+    return StringUtils.EMPTY;
   }
 
   @Override
