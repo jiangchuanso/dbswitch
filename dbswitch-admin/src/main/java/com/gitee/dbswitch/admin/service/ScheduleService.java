@@ -17,6 +17,7 @@ import com.gitee.dbswitch.admin.execution.ExecuteJobTaskRunnable;
 import com.gitee.dbswitch.admin.type.JobStatusEnum;
 import com.gitee.dbswitch.admin.type.ScheduleModeEnum;
 import com.gitee.dbswitch.common.event.EventSubscriber;
+import com.gitee.dbswitch.common.event.ExceptionHandler;
 import com.gitee.dbswitch.common.event.ListenedEvent;
 import com.gitee.dbswitch.common.event.TaskEventHub;
 import com.gitee.dbswitch.common.util.UuidUtils;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class ScheduleService implements InitializingBean {
+public class ScheduleService implements InitializingBean, ExceptionHandler {
 
   /**
    * @Bean是一个方法级别上的注解，Bean的ID为方法名字。
@@ -60,12 +61,18 @@ public class ScheduleService implements InitializingBean {
   @Resource
   private AssignmentJobDAO assignmentJobDAO;
 
-  private TaskEventHub taskEventBus = new TaskEventHub("manualRun", 5);
+  private TaskEventHub taskEventBus = new TaskEventHub("manual-run", 5, this);
 
   private Map<String, ExecuteJobTaskRunnable> taskRunnableMap = new ConcurrentHashMap<>();
 
+  @Override
   public void afterPropertiesSet() throws Exception {
     taskEventBus.registerSubscriber(new EventSubscriber(this::manualRunTask));
+  }
+
+  @Override
+  public void handleException(ListenedEvent event, Throwable throwable) {
+    log.warn("Failed to handle event: {}", event, throwable);
   }
 
   private void manualRunTask(ListenedEvent event) {
