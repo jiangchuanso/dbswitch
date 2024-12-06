@@ -157,6 +157,8 @@ public abstract class AbstractMetadataProvider
         for (ColumnDescription cd : ret) {
           if (columnName.equals(cd.getFieldName())) {
             cd.setRemarks(remarks);
+            //break out of the loop early
+            break;
           }
         }
       }

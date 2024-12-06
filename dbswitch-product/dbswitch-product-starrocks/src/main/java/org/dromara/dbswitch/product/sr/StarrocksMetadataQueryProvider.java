@@ -274,7 +274,9 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
       case ColumnMetaData.TYPE_BIGNUMBER:
         if (null != pks && !pks.isEmpty() && pks.contains(fieldname)) {
           if (useAutoInc) {
-            retval += "BIGINT AUTO_INCREMENT NOT NULL";
+            //see: https://docs.starrocks.io/zh/docs/sql-reference/sql-statements/table_bucket_part_index/CREATE_TABLE/#column_definition
+            //fix: AUTO_INCREMENT should be after not null
+            retval += "BIGINT NOT NULL AUTO_INCREMENT";
           } else {
             retval += "BIGINT NOT NULL";
           }
@@ -310,30 +312,15 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
         }
         break;
       case ColumnMetaData.TYPE_STRING:
-        if (length > 0) {
-          if (length == 1) {
-            retval += "CHAR(1)";
-          } else if (length < 256) {
-            retval += "VARCHAR(" + length * 2 + ")";
-          } else if (null != pks && !pks.isEmpty() && pks.contains(fieldname)) {
-            /*
-             * MySQL5.6中varchar字段为主键时最大长度为254,例如如下的建表语句在MySQL5.7下能通过，但在MySQL5.6下无法通过：
-             *	create table `t_test`(
-             *	`key` varchar(1024) binary,
-             *	`val` varchar(1024) binary,
-             *	primary key(`key`)
-             * );
-             */
-            retval += "VARCHAR(254) BINARY";
-          } else if (length < 65536) {
-            retval += "TEXT";
-          } else if (length < 16777216) {
-            retval += "MEDIUMTEXT";
-          } else {
-            retval += "LONGTEXT";
-          }
+        //see: https://docs.starrocks.io/zh/docs/category/string/
+        if (length <= 255) {
+          retval += "CHAR(" + length + ")";
+        } else if (length <= 65533) {
+          retval += "STRING";
+        } else if (length <= 1048576){
+          retval += "VARCHAR(" + length + ")";
         } else {
-          retval += "TINYTEXT";
+          retval += "VARBINARY";
         }
         break;
       case ColumnMetaData.TYPE_BINARY:
