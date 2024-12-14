@@ -348,6 +348,7 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
       SourceProperties tblProperties) {
     if (CollectionUtils.isNotEmpty(primaryKeys)) {
       String primaryKeyAsString = getPrimaryKeyAsString(primaryKeys);
+      // 自动分桶（BUCKETS AUTO）功能要求 Apache Doris 1.2.2 及以上版本
       builder.append(" DISTRIBUTED BY HASH(").append(primaryKeyAsString).append(") BUCKETS AUTO");
       if (StringUtils.isNotBlank(tblComment)) {
         builder.append(String.format(" COMMENT='%s' ", tblComment.replace("'", "\\'")));

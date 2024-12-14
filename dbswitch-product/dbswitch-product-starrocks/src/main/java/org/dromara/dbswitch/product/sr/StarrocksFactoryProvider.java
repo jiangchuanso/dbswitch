@@ -27,6 +27,7 @@ public class StarrocksFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new StarrocksFeatures();
   }

@@ -51,38 +51,6 @@
     </resources>
     <plugins>
       <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-license</id>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>..</directory>
-                  <includes>
-                    <include>LICENSE.txt</include>
-                    <include>README.txt</include>
-                  </includes>
-                </resource>
-              </resources>
-              <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
@@ -120,31 +88,7 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <sourceFileIncludes>
-            <sourceFileInclude>**/core/Flyway.java</sourceFileInclude>
-            <sourceFileInclude>**/core/api/**/*.java</sourceFileInclude>
-          </sourceFileIncludes>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.1</version>
-        <configuration>
-          <sourceFileIncludes>
-            <sourceFileInclude>**/core/Flyway.java</sourceFileInclude>
-            <sourceFileInclude>**/core/api/**/*.java</sourceFileInclude>
-          </sourceFileIncludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
 
 </project>

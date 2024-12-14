@@ -117,7 +117,7 @@ jdbc连接地址：jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEnc
 jdbc驱动名称：com.mysql.jdbc.Driver
 ```
 
-**Doris数据库**
+**Apache Doris数据库(>=1.2.2)**
 
 ```
 jdbc连接地址：jdbc:mysql://127.0.0.1:9030/test?useUnicode=true&characterEncoding=utf-8&useSSL=false

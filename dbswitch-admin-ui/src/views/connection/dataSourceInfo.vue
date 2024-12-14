@@ -18,12 +18,6 @@
                  status-icon>
           <div class="f1">
 
-            <el-form-item label="支持版本">
-              <span>
-                {{ this.dataSourceInfo.version }}
-              </span>
-            </el-form-item>
-
             <el-form-item prop="name"
                           label="数据源名称"
                           style="width:40%">
@@ -47,16 +41,6 @@
 
             <el-form-item label="编码格式">
               <label>{{dataSourceInfo.characterEncoding}}</label>
-            </el-form-item>
-
-          </div>
-          <div class="f1">
-            <el-form-item label="连接模式">
-              <el-radio-group v-model="dataSourceInfo.mode">
-                <el-radio :label=0>默认</el-radio>
-                <el-radio :disabled="true"
-                          :label=1>专业</el-radio>
-              </el-radio-group>
             </el-form-item>
 
             <el-form-item prop="address"
@@ -148,7 +132,6 @@ export default {
         typeName: "",
         version: "",
         driver: "",
-        mode: 0,
         address: "",
         port: "",
         databaseName: "",
@@ -167,7 +150,6 @@ export default {
   },
   created () {
     this.dataSourceInfo = this.$route.query;
-    this.dataSourceInfo.mode = parseInt(this.dataSourceInfo.mode)
   }
 }
 </script>

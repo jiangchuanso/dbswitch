@@ -29,6 +29,7 @@ public class DB2FactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new DefaultProductFeatures();
   }

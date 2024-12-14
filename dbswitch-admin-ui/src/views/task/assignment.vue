@@ -15,9 +15,6 @@
                    @click="batchStop()">停用</el-button>
         <span style="color:#e9e9f3;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
         <el-button size="mini"
-                   plain
-                   @click="batchImport()">导入</el-button>
-        <el-button size="mini"
                    :disabled=isSelected
                    plain
                    @click="batchExport()">导出</el-button>
@@ -341,12 +338,6 @@ export default {
             this.$message.error("导出任务失败," + res.data.message);
           }
         }
-      });
-    },
-    batchImport () {
-      this.$message({
-        message: '功能暂未开放，敬请期待！',
-        center: true
       });
     },
     downloadFile: function (resp) {

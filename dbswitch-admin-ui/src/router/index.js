@@ -50,7 +50,7 @@ const constantRouter = new Router({
         },
         {
           path: '/task',
-          name: '数据接入',
+          name: '迁移任务',
           icon: "el-icon-s-tools",
           component: () => import('@/views/task/index'),
           children: [

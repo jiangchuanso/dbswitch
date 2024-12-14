@@ -88,7 +88,7 @@
                 </li>
                 <li>StarRocks
                 </li>
-                <li>Doris
+                <li>Apache Doris
                 </li>
                 <li>MongoDB(只支持数据加载写入，不支持变化量同步)
                 </li>

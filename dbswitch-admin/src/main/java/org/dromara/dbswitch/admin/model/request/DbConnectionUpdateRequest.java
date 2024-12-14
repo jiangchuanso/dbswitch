@@ -23,7 +23,6 @@ public class DbConnectionUpdateRequest {
   private ProductTypeEnum type;
   private String version;
   private String driver;
-  private Integer mode;
   private String address;
   private String port;
   private String databaseName;
@@ -39,7 +38,6 @@ public class DbConnectionUpdateRequest {
     databaseConnectionEntity.setType(type);
     databaseConnectionEntity.setVersion(version.trim());
     databaseConnectionEntity.setDriver(driver.trim());
-    databaseConnectionEntity.setMode(mode);
     databaseConnectionEntity.setAddress(address.trim());
     databaseConnectionEntity.setPort(port.trim());
     databaseConnectionEntity.setDatabaseName(databaseName.trim());

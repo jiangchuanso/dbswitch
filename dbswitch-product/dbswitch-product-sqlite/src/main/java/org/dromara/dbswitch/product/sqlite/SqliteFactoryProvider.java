@@ -27,6 +27,7 @@ public class SqliteFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new DefaultProductFeatures();
   }

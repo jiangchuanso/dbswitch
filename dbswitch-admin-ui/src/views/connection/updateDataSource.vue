@@ -20,17 +20,6 @@
                  status-icon>
           <div class="f1">
 
-            <el-form-item label="支持版本">
-              <span v-for="(o, index) of connectionDriver"
-                    :key="index"
-                    :offset="1">
-                {{ o.driverVersion }}
-                <span v-if="index !== connectionDriver.length-1">
-                  、
-                </span>
-              </span>
-            </el-form-item>
-
             <el-form-item prop="name"
                           label="数据源名称"
                           style="width:40%">
@@ -56,16 +45,6 @@
             <!--              <el-form-item label="编码格式">-->
             <!--                <label>utf8、utf8mb4</label>-->
             <!--              </el-form-item>-->
-
-          </div>
-          <div class="f1">
-            <el-form-item label="连接模式">
-              <el-radio-group v-model="updateform.mode">
-                <el-radio :label=0>默认</el-radio>
-                <el-radio :disabled="true"
-                          :label=1>专业</el-radio>
-              </el-radio-group>
-            </el-form-item>
 
             <el-form-item v-if="isShowUrlAndPort()"
                           prop="address"
@@ -121,12 +100,6 @@
                           label-width="120px"
                           prop="url"
                           style="width:85%">
-              <el-tooltip placement="top">
-                <i class="el-icon-question">样例:</i>
-                <div slot="content">
-                  {{ this.selectedDataSource.sample }}
-                </div>
-              </el-tooltip>
               <el-input type="textarea"
                         :rows="6"
                         :spellcheck="false"

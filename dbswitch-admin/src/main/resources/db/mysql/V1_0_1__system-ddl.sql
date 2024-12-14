@@ -35,6 +35,10 @@ create table `DBSWITCH_DATABASE_CONNECTION` (
   `type`                varchar(200)          not null default ''                comment '数据库类型',
   `version`             varchar(255)          not null default ''                comment '驱动版本',
   `driver`              varchar(200)          not null default ''                comment '驱动类名称',
+  `address`             varchar(200)          not null default ''                comment '连接地址',
+  `port`                varchar(20)           not null default ''                comment '连接端口号',
+  `database_name`       varchar(200)          not null default ''                comment '数据库名',
+  `character_encoding`  varchar(20)           not null default ''                comment '编码格式',
   `url`                 longtext                                                 comment 'jdbc-url连接串',
   `username`            varchar(200)          not null default ''                comment '连接账号',
   `password`            varchar(200)          not null default ''                comment '账号密码',
@@ -63,13 +67,22 @@ create table `DBSWITCH_ASSIGNMENT_CONFIG` (
   `assignment_id`               bigint(20)   unsigned not null                comment '任务ID',
   `source_connection_id`        bigint(20)   unsigned not null                comment '来源端连接ID',
   `source_schema`               varchar(1024)         not null default ''     comment '来源端的schema',
+  `table_type`                  varchar(32)  null default 'TABLE'             COMMENT '表类型:TABLE;VIEW',
   `source_tables`               longtext                                      comment '来源端的table列表',
   `excluded_flag`               tinyint(1)            not null default 0      comment '是否排除(0:否 1:是)',
   `target_connection_id`        bigint(20)   unsigned not null                comment '目的端连接ID',
   `target_schema`               varchar(200)          not null default ''     comment '目的端的schema(一个)',
+  `target_only_create`          tinyint(1)   not null default '0'             comment '是否只建表',
+  `target_drop_table`           tinyint(1)            not null default 0      comment '同步前是否先删除目的表(0:否 1:是)',
   `table_name_map`              longtext              null                    comment '表名映射关系',
   `column_name_map`             longtext              null                    comment '字段名映射关系',
-  `target_drop_table`           tinyint(1)            not null default 0      comment '同步前是否先删除目的表(0:否 1:是)',
+  `table_name_case`             varchar(32)  not null default 'none'          comment '表名大小写转换策略',
+  `column_name_case`            varchar(32)  not null default 'none'          comment '列名大小写转换策略',
+  `target_auto_increment`       tinyint(1)   not null default '0'             comment '是否支持自增',
+  `target_sync_option`          varchar(32)  not null default 'insert_update_delete' comment '同步增删改选项',
+  `before_sql_scripts`          varchar(4096)  default null                   comment '目标端写入的前置执行sql脚本',
+  `after_sql_scripts`           varchar(4096)  default null                   comment '目标端写入的后置执行sql脚本',
+  `channel_size`                bigint(20)   unsigned not null default 100    comment '通道队列大小',
   `batch_size`                  bigint(20)   unsigned not null default 10000  comment '处理批次大小',
   `first_flag`                  tinyint(1)            not null default 1      comment '首次加载数据',
   `create_time`                 timestamp             not null default current_timestamp comment '创建时间',
@@ -94,3 +107,12 @@ create table `DBSWITCH_ASSIGNMENT_JOB` (
   primary key (`id`),
   foreign key (`assignment_id`) references `DBSWITCH_ASSIGNMENT_TASK` (`id`) on delete cascade on update cascade
 ) engine=innodb auto_increment=1 default charset=utf8 comment='JOB日志表';
+
+CREATE TABLE IF NOT EXISTS `DBSWITCH_JOB_LOGBACK` (
+  `id`          bigint          not null auto_increment                 comment '自增id',
+  `uuid`        varchar(128)    not null                                comment 'job id',
+  `content`     longtext                                                comment '日志内容',
+  `create_time` timestamp       not null default current_timestamp      comment '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='JOB执行日志';

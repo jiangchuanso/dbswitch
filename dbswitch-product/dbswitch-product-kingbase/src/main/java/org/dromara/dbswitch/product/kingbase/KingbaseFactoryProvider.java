@@ -30,6 +30,7 @@ public class KingbaseFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new DefaultProductFeatures();
   }

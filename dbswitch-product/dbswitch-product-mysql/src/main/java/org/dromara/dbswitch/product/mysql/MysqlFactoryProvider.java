@@ -27,6 +27,7 @@ public class MysqlFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new MysqlFeatures();
   }

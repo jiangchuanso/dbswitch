@@ -25,7 +25,6 @@ public class DbConnectionDetailConverter extends
     response.setType(databaseConnectionEntity.getType());
     response.setVersion(databaseConnectionEntity.getVersion());
     response.setDriver(databaseConnectionEntity.getDriver());
-    response.setMode(databaseConnectionEntity.getMode());
     response.setAddress(databaseConnectionEntity.getAddress());
     response.setPort(databaseConnectionEntity.getPort());
     response.setDatabaseName(databaseConnectionEntity.getDatabaseName());

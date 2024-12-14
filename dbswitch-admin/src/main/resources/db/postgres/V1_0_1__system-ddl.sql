@@ -61,7 +61,6 @@ CREATE TABLE IF NOT EXISTS DBSWITCH_DATABASE_CONNECTION (
   "type"                varchar(200)          not null default '',
   "version"             varchar(255)          not null default '',
   "driver"              varchar(200)          not null default '',
-  "mode"                varchar(20)           not null default '0',
   "address"             varchar(200)          not null default '',
   "port"                varchar(20)           not null default '0',
   "database_name"       varchar(200)          not null default '',
@@ -80,7 +79,6 @@ COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."name" IS '连接名称';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."type" IS '数据库类型';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."version" IS '驱动版本';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."driver" IS '驱动类名称';
-COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."mode" IS '连接模式：0默认 1专业';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."address" IS '连接地址';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."port" IS '连接端口号';
 COMMENT ON COLUMN DBSWITCH_DATABASE_CONNECTION."database_name" IS '数据库名';

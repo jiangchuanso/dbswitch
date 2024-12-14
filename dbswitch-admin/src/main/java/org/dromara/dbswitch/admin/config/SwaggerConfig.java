@@ -55,7 +55,6 @@ public class SwaggerConfig {
     pars.add(ticketPar.build());
 
     return new Docket(DocumentationType.SWAGGER_2)
-        .enable(true)
         .groupName("需要认证的接口")
         .apiInfo(createApiInfo())
         .select()
@@ -69,7 +68,6 @@ public class SwaggerConfig {
   @Bean(value = "publicApi")
   public Docket publicApi() {
     return new Docket(DocumentationType.SWAGGER_2)
-        .enable(true)
         .groupName("无需认证的接口")
         .apiInfo(createApiInfo())
         .select()

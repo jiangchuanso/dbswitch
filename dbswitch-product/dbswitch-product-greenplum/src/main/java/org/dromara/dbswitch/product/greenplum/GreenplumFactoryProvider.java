@@ -31,6 +31,7 @@ public class GreenplumFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new DefaultProductFeatures();
   }

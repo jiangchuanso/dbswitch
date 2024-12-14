@@ -28,6 +28,7 @@ public class GbaseFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new MysqlFeatures();
   }

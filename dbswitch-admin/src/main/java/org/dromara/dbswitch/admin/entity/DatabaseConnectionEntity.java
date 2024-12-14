@@ -44,9 +44,6 @@ public class DatabaseConnectionEntity {
   @TableField("driver")
   private String driver;
 
-  @TableField("mode")
-  private Integer mode;
-
   @TableField("address")
   private String address;
 

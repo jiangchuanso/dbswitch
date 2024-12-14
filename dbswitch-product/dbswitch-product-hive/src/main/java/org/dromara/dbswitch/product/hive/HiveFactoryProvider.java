@@ -24,6 +24,7 @@ public class HiveFactoryProvider extends AbstractFactoryProvider {
     super(dataSource);
   }
 
+  @Override
   public ProductFeatures getProductFeatures() {
     return new HiveFeatures();
   }
