@@ -22,7 +22,7 @@
                    type="primary"
                    size="mini"
                    icon="el-icon-document-add"
-                   @click="handleCreate">创建
+                   @click="handleCreate">创建任务
         </el-button>
       </el-row>
       <div class="assignment-list-top">
@@ -73,7 +73,7 @@
               <p>源端模式名：{{ scope.row.sourceSchema }}</p>
               <div slot="reference"
                    class="name-wrapper">
-                <el-tag size="medium">{{ scope.row.sourceSchema }}</el-tag>
+                <el-tag size="medium" class="name-wrapper-tag">{{ scope.row.sourceSchema }}</el-tag>
               </div>
             </el-popover>
           </template>
@@ -87,7 +87,7 @@
               <p>目标端模式名：{{ scope.row.targetSchema }}</p>
               <div slot="reference"
                    class="name-wrapper">
-                <el-tag size="medium">{{ scope.row.targetSchema }}</el-tag>
+                <el-tag size="medium" class="name-wrapper-tag">{{ scope.row.targetSchema }}</el-tag>
               </div>
             </el-popover>
           </template>
@@ -125,62 +125,85 @@
         <el-table-column label="操作"
                          min-width="35%">
           <template slot-scope="scope">
-            <el-button-group>
-              <el-tooltip content="跳转到调度监控"
-                          placement="top">
-                <el-button size="small"
-                           type="primary"
-                           icon="el-icon-timer"
-                           v-if="scope.row.isPublished===true"
-                           @click="schedulingLog(scope.$index, scope.row)"
-                           round>日志
-                </el-button>
-              </el-tooltip>
-              <el-button size="small"
-                         type="primary"
-                         icon="el-icon-timer"
-                         v-if="scope.row.isPublished===false"
-                         @click="handlePublish(scope.$index, scope.row)"
-                         round>启动
-              </el-button>
-              <el-button size="small"
-                         type="info"
-                         icon="el-icon-delete-location"
-                         v-if="scope.row.isPublished===true"
-                         @click="handleRetireTask(scope.$index, scope.row)"
-                         round>停用
-              </el-button>
-              <el-tooltip content="人工触发调度执行"
-                          placement="top">
-                <el-button size="small"
-                           type="danger"
-                           icon="el-icon-video-play"
-                           v-if="scope.row.isPublished===true"
-                           @click="handleRunTask(scope.$index, scope.row)"
-                           round>执行
-                </el-button>
-              </el-tooltip>
-              <el-button size="small"
-                         type="warning"
-                         icon="el-icon-edit"
-                         v-if="scope.row.isPublished===false"
-                         @click="handleUpdate(scope.$index, scope.row)"
-                         round>修改
-              </el-button>
-              <el-button size="small"
-                         type="success"
-                         icon="el-icon-document"
-                         @click="handleDetail(scope.$index, scope.row)"
-                         round>详情
-              </el-button>
-              <el-button size="small"
-                         type="danger"
-                         icon="el-icon-delete"
-                         v-if="scope.row.isPublished===false"
-                         @click="handleDelete(scope.$index, scope.row)"
-                         round>删除
-              </el-button>
-            </el-button-group>
+            <el-tooltip content="跳转到监控调度"  placement="top">
+              <el-link class="btn-text" type="primary" @click="schedulingLog(scope.$index, scope.row)">日志</el-link>
+            </el-tooltip>
+            <label class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" v-if="scope.row.isPublished===false"
+                     @click="handlePublish(scope.$index, scope.row)">启动</el-link>
+            <el-link class="btn-text" type="primary" v-if="scope.row.isPublished===true"
+                     @click="handleRetireTask(scope.$index, scope.row)">停止</el-link>
+            <label v-if="scope.row.isPublished===true" class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" v-if="scope.row.isPublished===true"
+                     @click="handleRunTask(scope.$index, scope.row)">执行</el-link>
+            <label v-if="scope.row.isPublished===false" class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" v-if="scope.row.isPublished===false"
+                     @click="handleUpdate(scope.$index, scope.row)">修改</el-link>
+            <label class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary"
+                     @click="handleDetail(scope.$index, scope.row)">详情</el-link>
+            <label v-if="scope.row.isPublished===false" class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" v-if="scope.row.isPublished===false"
+                     @click="handleDelete(scope.$index, scope.row)">删除</el-link>
+<!--            <label class="btn-style">&nbsp;|&nbsp;</label>-->
+<!--            <el-link class="btn-text" type="primary"-->
+<!--                     @click="handleDetailOld(scope.$index, scope.row)">老详情</el-link>-->
+
+<!--            <el-button-group>-->
+<!--              <el-button size="small"-->
+<!--                         type="primary"-->
+<!--                         icon="el-icon-timer"-->
+<!--                         v-if="scope.row.isPublished===false"-->
+<!--                         @click="handlePublish(scope.$index, scope.row)"-->
+<!--                         round>启动-->
+<!--              </el-button>-->
+<!--              <el-button size="small"-->
+<!--                         type="info"-->
+<!--                         icon="el-icon-delete-location"-->
+<!--                         v-if="scope.row.isPublished===true"-->
+<!--                         @click="handleRetireTask(scope.$index, scope.row)"-->
+<!--                         round>停用-->
+<!--              </el-button>-->
+<!--              <el-tooltip content="人工触发调度执行"-->
+<!--                          placement="top">-->
+<!--                <el-button size="small"-->
+<!--                           type="danger"-->
+<!--                           icon="el-icon-video-play"-->
+<!--                           v-if="scope.row.isPublished===true"-->
+<!--                           @click="handleRunTask(scope.$index, scope.row)"-->
+<!--                           round>执行-->
+<!--                </el-button>-->
+<!--              </el-tooltip>-->
+<!--              <el-button size="small"-->
+<!--                         type="warning"-->
+<!--                         icon="el-icon-edit"-->
+<!--                         v-if="scope.row.isPublished===false"-->
+<!--                         @click="handleUpdate(scope.$index, scope.row)"-->
+<!--                         round>修改-->
+<!--              </el-button>-->
+<!--              <el-button size="small"-->
+<!--                         type="success"-->
+<!--                         icon="el-icon-document"-->
+<!--                         @click="handleDetail(scope.$index, scope.row)"-->
+<!--                         round>详情-->
+<!--              </el-button>-->
+<!--              <el-button size="small"-->
+<!--                         type="danger"-->
+<!--                         icon="el-icon-delete"-->
+<!--                         v-if="scope.row.isPublished===false"-->
+<!--                         @click="handleDelete(scope.$index, scope.row)"-->
+<!--                         round>删除-->
+<!--              </el-button>-->
+<!--              <el-tooltip content="跳转到调度监控"-->
+<!--                          placement="top">-->
+<!--                <el-button size="small"-->
+<!--                           type="primary"-->
+<!--                           icon="el-icon-timer"-->
+<!--                           @click="schedulingLog(scope.$index, scope.row)"-->
+<!--                           round>日志-->
+<!--                </el-button>-->
+<!--              </el-tooltip>-->
+<!--            </el-button-group>-->
           </template>
         </el-table-column>
       </el-table>
@@ -247,9 +270,9 @@ export default {
     },
     boolFormatPublish (row, column) {
       if (row.isPublished === true) {
-        return "已启动";
+        return "启动";
       } else {
-        return "已停止";
+        return "停止";
       }
     },
     scheduleTimeFormat (row, column) {
@@ -382,7 +405,10 @@ export default {
       this.$router.push('/task/create')
     },
     handleDetail: function (index, row) {
-      this.$router.push({ path: '/task/detail', query: { id: row.id } })
+      this.$router.push({ path: '/task/detail', query: { id: row.id, record: row } })
+    },
+    handleDetailOld: function (index, row) {
+      this.$router.push({ path: '/task/detail_old', query: { id: row.id } })
     },
     handleUpdate: function (index, row) {
       this.$router.push({ path: '/task/update', query: { id: row.id } })
@@ -592,4 +618,19 @@ export default {
   text-decoration: underline;
 }
 
+.btn-style {
+  color: #e9e9f3;
+}
+
+.btn-text {
+  font-size: 12px;
+  color: #6873ce;
+}
+
+.name-wrapper-tag {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
 </style>

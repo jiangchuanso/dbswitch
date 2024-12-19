@@ -120,6 +120,12 @@ const constantRouter = new Router({
           component: () => import('@/views/task/detail')
         },
         {
+          path: '/task/detail_old',
+          name: '查看任务(原)',
+          hidden: true,
+          component: () => import('@/views/task/detail_old')
+        },
+        {
           path: '/connection/list/addDataSource1',
           name: '数据源创建步骤1',
           icon: "el-icon-menu",

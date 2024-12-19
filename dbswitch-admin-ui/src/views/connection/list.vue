@@ -49,33 +49,15 @@
                          min-width="10%"></el-table-column>
         <el-table-column label="操作"
                          min-width="35%">
+
           <template slot-scope="scope">
-            <el-button-group>
-              <el-button size="small"
-                         type="danger"
-                         icon="el-icon-video-play"
-                         @click="handleTest(scope.$index, scope.row)"
-                         round>测试
-              </el-button>
-              <el-button size="small"
-                         type="primary"
-                         icon="el-icon-document"
-                         @click="handleMore(scope.$index, scope.row)"
-                         round>详情
-              </el-button>
-              <el-button size="small"
-                         type="warning"
-                         icon="el-icon-edit"
-                         @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑
-              </el-button>
-              <el-button size="small"
-                         type="success"
-                         icon="el-icon-delete"
-                         @click="handleDelete(scope.$index, scope.row)"
-                         round>删除
-              </el-button>
-            </el-button-group>
+            <el-link class="btn-text" type="primary" @click="handleTest(scope.$index, scope.row)">测试</el-link>
+            <label class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" @click="handleUpdate(scope.$index, scope.row)">编辑</el-link>
+            <label class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" @click="handleMore(scope.$index, scope.row)">详情</el-link>
+            <label class="btn-style">&nbsp;|&nbsp;</label>
+            <el-link class="btn-text" type="primary" @click="handleDelete(scope.$index, scope.row)">删除</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -346,5 +328,14 @@ export default {
   width: 100px;
   margin-left: auto;
   margin: 10px 5px;
+}
+
+.btn-style {
+  color: #e9e9f3;
+}
+
+.btn-text {
+  font-size: 12px;
+  color: #6873ce;
 }
 </style>

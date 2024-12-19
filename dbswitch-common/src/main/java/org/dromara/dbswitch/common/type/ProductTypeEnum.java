@@ -223,6 +223,15 @@ public enum ProductTypeEnum {
       new String[]{"jdbc:oceanbase://{host}[:{port}]/[{database}][\\?{params}]"},
       "jdbc:oceanbase://127.0.0.1:2881/test?pool=false&useUnicode=true&characterEncoding=utf-8&useSSL=false"),
 
+  /**
+   * TDengine 数据库类型
+   */
+  TDENGINE(23, "", "TDengine", "com.taosdata.jdbc.rs.RestfulDriver", 6041,
+      "/* ping */ SELECT 1",
+      "jdbc:TAOS-RS://",
+      new String[]{"jdbc:TAOS-RS://{host}[:{port}]/[{database}][\\?{params}]"},
+      "jdbc:TAOS-RS://127.0.0.1:6041/test?charset=UTF-8&locale=en_US.UTF-8&timezone=UTC+8"),
+
   ;
 
   private int id;

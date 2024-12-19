@@ -35,6 +35,7 @@
     <module>dbswitch-product-greenplum</module>
     <module>dbswitch-product-doris</module>
     <module>dbswitch-product-oceanbase</module>
+    <module>dbswitch-product-tdengine</module>
   </modules>
 
 </project>
