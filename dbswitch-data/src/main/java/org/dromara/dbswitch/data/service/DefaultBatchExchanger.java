@@ -10,9 +10,9 @@
 package org.dromara.dbswitch.data.service;
 
 import org.dromara.dbswitch.common.entity.PrintablePerfStat;
-import org.dromara.dbswitch.core.core.exchange.AbstractBatchExchanger;
-import org.dromara.dbswitch.core.core.robot.RobotReader;
-import org.dromara.dbswitch.core.core.robot.RobotWriter;
+import org.dromara.dbswitch.core.basic.exchange.AbstractBatchExchanger;
+import org.dromara.dbswitch.core.basic.robot.RobotReader;
+import org.dromara.dbswitch.core.basic.robot.RobotWriter;
 import org.dromara.dbswitch.data.domain.ComparePerfStat;
 import org.dromara.dbswitch.data.domain.ExceptPerfStat;
 import org.dromara.dbswitch.data.domain.ReaderPerfStat;

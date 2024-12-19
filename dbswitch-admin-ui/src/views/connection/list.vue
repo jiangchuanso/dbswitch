@@ -16,7 +16,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="selectDataSource">接入数据源</el-button>
+                     @click="selectDataSource">创建数据源</el-button>
         </div>
       </div>
 
@@ -31,7 +31,6 @@
                          label="数据源名称"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
-
         <el-table-column prop="type"
                          label="数据库类型"
                          show-overflow-tooltip
@@ -49,15 +48,22 @@
                          min-width="10%"></el-table-column>
         <el-table-column label="操作"
                          min-width="35%">
-
           <template slot-scope="scope">
-            <el-link class="btn-text" type="primary" @click="handleTest(scope.$index, scope.row)">测试</el-link>
+            <el-link class="btn-text"
+                     type="primary"
+                     @click="handleTest(scope.$index, scope.row)">测试</el-link>
             <label class="btn-style">&nbsp;|&nbsp;</label>
-            <el-link class="btn-text" type="primary" @click="handleUpdate(scope.$index, scope.row)">编辑</el-link>
+            <el-link class="btn-text"
+                     type="primary"
+                     @click="handleUpdate(scope.$index, scope.row)">编辑</el-link>
             <label class="btn-style">&nbsp;|&nbsp;</label>
-            <el-link class="btn-text" type="primary" @click="handleMore(scope.$index, scope.row)">详情</el-link>
+            <el-link class="btn-text"
+                     type="primary"
+                     @click="handleDetail(scope.$index, scope.row)">详情</el-link>
             <label class="btn-style">&nbsp;|&nbsp;</label>
-            <el-link class="btn-text" type="primary" @click="handleDelete(scope.$index, scope.row)">删除</el-link>
+            <el-link class="btn-text"
+                     type="primary"
+                     @click="handleDelete(scope.$index, scope.row)">删除</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -78,7 +84,7 @@
 <script>
 
 export default {
-  data() {
+  data () {
     return {
       loading: true,
       keyword: null,
@@ -181,19 +187,15 @@ export default {
           size: this.pageSize
         })
       }).then(res => {
-            if (0 === res.data.code) {
-              this.currentPage = res.data.pagination.page;
-              this.pageSize = res.data.pagination.size;
-              this.totalCount = res.data.pagination.total;
-              this.tableData = res.data.data;
-            } else {
-              alert("加载任务列表失败:" + res.data.message);
-            }
-          },
-          function () {
-            console.log("load connection list failed");
-          }
-      );
+        if (0 === res.data.code) {
+          this.currentPage = res.data.pagination.page;
+          this.pageSize = res.data.pagination.size;
+          this.totalCount = res.data.pagination.total;
+          this.tableData = res.data.data;
+        } else {
+          alert("加载任务列表失败:" + res.data.message);
+        }
+      });
     },
     searchByKeyword: function () {
       this.currentPage = 1;
@@ -205,30 +207,30 @@ export default {
         method: "GET",
         url: "/dbswitch/admin/api/v1/connection/types"
       }).then(
-          res => {
-            if (0 === res.data.code) {
-              this.databaseType = res.data.data;
-            } else {
-              alert("加载任务列表失败:" + res.data.message);
-            }
-          },
-          function () {
-            console.log("failed");
+        res => {
+          if (0 === res.data.code) {
+            this.databaseType = res.data.data;
+          } else {
+            alert("加载任务列表失败:" + res.data.message);
           }
+        },
+        function () {
+          console.log("failed");
+        }
       );
     },
     handleDelete: function (index, row) {
       this.$confirm(
-          "此操作将此数据源ID=" + row.id + "删除么, 是否继续?",
-          "提示",
-          {
-            confirmButtonText: "确定",
-            cancelButtonText: "取消",
-            type: "warning"
-          }
+        "此操作将此数据源ID=" + row.id + "删除么, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
       ).then(() => {
         this.$http.delete(
-            "/dbswitch/admin/api/v1/connection/delete/" + row.id
+          "/dbswitch/admin/api/v1/connection/delete/" + row.id
         ).then(res => {
           if (0 === res.data.code) {
             this.loadData();
@@ -238,15 +240,12 @@ export default {
         });
       });
     },
-    handleMore: function (index, row) {
-      this.$router.push({
-        path: "/connection/list/dataSourceInfo", query:
-        row
-      });
+    handleDetail: function (index, row) {
+      this.$router.push({ path: "/connection/list/detail", query: { id: row.id } });
     },
     handleTest: function (index, row) {
       this.$http.get(
-          "/dbswitch/admin/api/v1/connection/test/" + row.id
+        "/dbswitch/admin/api/v1/connection/test/" + row.id
       ).then(res => {
         if (0 === res.data.code) {
           this.$message({
@@ -259,18 +258,12 @@ export default {
       });
     },
     selectDataSource: function () {
-      // this.dataSourceCreateStep1 = true;
-      this.$router.push('/connection/list/addDataSource1');
+      this.$router.push('/connection/list/select');
 
     },
     handleUpdate: function (index, row) {
-      row["templateUrl"] = this.databaseType.find(
-          (item) => {
-            return item.type === row['type'];
-          }).url;
       this.$router.push({
-        path: "/connection/list/updateDataSource", query:
-        row
+        path: "/connection/list/update", query: { id: row.id }
       });
     },
     handleSizeChange: function (pageSize) {
@@ -278,14 +271,13 @@ export default {
       this.pageSize = pageSize;
       this.loadData();
     },
-
     handleCurrentChange: function (currentPage) {
       this.loading = true;
       this.currentPage = currentPage;
       this.loadData();
     },
   },
-  created() {
+  created () {
     this.loadDatabaseTypes();
     this.loadData();
   }

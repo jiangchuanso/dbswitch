@@ -10,10 +10,10 @@
 package org.dromara.dbswitch.data.handler;
 
 import cn.hutool.core.date.StopWatch;
-import org.dromara.dbswitch.core.core.exchange.BatchElement;
-import org.dromara.dbswitch.core.core.exchange.MemChannel;
-import org.dromara.dbswitch.core.core.robot.RobotReader;
-import org.dromara.dbswitch.core.core.task.TaskProcessor;
+import org.dromara.dbswitch.core.basic.exchange.BatchElement;
+import org.dromara.dbswitch.core.basic.exchange.MemChannel;
+import org.dromara.dbswitch.core.basic.robot.RobotReader;
+import org.dromara.dbswitch.core.basic.task.TaskProcessor;
 import org.dromara.dbswitch.data.domain.WriterTaskParam;
 import org.dromara.dbswitch.data.domain.WriterTaskResult;
 import java.util.Optional;

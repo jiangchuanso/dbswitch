@@ -55,10 +55,10 @@ const constantRouter = new Router({
           component: () => import('@/views/task/index'),
           children: [
             {
-              path: '/task/assignment',
+              path: '/task/list',
               name: '任务管理',
               icon: "el-icon-eleme",
-              component: () => import('@/views/task/assignment'),
+              component: () => import('@/views/task/list'),
             },
             {
               path: '/task/schedule',
@@ -120,38 +120,32 @@ const constantRouter = new Router({
           component: () => import('@/views/task/detail')
         },
         {
-          path: '/task/detail_old',
-          name: '查看任务(原)',
-          hidden: true,
-          component: () => import('@/views/task/detail_old')
-        },
-        {
-          path: '/connection/list/addDataSource1',
-          name: '数据源创建步骤1',
+          path: '/connection/list/select',
+          name: '选择数据源类型',
           icon: "el-icon-menu",
           hidden: true,
-          component: () => import('@/views/connection/addDataSource1.vue')
+          component: () => import('@/views/connection/select.vue')
         },
         {
-          path: '/connection/list/addDataSource2',
-          name: '数据源创建步骤2',
+          path: '/connection/list/create',
+          name: '创建数据源',
           icon: "el-icon-menu",
           hidden: true,
-          component: () => import('@/views/connection/addDataSource2.vue')
+          component: () => import('@/views/connection/create.vue')
         },
         {
-          path: '/connection/list/dataSourceInfo',
+          path: '/connection/list/detail',
           name: '数据源详情',
           icon: "el-icon-menu",
           hidden: true,
-          component: () => import('@/views/connection/dataSourceInfo.vue')
+          component: () => import('@/views/connection/detail.vue')
         },
         {
-          path: '/connection/list/updateDataSource',
+          path: '/connection/list/update',
           name: '编辑数据源',
           icon: "el-icon-menu",
           hidden: true,
-          component: () => import('@/views/connection/updateDataSource.vue')
+          component: () => import('@/views/connection/update.vue')
         },
       ],
     },

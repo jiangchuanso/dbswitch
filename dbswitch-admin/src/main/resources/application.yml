@@ -23,4 +23,4 @@ mybatis:
 
 dbswitch:
   configuration:
-    drivers-base-path: ${APP_DRIVERS_PATH:D:\lzm\otherproject\dbswitch\drivers}
+    drivers-base-path: ${APP_DRIVERS_PATH}

@@ -15,7 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import org.dromara.dbswitch.common.entity.CloseableDataSource;
 import org.dromara.dbswitch.common.entity.LoggingSupplier;
 import org.dromara.dbswitch.common.entity.MdcKeyValue;
-import org.dromara.dbswitch.core.core.robot.RobotReader;
+import org.dromara.dbswitch.core.basic.robot.RobotReader;
 import org.dromara.dbswitch.data.config.DbswichPropertiesConfiguration;
 import org.dromara.dbswitch.data.domain.ReaderTaskParam;
 import org.dromara.dbswitch.data.domain.ReaderTaskResult;

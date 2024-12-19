@@ -12,11 +12,11 @@ package org.dromara.dbswitch.admin.controller.converter;
 import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.dbswitch.admin.dao.AssignmentConfigDAO;
 import org.dromara.dbswitch.admin.dao.DatabaseConnectionDAO;
-import org.dromara.dbswitch.admin.model.response.AssignmentDetailResponse;
-import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
 import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
 import org.dromara.dbswitch.admin.entity.AssignmentTaskEntity;
 import org.dromara.dbswitch.admin.entity.DatabaseConnectionEntity;
+import org.dromara.dbswitch.admin.model.response.AssignmentDetailResponse;
+import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
 import org.dromara.dbswitch.common.converter.AbstractConverter;
 
 public class AssignmentDetailConverter extends
@@ -36,6 +36,7 @@ public class AssignmentDetailConverter extends
     AssignmentDetailResponse.Configuration config = new AssignmentDetailResponse.Configuration();
     config.setSourceConnectionId(srcConn.getId());
     config.setSourceConnectionName(srcConn.getName());
+    config.setSourceTypeName(srcConn.getType().getName());
     config.setSourceSchema(taskConfig.getSourceSchema());
     config.setTableType(taskConfig.getTableType());
     config.setIncludeOrExclude(taskConfig.getExcludedFlag()
@@ -44,6 +45,7 @@ public class AssignmentDetailConverter extends
     config.setSourceTables(taskConfig.getSourceTables());
     config.setTargetConnectionId(dstConn.getId());
     config.setTargetConnectionName(dstConn.getName());
+    config.setTargetTypeName(dstConn.getType().getName());
     config.setTargetSchema(taskConfig.getTargetSchema());
     config.setTargetOnlyCreate(taskConfig.getTargetOnlyCreate());
     config.setTargetDropTable(taskConfig.getTargetDropTable());

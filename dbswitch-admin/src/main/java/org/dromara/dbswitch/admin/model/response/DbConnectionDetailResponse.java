@@ -10,12 +10,12 @@
 package org.dromara.dbswitch.admin.model.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.dbswitch.common.type.ProductTypeEnum;
 
 @NoArgsConstructor
 @Data

@@ -10,32 +10,6 @@
 package org.dromara.dbswitch.admin.service;
 
 import cn.hutool.core.io.FileUtil;
-import org.dromara.dbswitch.admin.common.exception.DbswitchException;
-import org.dromara.dbswitch.admin.common.response.PageResult;
-import org.dromara.dbswitch.admin.common.response.Result;
-import org.dromara.dbswitch.admin.common.response.ResultCode;
-import org.dromara.dbswitch.admin.dao.AssignmentConfigDAO;
-import org.dromara.dbswitch.admin.dao.AssignmentTaskDAO;
-import org.dromara.dbswitch.admin.dao.DatabaseConnectionDAO;
-import org.dromara.dbswitch.admin.model.request.DbConnectionCreateRequest;
-import org.dromara.dbswitch.admin.model.request.DbConnectionSearchRequest;
-import org.dromara.dbswitch.admin.model.request.DbConnectionUpdateRequest;
-import org.dromara.dbswitch.admin.model.response.DatabaseTypeDetailResponse;
-import org.dromara.dbswitch.admin.model.response.DatabaseTypeDriverResponse;
-import org.dromara.dbswitch.admin.model.response.DbConnectionDetailResponse;
-import org.dromara.dbswitch.admin.model.response.DbConnectionNameResponse;
-import org.dromara.dbswitch.admin.util.PageUtils;
-import org.dromara.dbswitch.admin.controller.converter.DbConnectionDetailConverter;
-import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
-import org.dromara.dbswitch.admin.entity.AssignmentTaskEntity;
-import org.dromara.dbswitch.admin.entity.DatabaseConnectionEntity;
-import org.dromara.dbswitch.common.converter.ConverterFactory;
-import org.dromara.dbswitch.common.entity.CloseableDataSource;
-import org.dromara.dbswitch.common.type.ProductTypeEnum;
-import org.dromara.dbswitch.common.util.JdbcUrlUtils;
-import org.dromara.dbswitch.data.util.DataSourceUtils;
-import org.dromara.dbswitch.core.service.DefaultMetadataService;
-import org.dromara.dbswitch.core.service.MetadataService;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +20,32 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.dbswitch.admin.common.exception.DbswitchException;
+import org.dromara.dbswitch.admin.common.response.PageResult;
+import org.dromara.dbswitch.admin.common.response.Result;
+import org.dromara.dbswitch.admin.common.response.ResultCode;
+import org.dromara.dbswitch.admin.controller.converter.DbConnectionDetailConverter;
+import org.dromara.dbswitch.admin.dao.AssignmentConfigDAO;
+import org.dromara.dbswitch.admin.dao.AssignmentTaskDAO;
+import org.dromara.dbswitch.admin.dao.DatabaseConnectionDAO;
+import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
+import org.dromara.dbswitch.admin.entity.AssignmentTaskEntity;
+import org.dromara.dbswitch.admin.entity.DatabaseConnectionEntity;
+import org.dromara.dbswitch.admin.model.request.DbConnectionCreateRequest;
+import org.dromara.dbswitch.admin.model.request.DbConnectionSearchRequest;
+import org.dromara.dbswitch.admin.model.request.DbConnectionUpdateRequest;
+import org.dromara.dbswitch.admin.model.response.DatabaseTypeDetailResponse;
+import org.dromara.dbswitch.admin.model.response.DatabaseTypeDriverResponse;
+import org.dromara.dbswitch.admin.model.response.DbConnectionDetailResponse;
+import org.dromara.dbswitch.admin.model.response.DbConnectionNameResponse;
+import org.dromara.dbswitch.admin.util.PageUtils;
+import org.dromara.dbswitch.common.converter.ConverterFactory;
+import org.dromara.dbswitch.common.entity.CloseableDataSource;
+import org.dromara.dbswitch.common.type.ProductTypeEnum;
+import org.dromara.dbswitch.common.util.JdbcUrlUtils;
+import org.dromara.dbswitch.core.service.DefaultMetadataService;
+import org.dromara.dbswitch.core.service.MetadataService;
+import org.dromara.dbswitch.data.util.DataSourceUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -108,17 +108,20 @@ public class ConnectionService {
   public List<DatabaseTypeDetailResponse> getTypes() {
     List<DatabaseTypeDetailResponse> lists = new ArrayList<>();
     for (ProductTypeEnum type : ProductTypeEnum.values()) {
-      DatabaseTypeDetailResponse detail = new DatabaseTypeDetailResponse();
-      detail.setId(type.getId());
-      detail.setType(type.getName().toUpperCase());
-      detail.setDriver(type.getDriver());
-      detail.setSample(type.getSample());
-      detail.setName(type.getName());
-      detail.setUrl(JdbcUrlUtils.getTemplateUrl(type.getUrl()[0]));
-      lists.add(detail);
+      lists.add(getTypeDetail(type));
     }
-
     return lists;
+  }
+
+  public DatabaseTypeDetailResponse getTypeDetail(ProductTypeEnum type) {
+    DatabaseTypeDetailResponse detail = new DatabaseTypeDetailResponse();
+    detail.setId(type.getId());
+    detail.setType(type.getName().toUpperCase());
+    detail.setDriver(type.getDriver());
+    detail.setSample(type.getSample());
+    detail.setName(type.getName());
+    detail.setUrl(JdbcUrlUtils.getTemplateUrl(type.getUrl()[0]));
+    return detail;
   }
 
   public List<DatabaseTypeDriverResponse> getDrivers(ProductTypeEnum dbTypeEnum) {
@@ -262,7 +265,13 @@ public class ConnectionService {
     Supplier<List<DbConnectionNameResponse>> method = () -> {
       List<DatabaseConnectionEntity> lists = databaseConnectionDAO.listAll(null);
       return lists.stream()
-          .map(c -> new DbConnectionNameResponse(c.getId(), c.getName(), c.getType().isUseSql()))
+          .map(c ->
+              DbConnectionNameResponse.builder()
+                  .id(c.getId())
+                  .name(c.getName())
+                  .typeName(c.getType().getName())
+                  .useSql(c.getType().isUseSql())
+                  .build())
           .collect(Collectors.toList());
     };
 

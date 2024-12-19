@@ -12,6 +12,7 @@ package org.dromara.dbswitch.product.tdengine;
 import javax.sql.DataSource;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import org.dromara.dbswitch.core.annotation.Product;
+import org.dromara.dbswitch.core.features.DefaultProductFeatures;
 import org.dromara.dbswitch.core.features.ProductFeatures;
 import org.dromara.dbswitch.core.provider.AbstractFactoryProvider;
 import org.dromara.dbswitch.core.provider.manage.TableManageProvider;
@@ -29,7 +30,7 @@ public class TdengineFactoryProvider extends AbstractFactoryProvider {
 
   @Override
   public ProductFeatures getProductFeatures() {
-    return new TdengineFeatures();
+    return new DefaultProductFeatures();
   }
 
   @Override

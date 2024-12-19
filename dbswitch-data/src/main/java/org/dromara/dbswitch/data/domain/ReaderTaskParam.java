@@ -10,8 +10,8 @@
 package org.dromara.dbswitch.data.domain;
 
 import org.dromara.dbswitch.common.entity.CloseableDataSource;
-import org.dromara.dbswitch.core.core.exchange.MemChannel;
-import org.dromara.dbswitch.core.core.task.TaskParam;
+import org.dromara.dbswitch.core.basic.exchange.MemChannel;
+import org.dromara.dbswitch.core.basic.task.TaskParam;
 import org.dromara.dbswitch.data.config.DbswichPropertiesConfiguration;
 import org.dromara.dbswitch.core.schema.TableDescription;
 import java.util.Set;

@@ -9,6 +9,9 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.admin.controller.privateapi;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import javax.annotation.Resource;
 import org.dromara.dbswitch.admin.common.annotation.LogOperate;
 import org.dromara.dbswitch.admin.common.annotation.TokenCheck;
 import org.dromara.dbswitch.admin.common.response.PageResult;
@@ -21,9 +24,6 @@ import org.dromara.dbswitch.admin.model.response.DbConnectionDetailResponse;
 import org.dromara.dbswitch.admin.model.response.DbConnectionNameResponse;
 import org.dromara.dbswitch.admin.service.ConnectionService;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import javax.annotation.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +47,13 @@ public class ConnectionController {
   @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
   public Result getTypes() {
     return Result.success(connectionService.getTypes());
+  }
+
+  @TokenCheck
+  @ApiOperation(value = "数据库类型详情")
+  @GetMapping(value = "/type/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Result typeDetail(@PathVariable("type") ProductTypeEnum type) {
+    return Result.success(connectionService.getTypeDetail(type));
   }
 
   @TokenCheck

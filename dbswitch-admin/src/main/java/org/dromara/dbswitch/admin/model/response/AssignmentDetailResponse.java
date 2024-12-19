@@ -10,18 +10,18 @@
 package org.dromara.dbswitch.admin.model.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
-import org.dromara.dbswitch.admin.type.ScheduleModeEnum;
-import org.dromara.dbswitch.common.entity.PatternMapper;
-import org.dromara.dbswitch.common.type.CaseConvertEnum;
-import org.dromara.dbswitch.common.type.ProductTableEnum;
-import org.dromara.dbswitch.common.type.SyncOptionEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
+import org.dromara.dbswitch.admin.type.ScheduleModeEnum;
+import org.dromara.dbswitch.common.entity.PatternMapper;
+import org.dromara.dbswitch.common.type.CaseConvertEnum;
+import org.dromara.dbswitch.common.type.ProductTableEnum;
+import org.dromara.dbswitch.common.type.SyncOptionEnum;
 
 @NoArgsConstructor
 @Data
@@ -68,6 +68,9 @@ public class AssignmentDetailResponse {
     @ApiModelProperty("源端连接名称")
     private String sourceConnectionName;
 
+    @ApiModelProperty("源端数据源类型")
+    private String sourceTypeName;
+
     @ApiModelProperty("源端数据源的Schema")
     private String sourceSchema;
 
@@ -85,6 +88,9 @@ public class AssignmentDetailResponse {
 
     @ApiModelProperty("目的端连接名称")
     private String targetConnectionName;
+
+    @ApiModelProperty("目的端数据源类型")
+    private String targetTypeName;
 
     @ApiModelProperty("目的端数据源的Schema")
     private String targetSchema;

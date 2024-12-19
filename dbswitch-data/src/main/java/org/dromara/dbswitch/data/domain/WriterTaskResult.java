@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.data.domain;
 
-import org.dromara.dbswitch.core.core.task.TaskResult;
+import org.dromara.dbswitch.core.basic.task.TaskResult;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;

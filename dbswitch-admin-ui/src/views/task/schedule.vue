@@ -298,7 +298,6 @@ export default {
       this.$http.get(
         "/dbswitch/admin/api/v1/ops/job/logs/tail?id=" + jobId + "&size=500"
       ).then(res => {
-        //console.log(res.data)
         if (0 === res.data.code) {
           let lists = res.data.data.logs
           this.status = res.data.data.status;
@@ -318,7 +317,6 @@ export default {
       });
     },
     timerRefreshLogs: function () {
-      //console.log("time run ...");
       this.$http.get(
         "/dbswitch/admin/api/v1/ops/job/logs/next?id=" + this.jobId + "&baseId=" + this.baseId
       ).then(res => {

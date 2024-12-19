@@ -9,28 +9,29 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.product.oceanbase;
 
-import org.dromara.dbswitch.core.annotation.Product;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
+import org.dromara.dbswitch.core.annotation.Product;
 import org.dromara.dbswitch.core.features.DefaultProductFeatures;
 import org.dromara.dbswitch.core.features.ProductFeatures;
+import org.dromara.dbswitch.core.provider.AbstractFactoryProvider;
+import org.dromara.dbswitch.core.provider.manage.DefaultTableManageProvider;
+import org.dromara.dbswitch.core.provider.manage.TableManageProvider;
+import org.dromara.dbswitch.core.provider.meta.MetadataProvider;
+import org.dromara.dbswitch.core.provider.query.TableDataQueryProvider;
+import org.dromara.dbswitch.core.provider.sync.AutoCastTableDataSynchronizeProvider;
+import org.dromara.dbswitch.core.provider.sync.TableDataSynchronizeProvider;
+import org.dromara.dbswitch.core.provider.write.AutoCastTableDataWriteProvider;
+import org.dromara.dbswitch.core.provider.write.TableDataWriteProvider;
 import org.dromara.dbswitch.product.mysql.MysqlFeatures;
 import org.dromara.dbswitch.product.mysql.MysqlMetadataQueryProvider;
 import org.dromara.dbswitch.product.oracle.OracleMetadataQueryProvider;
 import org.dromara.dbswitch.product.oracle.OracleTableDataSynchronizer;
 import org.dromara.dbswitch.product.oracle.OracleTableDataWriteProvider;
 import org.dromara.dbswitch.product.oracle.OracleTableManageProvider;
-import org.dromara.dbswitch.core.provider.AbstractFactoryProvider;
-import org.dromara.dbswitch.core.provider.manage.DefaultTableManageProvider;
-import org.dromara.dbswitch.core.provider.manage.TableManageProvider;
-import org.dromara.dbswitch.core.provider.meta.MetadataProvider;
-import org.dromara.dbswitch.core.provider.sync.AutoCastTableDataSynchronizeProvider;
-import org.dromara.dbswitch.core.provider.sync.TableDataSynchronizeProvider;
-import org.dromara.dbswitch.core.provider.write.AutoCastTableDataWriteProvider;
-import org.dromara.dbswitch.core.provider.write.TableDataWriteProvider;
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Product(ProductTypeEnum.OCEANBASE)
@@ -62,6 +63,11 @@ public class OceanbaseFactoryProvider extends AbstractFactoryProvider {
         ? new MysqlMetadataQueryProvider(this)
         : new OracleMetadataQueryProvider(this);
     return new OceanbaseMetadataQueryProvider(this, provider);
+  }
+
+  @Override
+  public TableDataQueryProvider createTableDataQueryProvider() {
+    return new OceanbaseTableDataQueryProvider(this, isMySqlMode);
   }
 
   @Override

@@ -9,9 +9,9 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.data.domain;
 
-import org.dromara.dbswitch.core.core.exchange.MemChannel;
-import org.dromara.dbswitch.core.core.robot.RobotReader;
-import org.dromara.dbswitch.core.core.task.TaskParam;
+import org.dromara.dbswitch.core.basic.exchange.MemChannel;
+import org.dromara.dbswitch.core.basic.robot.RobotReader;
+import org.dromara.dbswitch.core.basic.task.TaskParam;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
