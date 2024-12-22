@@ -166,8 +166,16 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName) {
     List<String> ret = new ArrayList<>();
-    try (ResultSet primaryKeys = connection.getMetaData()
-        .getPrimaryKeys(schemaName, null, tableName)) {
+    try {
+      Statement statement = connection.createStatement();
+      String sql = String.format(" SELECT * \n" +
+                      " from information_schema.columns\n" +
+                      " where TABLE_SCHEMA=\"%s\" and TABLE_NAME=\"%s\"\n" +
+                      " and TABLE_CATALOG is null\n" +
+                      " and COLUMN_KEY is not null;",
+              schemaName, tableName
+      );
+      ResultSet primaryKeys = statement.executeQuery(sql);
       while (primaryKeys.next()) {
         ret.add(primaryKeys.getString("COLUMN_NAME"));
       }
