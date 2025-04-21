@@ -17,18 +17,18 @@
       <div v-show="active == 1"
            class="common-top">
         <el-form-item label="任务名称"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="name"
                       style="width:65%">
           <el-input v-model="dataform.name"
                     auto-complete="off"
                     placeholder="请输入任务名称"
-                    style="width:50%"></el-input>
+                    style="width:80%"></el-input>
           <label class="tips-style block">请输入任务名称，只能以字母、数字为开头，包含字母、数字和._-，3-100个字符</label>
         </el-form-item>
         <el-form-item label="描述"
-                      label-width="100px"
+                      label-width="160px"
                       prop="description"
                       style="width:65%">
           <el-input v-model="dataform.description"
@@ -36,13 +36,13 @@
                     :rows="3"
                     auto-complete="off"
                     placeholder="请输入任务描述"
-                    style="width:50%"></el-input>
+                    style="width:80%"></el-input>
         </el-form-item>
         <el-form-item label="集成模式"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="scheduleMode"
-                      style="width:65%">
+                      style="width:80%">
           <el-input v-model="dataform.scheduleMode"
                     v-if="false"></el-input>
           <el-radio-group v-model="dataform.scheduleModeName"
@@ -55,8 +55,8 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="执行周期"
-                      label-width="100px"
-                      style="width:65%"
+                      label-width="160px"
+                      style="width:80%"
                       :required="true"
                       v-if="dataform.scheduleMode=='SYSTEM_SCHEDULED'">
           <el-select v-model="dataform.cronExpression"
@@ -73,10 +73,10 @@
       <div v-show="active == 2"
            class="common-top">
         <el-form-item label="源端数据源"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="sourceConnectionId"
-                      style="width:65%">
+                      style="width:80%">
           <el-select v-model="dataform.sourceConnectionId"
                      @change="selectChangedSourceConnection"
                      placeholder="请选择">
@@ -87,10 +87,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="源端模式名"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="sourceSchema"
-                      style="width:65%">
+                      style="width:80%">
           <el-select v-model="dataform.sourceSchema"
                      filterable
                      @change="selectCreateChangedSourceSchema"
@@ -102,10 +102,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="源端表类型"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="tableType"
-                      style="width:65%">
+                      style="width:80%">
           <el-select placeholder="请选择表类型"
                      @change="selectCreateChangedTableType"
                      v-model="dataform.tableType">
@@ -116,10 +116,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="配置方式"
-                      label-width="100px"
+                      label-width="160px"
                       :required=true
                       prop="includeOrExclude"
-                      style="width:65%">
+                      style="width:80%">
           <el-select placeholder="请选择配置方式"
                      v-model="dataform.includeOrExclude">
             <el-option label="包含表"
@@ -129,10 +129,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="表名配置"
-                      label-width="100px"
+                      label-width="160px"
                       :required=false
                       prop="sourceTables"
-                      style="width:65%">
+                      style="width:80%">
           <el-select placeholder="请选择表名"
                      multiple
                      filterable
@@ -142,16 +142,70 @@
                        :label="item"
                        :value="item"></el-option>
           </el-select>
-          <label class="tips-style block">当为包含表时，选择所要精确包含的表名，如果不选则代表选择所有；当为排除表时，选择索要精确排除的表名。</label>
+          <label class="tips-style block">当为包含表时，选择所要精确包含的表名，如果不选则代表选择所有；当为排除表时，必须选择要精确排除的表名。</label>
+        </el-form-item>
+        <el-form-item label="增量同步配置"
+                      label-width="160px"
+                      :required=false
+                      style="width:80%">
+          &nbsp;&nbsp;
+          <i class="el-icon-plus"
+             @click="handleAddInputIncrTable"></i>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <i class="el-icon-question"
+             @click="showDataSyncMessageDialogVisible=true"></i>
+          <el-table :data="dataform.incrTableColumns"
+                    :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                    size="mini"
+                    border>
+            <el-table-column label="表名"
+                             prop="tableName"
+                             min-width="45%">
+            </el-table-column>
+            <el-table-column label="增量字段名"
+                             prop="columnName"
+                             min-width="45%">
+            </el-table-column>
+            <el-table-column label="操作"
+                             min-width="10%">
+              <template slot-scope="scope">
+                <el-link icon="el-icon-delete"
+                         @click="handleDeleteIncrTable(scope.$index)"></el-link>
+              </template>
+            </el-table-column>
+          </el-table>
+          <label class="tips-style block">可点击加号+按钮为需要增量同步的大表配置增量同步的字段来加快数据同步速度</label>
+        </el-form-item>
+        <el-form-item label="同步前置执行SQL脚本"
+                      label-width="160px"
+                      prop="sourceBeforeSqlScripts"
+                      style="width:80%">
+          <el-input v-model="dataform.sourceBeforeSqlScripts"
+                    type="textarea"
+                    :rows="3"
+                    auto-complete="off"
+                    style="width: 80%"></el-input>
+          <label class="tips-style block">数据同步查询源端数据库前执行的SQL，多个SQL间以英文逗号分隔。</label>
+        </el-form-item>
+        <el-form-item label="同步后置执行SQL脚本"
+                      label-width="160px"
+                      prop="sourceAfterSqlScripts"
+                      style="width:80%">
+          <el-input v-model="dataform.sourceAfterSqlScripts"
+                    type="textarea"
+                    :rows="3"
+                    auto-complete="off"
+                    style="width: 80%"></el-input>
+          <label class="tips-style block">数据同步查询源端数据库后执行的SQL，多个SQL间以英文逗号分隔。</label>
         </el-form-item>
       </div>
       <div v-show="active == 3"
            class="common-top">
         <el-form-item label="目的端数据源"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       prop="targetConnectionId"
-                      style="width:65%">
+                      style="width:80%">
           <el-select v-model="dataform.targetConnectionId"
                      @change="selectChangedTargetConnection"
                      placeholder="请选择">
@@ -162,10 +216,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="目的端模式名"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       prop="targetSchema"
-                      style="width:65%">
+                      style="width:80%">
           <el-select v-model="dataform.targetSchema"
                      filterable
                      placeholder="请选择">
@@ -176,10 +230,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="自动同步模式"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       prop="autoSyncMode"
-                      style="width:65%">
+                      style="width:80%">
           <span slot="label">
             <span style="color: red"><strong>自动同步模式</strong> </span>
           </span>
@@ -202,11 +256,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="建表字段自增"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       v-if=" dataform.autoSyncMode!==0 "
                       prop="targetAutoIncrement"
-                      style="width:65%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               创建表时是否自动支持字段的自增；只有使用自动建表才会生效，不过前提需要两端的数据库表建表时支持指定自增字段，默认为false。
@@ -221,10 +275,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="表名转换方法"
-                      label-width="130px"
+                      label-width="160px"
                       :required=true
                       prop="tableNameCase"
-                      style="width:45%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               转换说明：先使用下面的表名映射，然后再使用这里的表名转换方法转换，对支持大小写敏感的数据库类型有效。
@@ -239,10 +293,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="列名转换方法"
-                      label-width="130px"
+                      label-width="160px"
                       :required=true
                       prop="columnNameCase"
-                      style="width:45%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               转换说明：先使用下面的列名映射，然后再使用这里的转换方法转换，对支持大小写敏感的数据库类型有效。
@@ -257,11 +311,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数据批次大小"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       v-if=" dataform.autoSyncMode!==1 "
                       prop="batchSize"
-                      style="width:65%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               数据同步时单个批次处理的行记录总数，该值越大越占用内存空间。建议：小字段表设置为10000或20000，大字段表设置为100或500
@@ -276,11 +330,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="通道队列大小"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       v-if=" dataform.autoSyncMode!==1 "
                       prop="channelSize"
-                      style="width:65%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               数据同步时缓存数据的通道队列大小，该值越大越占用内存空间。当源库读取快目标库写入慢时，缓存在内存中的数据最大占用空间 = 行记录大小 × 数据批次大小 × 通道队列大小 。
@@ -295,11 +349,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="同步操作方法"
-                      label-width="120px"
+                      label-width="160px"
                       :required=true
                       v-if=" dataform.autoSyncMode!==1 "
                       prop="targetSyncOption"
-                      style="width:65%">
+                      style="width:80%">
           <el-tooltip placement="top">
             <div slot="content">
               <p>数据同步时包括增删改操作，这里选择配置执行INSERT、UPDATE、DELETE操作类型的方法;</p>
@@ -318,26 +372,26 @@
         <el-form-item label="同步前置执行SQL脚本"
                       label-width="160px"
                       v-if=" dataform.autoSyncMode!==1 "
-                      prop="beforeSqlScripts"
-                      style="width:65%">
-          <el-input v-model="dataform.beforeSqlScripts"
+                      prop="targetBeforeSqlScripts"
+                      style="width:80%">
+          <el-input v-model="dataform.targetBeforeSqlScripts"
                     type="textarea"
                     :rows="3"
                     auto-complete="off"
-                    style="width: 65%"></el-input>
+                    style="width: 80%"></el-input>
           <label class="tips-style block">数据同步写入目标端数据库前执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库关闭外键约束 SET FOREIGN_KEY_CHECKS
             = 0</label>
         </el-form-item>
         <el-form-item label="同步后置执行SQL脚本"
                       label-width="160px"
                       v-if=" dataform.autoSyncMode!==1 "
-                      prop="afterSqlScripts"
-                      style="width:65%">
-          <el-input v-model="dataform.afterSqlScripts"
+                      prop="targetAfterSqlScripts"
+                      style="width:80%">
+          <el-input v-model="dataform.targetAfterSqlScripts"
                     type="textarea"
                     :rows="3"
                     auto-complete="off"
-                    style="width: 65%"></el-input>
+                    style="width: 80%"></el-input>
           <label class="tips-style block">数据同步写入目标端数据库后执行的SQL，多个SQL间以英文逗号分隔。使用场景如：MySQL数据库恢复外键约束 SET FOREIGN_KEY_CHECKS = 1</label>
         </el-form-item>
       </div>
@@ -447,6 +501,93 @@
                v-if="active == 5">
       提交
     </el-button>
+
+    <el-dialog v-if="active == 2"
+               title="选择增量同步表的增量标识字段"
+               :visible.sync="columnNameIncrementDialogVisible"
+               :showClose="false"
+               :before-close="handleClose">
+      <el-select @change="queryPreviewColumnNameMapperList"
+                 v-model="preiveTableName"
+                 placeholder="请选择">
+        <el-option v-for="(item,index) in preiveSeeTableNameList"
+                   :key="index"
+                   :label="item"
+                   :value="item"></el-option>
+      </el-select>
+      <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                :data="columnNamesMapperData"
+                @row-click="singleRowClick"
+                highlight-current-row
+                size="mini"
+                border>
+        <el-table-column label="#"
+                         min-width="10%">
+          <template slot-scope="scope">
+            {{scope.$index}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="originalName"
+                         label="字段名"
+                         min-width="30%"></el-table-column>
+        <el-table-column prop="typeName"
+                         label="字段类型"
+                         min-width="30%"></el-table-column>
+        <el-table-column prop="canIncrement"
+                         label="可标识增量"
+                         min-width="20%">
+          <template slot-scope="scope">
+            <el-tag size="medium">{{ boolValueFormat(scope.row.canIncrement) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="选择"
+                         min-width="10%">
+          <template slot-scope="scope">
+            <el-radio :label="scope.row.originalName"
+                      v-model="radio"
+                      :disabled="!scope.row.canIncrement"
+                      @change.native="singleRowClick(scope.row)">{{""}}</el-radio>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="handleConfirmSelectIncrTableColumn">确定</el-button>
+        <el-button @click="handleCancelSelectIncrTableColumn">取消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-if="active == 2"
+               title="提示信息"
+               :visible.sync="showDataSyncMessageDialogVisible"
+               :showClose="false"
+               :before-close="handleClose">
+      <el-alert title="1、数据同步概念"
+                type="warning"
+                :closable="false"
+                show-icon>
+        <ul>
+          <li><b>全量同步:</b> 先truncate清空目标表后，然后将源端表数据全部插入目标表的过程</li>
+          <li><b>增量同步:</b> 根据增量表指定的增量字段，使用带有WHERE field > value的条件SQL查询源端表数据，然后插入目标表的过程</li>
+          <li><b>变化量同步:</b> 在源端表和目标表都有主键且映射一致的条件下，通过两边数据比对计算出差异，然后目标表执行插入/更新/删除数据的过程</li>
+        </ul>
+      </el-alert>
+      <el-alert title="2、dbswitch同步逻辑"
+                type="info"
+                :closable="false"
+                show-icon>
+        <ul>
+          <li><b>步骤1:</b> 如果是首次同步，则会自动创建目标表，并执行全量数据同步;</li>
+          <li><b>步骤2:</b> 非首次同步时，如果表配置了增量同步标识字段，则会执行增量数据同步;</li>
+          <li><b>步骤3:</b> 非首次同步时，且没有配置增量同步标识字段，如果两端都有主键且映射一致，则会执行变化量数据同步;</li>
+          <li><b>步骤3:</b> 非首次同步时，且没有配置增量同步标识字段，如果两端没有主键或主键不一致，则会执行全量数据同步;</li>
+        </ul>
+      </el-alert>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="showDataSyncMessageDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
 
     <el-dialog v-if="active == 4"
                title="查看表名映射关系"
@@ -603,6 +744,9 @@ export default {
         tableType: "TABLE",
         includeOrExclude: "",
         sourceTables: [],
+        incrTableColumns: [],
+        sourceBeforeSqlScripts: "",
+        sourceAfterSqlScripts: "",
         tableNameMapper: [],
         columnNameMapper: [],
         tableNameCase: 'NONE',
@@ -617,8 +761,8 @@ export default {
         batchSize: 5000,
         channelSize: 100,
         targetSyncOption: 'INSERT_UPDATE_DELETE',
-        beforeSqlScripts: '',
-        afterSqlScripts: '',
+        targetBeforeSqlScripts: '',
+        targetAfterSqlScripts: '',
       },
       rules: {
         name: [
@@ -718,17 +862,22 @@ export default {
         ]
       },
       active: 1,
+      radio: '0',
       sourceConnection: {},
       targetConnection: {},
       sourceConnectionSchemas: [],
       sourceSchemaTables: [],
       targetConnectionSchemas: [],
+      columnNameIncrementDialogVisible: false,
+      showDataSyncMessageDialogVisible: false,
       tableNameMapperDialogVisible: false,
       columnNameMapperDialogVisible: false,
       tableNamesMapperData: [],
       columnNamesMapperData: [],
       preiveSeeTableNameList: [],
       preiveTableName: "",
+      tempIncrTableName: "",
+      tempIncrColumnName: "",
     }
   },
   methods: {
@@ -746,6 +895,13 @@ export default {
       }
       if (val === '手动调度') {
         this.dataform.scheduleMode = "MANUAL"
+      }
+    },
+    boolValueFormat (value) {
+      if (value === true) {
+        return "是";
+      } else {
+        return "否";
       }
     },
     handleClose (done) {
@@ -803,6 +959,9 @@ export default {
               tableType: detail.configuration.tableType,
               includeOrExclude: detail.configuration.includeOrExclude,
               sourceTables: detail.configuration.sourceTables,
+              incrTableColumns: detail.configuration.incrTableColumns,
+              sourceBeforeSqlScripts: detail.configuration.sourceBeforeSqlScripts,
+              sourceAfterSqlScripts: detail.configuration.sourceAfterSqlScripts,
               tableNameMapper: detail.configuration.tableNameMapper,
               columnNameMapper: detail.configuration.columnNameMapper,
               tableNameCase: detail.configuration.tableNameCase,
@@ -818,9 +977,9 @@ export default {
               batchSize: detail.configuration.batchSize,
               channelSize: detail.configuration.channelSize,
               targetSyncOption: detail.configuration.targetSyncOption,
-              beforeSqlScripts: detail.configuration.beforeSqlScripts,
-              afterSqlScripts: detail.configuration.afterSqlScripts,
-            }
+              targetBeforeSqlScripts: detail.configuration.targetBeforeSqlScripts,
+              targetAfterSqlScripts: detail.configuration.targetAfterSqlScripts,
+            };
             this.selectChangedSourceConnection(this.dataform.sourceConnectionId)
             this.selectCreateChangedSourceSchema(this.dataform.sourceSchema)
             this.selectChangedTargetConnection(this.dataform.targetConnectionId)
@@ -908,6 +1067,47 @@ export default {
         });
       }
     },
+    handleAddInputIncrTable: function () {
+      if (!this.dataform.sourceConnectionId || this.dataform.sourceConnectionId < 0
+        || !this.dataform.sourceSchema || this.dataform.sourceSchema.length == 0) {
+        alert("请选择【源端数据源】和【源端模式名】！");
+        return;
+      }
+
+      if (!this.dataform.includeOrExclude) {
+        alert("请选择源端表选择的【配置方式】！");
+        return;
+      }
+
+      if (this.dataform.includeOrExclude == "INCLUDE") {
+        if (this.dataform.sourceTables.length == 0) {
+          this.preiveSeeTableNameList = this.sourceSchemaTables;
+        } else {
+          this.preiveSeeTableNameList = this.dataform.sourceTables;
+        }
+      } else {
+        if (this.dataform.sourceTables.length == 0) {
+          alert("请选择排除表的【表名配置】！");
+          return;
+        }
+
+        // 排除表，求差集
+        this.preiveSeeTableNameList = JSON.parse(JSON.stringify(this.sourceSchemaTables));
+        for (var i = 0; i < this.dataform.sourceTables.length; ++i) {
+          var one = this.dataform.sourceTables[i];
+          this.preiveSeeTableNameList.some((item, index) => {
+            if (item == one) {
+              this.preiveSeeTableNameList.splice(index, 1)
+              return true;
+            }
+          })
+        }
+      }
+      this.columnNameIncrementDialogVisible = true;
+    },
+    handleDeleteIncrTable: function (index) {
+      this.dataform.incrTableColumns.splice(index, 1);
+    },
     selectChangedTargetConnection: function (value) {
       this.targetConnection = this.connectionNameList.find(
         (item) => {
@@ -939,6 +1139,11 @@ export default {
       if (!this.dataform.sourceConnectionId || this.dataform.sourceConnectionId < 0
         || !this.dataform.sourceSchema || this.dataform.sourceSchema.length == 0) {
         alert("请选择【源端数据源】和【源端模式名】！");
+        return;
+      }
+
+      if (!this.dataform.includeOrExclude) {
+        alert("请选择源端表选择的【配置方式】！");
         return;
       }
 
@@ -1051,7 +1256,56 @@ export default {
           }
         }
       });
-
+    },
+    singleRowClick (row) {
+      if (row.canIncrement) {
+        this.tempIncrTableName = this.preiveTableName;
+        this.tempIncrColumnName = row.originalName;
+        this.radio = row.originalName;
+        console.log("table=" + this.tempIncrTableName + ";column=" + this.tempIncrColumnName)
+      } else {
+        this.$alert("非整型或日期时间类型不能被选中", "提示信息",
+          {
+            confirmButtonText: "确定",
+            type: "warn"
+          }
+        );
+      }
+    },
+    handleConfirmSelectIncrTableColumn: function () {
+      if (!this.tempIncrTableName || !this.tempIncrColumnName) {
+        this.$alert("请选择一个标识增量字段来", "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
+        return;
+      }
+      if (!this.dataform.incrTableColumns.find(item => item.tableName === this.tempIncrTableName)) {
+        this.dataform.incrTableColumns.push(
+          {
+            tableName: this.tempIncrTableName,
+            columnName: this.tempIncrColumnName
+          }
+        );
+        this.handleCancelSelectIncrTableColumn();
+      } else {
+        this.$alert("已经存在增量同步表[" + this.tempIncrTableName + "]的配置了", "提示信息",
+          {
+            confirmButtonText: "确定",
+            type: "info"
+          }
+        );
+      }
+    },
+    handleCancelSelectIncrTableColumn: function () {
+      this.columnNameIncrementDialogVisible = false;
+      this.preiveTableName = "";
+      this.columnNamesMapperData = [];
+      this.tempIncrTableName = "";
+      this.tempIncrColumnName = "";
+      this.radio = "";
     },
     handleSave: function () {
       if (0 === this.dataform.autoSyncMode) {
@@ -1085,6 +1339,9 @@ export default {
                   tableType: this.dataform.tableType,
                   includeOrExclude: this.dataform.includeOrExclude,
                   sourceTables: this.dataform.sourceTables,
+                  incrTableColumns: this.dataform.incrTableColumns,
+                  sourceBeforeSqlScripts: this.dataform.sourceBeforeSqlScripts,
+                  sourceAfterSqlScripts: this.dataform.sourceAfterSqlScripts,
                   targetConnectionId: this.dataform.targetConnectionId,
                   targetSchema: this.dataform.targetSchema,
                   tableNameMapper: this.dataform.tableNameMapper,
@@ -1097,8 +1354,8 @@ export default {
                   batchSize: this.dataform.batchSize,
                   channelSize: this.dataform.channelSize,
                   targetSyncOption: this.dataform.targetSyncOption,
-                  beforeSqlScripts: this.dataform.beforeSqlScripts,
-                  afterSqlScripts: this.dataform.afterSqlScripts,
+                  targetBeforeSqlScripts: this.dataform.targetBeforeSqlScripts,
+                  targetAfterSqlScripts: this.dataform.targetAfterSqlScripts,
                 }
               })
             }).then(res => {
@@ -1132,6 +1389,9 @@ export default {
                   tableType: this.dataform.tableType,
                   includeOrExclude: this.dataform.includeOrExclude,
                   sourceTables: this.dataform.sourceTables,
+                  incrTableColumns: this.dataform.incrTableColumns,
+                  sourceBeforeSqlScripts: this.dataform.sourceBeforeSqlScripts,
+                  sourceAfterSqlScripts: this.dataform.sourceAfterSqlScripts,
                   targetConnectionId: this.dataform.targetConnectionId,
                   targetSchema: this.dataform.targetSchema,
                   tableNameMapper: this.dataform.tableNameMapper,
@@ -1144,8 +1404,8 @@ export default {
                   batchSize: this.dataform.batchSize,
                   channelSize: this.dataform.channelSize,
                   targetSyncOption: this.dataform.targetSyncOption,
-                  beforeSqlScripts: this.dataform.beforeSqlScripts,
-                  afterSqlScripts: this.dataform.afterSqlScripts,
+                  targetBeforeSqlScripts: this.dataform.targetBeforeSqlScripts,
+                  targetAfterSqlScripts: this.dataform.targetAfterSqlScripts,
                 }
               })
             }).then(res => {

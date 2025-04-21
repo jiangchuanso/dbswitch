@@ -108,6 +108,49 @@
                 </div>
               </el-col>
             </el-row>
+            <el-row class="row-gutter">
+              <el-col :span="4">
+                <label class="key-text">增量同步配置</label>
+              </el-col>
+              <el-col :span="20">
+                <el-table :data="infoform.incrTableColumns"
+                          style="width: 100%"
+                          :row-class-name="tableRowClassName">
+                  <el-table-column prop="tableName"
+                                   label="增量同步表名">
+                  </el-table-column>
+                  <el-table-column prop="columnName"
+                                   label="增量标识字段">
+                  </el-table-column>
+                </el-table>
+              </el-col>
+            </el-row>
+            <el-row class="row-gutter">
+              <el-col :span="8">
+                <label class="key-text">同步前置执行SQL脚本</label>
+              </el-col>
+              <el-col :span="16">
+                <label class="value-text">
+                  <span v-show="!infoform.sourceBeforeSqlScripts || infoform.sourceBeforeSqlScripts.length==0">[SQL脚本内容为空]</span>
+                  <span v-show="infoform.sourceBeforeSqlScripts && infoform.sourceBeforeSqlScripts.length>0">{{
+                          infoform.sourceBeforeSqlScripts
+                        }}</span>
+                </label>
+              </el-col>
+            </el-row>
+            <el-row class="row-gutter">
+              <el-col :span="8">
+                <label class="key-text">同步后置执行SQL脚本</label>
+              </el-col>
+              <el-col :span="16">
+                <label class="value-text">
+                  <span v-show="!infoform.sourceAfterSqlScripts || infoform.sourceAfterSqlScripts.length==0">[SQL脚本内容为空]</span>
+                  <span v-show="infoform.sourceAfterSqlScripts && infoform.sourceAfterSqlScripts.length>0">{{
+                          infoform.sourceAfterSqlScripts
+                        }}</span>
+                </label>
+              </el-col>
+            </el-row>
           </div>
         </div>
         <div class="target">
@@ -246,9 +289,9 @@
               <el-col :span="16">
                 <label class="value-text"
                        v-if=" infoform.autoSyncMode!==1 ">
-                  <span v-show="!infoform.beforeSqlScripts || infoform.beforeSqlScripts.length==0">[SQL脚本内容为空]</span>
-                  <span v-show="infoform.beforeSqlScripts && infoform.beforeSqlScripts.length>0">{{
-                          infoform.beforeSqlScripts
+                  <span v-show="!infoform.targetBeforeSqlScripts || infoform.targetBeforeSqlScripts.length==0">[SQL脚本内容为空]</span>
+                  <span v-show="infoform.targetBeforeSqlScripts && infoform.targetBeforeSqlScripts.length>0">{{
+                          infoform.targetBeforeSqlScripts
                         }}</span>
                 </label>
               </el-col>
@@ -260,9 +303,9 @@
               <el-col :span="16">
                 <label class="value-text"
                        v-if=" infoform.autoSyncMode!==1 ">
-                  <span v-show="!infoform.afterSqlScripts || infoform.afterSqlScripts.length==0">[SQL脚本内容为空]</span>
-                  <span v-show="infoform.afterSqlScripts && infoform.afterSqlScripts.length>0">{{
-                          infoform.afterSqlScripts
+                  <span v-show="!infoform.targetAfterSqlScripts || infoform.targetAfterSqlScripts.length==0">[SQL脚本内容为空]</span>
+                  <span v-show="infoform.targetAfterSqlScripts && infoform.targetAfterSqlScripts.length>0">{{
+                          infoform.targetAfterSqlScripts
                         }}</span>
                 </label>
               </el-col>
@@ -325,6 +368,9 @@ export default {
         tableType: "TABLE",
         includeOrExclude: "",
         sourceTables: [],
+        incrTableColumns: [],
+        sourceBeforeSqlScripts: "",
+        sourceAfterSqlScripts: "",
         tableNameMapper: [],
         columnNameMapper: [],
         tableNameCase: 'NONE',
@@ -338,8 +384,8 @@ export default {
         batchSize: 5000,
         channelSize: 100,
         targetSyncOption: 'INSERT_UPDATE_DELETE',
-        beforeSqlScripts: '',
-        afterSqlScripts: '',
+        targetBeforeSqlScripts: '',
+        targetAfterSqlScripts: '',
       }
     }
   },
@@ -461,5 +507,9 @@ export default {
 .table-name-list ul li {
   padding: 2px 2px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+/deep/.el-table .el-table__cell {
+  padding: 0px;
 }
 </style>

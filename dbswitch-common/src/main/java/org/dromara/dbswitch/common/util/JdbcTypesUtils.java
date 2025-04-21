@@ -121,8 +121,17 @@ public final class JdbcTypesUtils {
         || Types.LONGVARBINARY == sqlType);
   }
 
-  public static boolean isTextable(int sqlType) {
+  public static boolean isTextile(int sqlType) {
     return isNumeric(sqlType) || isString(sqlType) || isDateTime(sqlType) || isBoolean(sqlType);
+  }
+
+  public static boolean isIncrement(int sqlType) {
+    return (Types.BIT == sqlType
+        || Types.BIGINT == sqlType
+        || Types.INTEGER == sqlType
+        || Types.TIMESTAMP == sqlType
+        || Types.TIME_WITH_TIMEZONE == sqlType
+        || Types.TIMESTAMP_WITH_TIMEZONE == sqlType);
   }
 
   // 其他类型如下：9个

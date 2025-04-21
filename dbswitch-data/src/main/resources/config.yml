@@ -20,6 +20,9 @@ dbswitch:
     source-includes: ''
     ## table name exclude from table lists, separate by ','
     source-excludes: ''
+    ## table incr column name for table data increment synchronization
+    incr-table-columns:
+      t_test_table: id
     ## table name convert mapper by regular expression
     regex-table-mapper:
       - from-pattern: '^'

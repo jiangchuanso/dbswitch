@@ -79,6 +79,9 @@ export default {
             tableType: detail.configuration.tableType,
             includeOrExclude: detail.configuration.includeOrExclude,
             sourceTables: detail.configuration.sourceTables,
+            incrTableColumns: detail.configuration.incrTableColumns,
+            sourceBeforeSqlScripts: detail.configuration.sourceBeforeSqlScripts,
+            sourceAfterSqlScripts: detail.configuration.sourceAfterSqlScripts,
             tableNameMapper: detail.configuration.tableNameMapper,
             columnNameMapper: detail.configuration.columnNameMapper,
             tableNameCase: detail.configuration.tableNameCase,
@@ -94,8 +97,8 @@ export default {
             batchSize: detail.configuration.batchSize,
             channelSize: detail.configuration.channelSize,
             targetSyncOption: detail.configuration.targetSyncOption,
-            beforeSqlScripts: detail.configuration.beforeSqlScripts,
-            afterSqlScripts: detail.configuration.afterSqlScripts,
+            targetBeforeSqlScripts: detail.configuration.targetBeforeSqlScripts,
+            targetAfterSqlScripts: detail.configuration.targetAfterSqlScripts,
           }
         } else {
           if (res.data.message) {

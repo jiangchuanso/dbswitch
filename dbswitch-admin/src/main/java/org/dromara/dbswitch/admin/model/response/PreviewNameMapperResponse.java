@@ -9,4 +9,7 @@ public class PreviewNameMapperResponse {
 
   private String originalName;
   private String targetName;
+  private String typeName;
+  private int fieldType;
+  private boolean canIncrement;
 }

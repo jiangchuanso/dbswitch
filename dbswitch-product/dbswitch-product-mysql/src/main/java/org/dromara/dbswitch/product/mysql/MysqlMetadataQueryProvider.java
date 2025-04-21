@@ -291,7 +291,7 @@ public class MysqlMetadataQueryProvider extends AbstractMetadataProvider {
             if (length > 65) {
               length = 65;
             }
-            if (length > 15) {
+            if (length >= 15) {
               retval += "DECIMAL(" + length;
               if (precision > 0) {
                 if (precision > 30) {

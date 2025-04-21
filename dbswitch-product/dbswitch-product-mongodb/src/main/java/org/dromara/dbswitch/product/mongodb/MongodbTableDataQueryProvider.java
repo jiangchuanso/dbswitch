@@ -1,6 +1,7 @@
 package org.dromara.dbswitch.product.mongodb;
 
 import org.dromara.dbswitch.common.consts.Constants;
+import org.dromara.dbswitch.common.entity.IncrementPoint;
 import org.dromara.dbswitch.common.entity.ResultSetWrapper;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
@@ -42,7 +43,7 @@ public class MongodbTableDataQueryProvider implements TableDataQueryProvider {
 
   @Override
   public ResultSetWrapper queryTableData(String schemaName, String tableName, List<String> fields,
-      List<String> orders) {
+      IncrementPoint point, List<String> orders) {
     String sql = String.format("%s.getCollection('%s').find().sort({ %s })",
         schemaName, tableName, orders.stream().map(s -> String.format("'%s' : 1", s))
             .collect(Collectors.joining(",")));

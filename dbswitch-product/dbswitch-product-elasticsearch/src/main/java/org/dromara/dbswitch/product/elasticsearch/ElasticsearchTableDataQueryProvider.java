@@ -10,6 +10,7 @@
 package org.dromara.dbswitch.product.elasticsearch;
 
 import org.dromara.dbswitch.common.consts.Constants;
+import org.dromara.dbswitch.common.entity.IncrementPoint;
 import org.dromara.dbswitch.common.entity.ResultSetWrapper;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
@@ -50,7 +51,7 @@ public class ElasticsearchTableDataQueryProvider implements TableDataQueryProvid
 
   @Override
   public ResultSetWrapper queryTableData(String schemaName, String tableName, List<String> fields,
-      List<String> orders) {
+      IncrementPoint point, List<String> orders) {
     String sql = tableName;
     try {
       Connection connection = this.dataSource.getConnection();

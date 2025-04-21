@@ -10,6 +10,8 @@
 package org.dromara.dbswitch.admin.controller.converter;
 
 import cn.hutool.extra.spring.SpringUtil;
+import java.util.ArrayList;
+import java.util.Optional;
 import org.dromara.dbswitch.admin.dao.AssignmentConfigDAO;
 import org.dromara.dbswitch.admin.dao.DatabaseConnectionDAO;
 import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
@@ -43,6 +45,9 @@ public class AssignmentDetailConverter extends
         ? IncludeExcludeEnum.EXCLUDE
         : IncludeExcludeEnum.INCLUDE);
     config.setSourceTables(taskConfig.getSourceTables());
+    config.setIncrTableColumns(Optional.ofNullable(taskConfig.getIncrTableColumns()).orElseGet(ArrayList::new));
+    config.setSourceBeforeSqlScripts(taskConfig.getPreSqlScripts());
+    config.setSourceAfterSqlScripts(taskConfig.getPostSqlScripts());
     config.setTargetConnectionId(dstConn.getId());
     config.setTargetConnectionName(dstConn.getName());
     config.setTargetTypeName(dstConn.getType().getName());
@@ -52,13 +57,13 @@ public class AssignmentDetailConverter extends
     config.setTargetAutoIncrement(taskConfig.getTargetAutoIncrement());
     config.setTableNameCase(taskConfig.getTableNameCase());
     config.setColumnNameCase(taskConfig.getColumnNameCase());
-    config.setTableNameMapper(taskConfig.getTableNameMap());
-    config.setColumnNameMapper(taskConfig.getColumnNameMap());
+    config.setTableNameMapper(Optional.ofNullable(taskConfig.getTableNameMap()).orElseGet(ArrayList::new));
+    config.setColumnNameMapper(Optional.ofNullable(taskConfig.getColumnNameMap()).orElseGet(ArrayList::new));
     config.setBatchSize(taskConfig.getBatchSize());
     config.setChannelSize(taskConfig.getChannelSize());
     config.setTargetSyncOption(taskConfig.getTargetSyncOption());
-    config.setBeforeSqlScripts(taskConfig.getBeforeSqlScripts());
-    config.setAfterSqlScripts(taskConfig.getAfterSqlScripts());
+    config.setTargetBeforeSqlScripts(taskConfig.getBeforeSqlScripts());
+    config.setTargetAfterSqlScripts(taskConfig.getAfterSqlScripts());
 
     AssignmentDetailResponse detailResponse = new AssignmentDetailResponse();
     detailResponse.setId(assignmentTaskEntity.getId());

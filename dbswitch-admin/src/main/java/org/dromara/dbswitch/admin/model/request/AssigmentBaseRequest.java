@@ -9,16 +9,17 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.admin.model.request;
 
-import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
-import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
-import org.dromara.dbswitch.common.entity.PatternMapper;
-import org.dromara.dbswitch.common.type.CaseConvertEnum;
-import org.dromara.dbswitch.common.type.ProductTableEnum;
-import org.dromara.dbswitch.common.type.SyncOptionEnum;
 import java.util.List;
 import java.util.Objects;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
+import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
+import org.dromara.dbswitch.common.entity.PatternMapper;
+import org.dromara.dbswitch.common.entity.TableColumnPair;
+import org.dromara.dbswitch.common.type.CaseConvertEnum;
+import org.dromara.dbswitch.common.type.ProductTableEnum;
+import org.dromara.dbswitch.common.type.SyncOptionEnum;
 
 public class AssigmentBaseRequest {
 
@@ -31,6 +32,10 @@ public class AssigmentBaseRequest {
     private ProductTableEnum tableType;
     private IncludeExcludeEnum includeOrExclude;
     private List<String> sourceTables;
+    private List<TableColumnPair> incrTableColumns;
+    private String sourceBeforeSqlScripts;
+    private String sourceAfterSqlScripts;
+
     private Long targetConnectionId;
     private String targetSchema;
     private CaseConvertEnum tableNameCase;
@@ -41,8 +46,8 @@ public class AssigmentBaseRequest {
     private Boolean targetOnlyCreate;
     private Boolean targetAutoIncrement;
     private SyncOptionEnum targetSyncOption;
-    private String beforeSqlScripts;
-    private String afterSqlScripts;
+    private String targetBeforeSqlScripts;
+    private String targetAfterSqlScripts;
     private Integer batchSize;
     private Integer channelSize;
   }
@@ -54,9 +59,10 @@ public class AssigmentBaseRequest {
     assignmentConfigEntity.setSourceSchema(config.getSourceSchema());
     assignmentConfigEntity.setTableType(config.getTableType());
     assignmentConfigEntity.setSourceTables(config.getSourceTables());
-    assignmentConfigEntity.setExcludedFlag(
-        config.getIncludeOrExclude() == IncludeExcludeEnum.EXCLUDE
-    );
+    assignmentConfigEntity.setIncrTableColumns(config.getIncrTableColumns());
+    assignmentConfigEntity.setExcludedFlag(getExcludedFlag(config.getIncludeOrExclude()));
+    assignmentConfigEntity.setPreSqlScripts(getTrimValueOrNull(config.getSourceBeforeSqlScripts()));
+    assignmentConfigEntity.setPostSqlScripts(getTrimValueOrNull(config.getSourceAfterSqlScripts()));
     assignmentConfigEntity.setTargetConnectionId(config.getTargetConnectionId());
     assignmentConfigEntity.setTargetSchema(config.getTargetSchema());
     assignmentConfigEntity.setTableNameCase(config.getTableNameCase());
@@ -66,14 +72,18 @@ public class AssigmentBaseRequest {
     assignmentConfigEntity.setTargetDropTable(config.getTargetDropTable());
     assignmentConfigEntity.setTargetOnlyCreate(config.getTargetOnlyCreate());
     assignmentConfigEntity.setTargetAutoIncrement(config.getTargetAutoIncrement());
-    assignmentConfigEntity.setBeforeSqlScripts(getTrimValueOrNull(config.getBeforeSqlScripts()));
-    assignmentConfigEntity.setAfterSqlScripts(getTrimValueOrNull(config.getAfterSqlScripts()));
+    assignmentConfigEntity.setBeforeSqlScripts(getTrimValueOrNull(config.getTargetBeforeSqlScripts()));
+    assignmentConfigEntity.setAfterSqlScripts(getTrimValueOrNull(config.getTargetAfterSqlScripts()));
     assignmentConfigEntity.setTargetSyncOption(config.getTargetSyncOption());
     assignmentConfigEntity.setBatchSize(getValueOrDefault(config.getBatchSize(), 10000));
     assignmentConfigEntity.setChannelSize(getValueOrDefault(config.getChannelSize(), 100));
     assignmentConfigEntity.setFirstFlag(Boolean.FALSE);
 
     return assignmentConfigEntity;
+  }
+
+  protected boolean getExcludedFlag(IncludeExcludeEnum includeOrExclude) {
+    return includeOrExclude == IncludeExcludeEnum.EXCLUDE;
   }
 
   protected int getValueOrDefault(Integer value, int defaultValue) {

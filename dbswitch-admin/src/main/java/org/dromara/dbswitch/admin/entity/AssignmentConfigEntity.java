@@ -15,8 +15,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.dromara.dbswitch.admin.handler.ListPatternHandler;
+import org.dromara.dbswitch.admin.handler.ListTabColHandler;
 import org.dromara.dbswitch.admin.handler.ListTypeHandler;
 import org.dromara.dbswitch.common.entity.PatternMapper;
+import org.dromara.dbswitch.common.entity.TableColumnPair;
 import org.dromara.dbswitch.common.type.CaseConvertEnum;
 import org.dromara.dbswitch.common.type.ProductTableEnum;
 import org.dromara.dbswitch.common.type.SyncOptionEnum;
@@ -53,8 +55,17 @@ public class AssignmentConfigEntity {
   @TableField(value = "source_tables", typeHandler = ListTypeHandler.class)
   private List<String> sourceTables;
 
+  @TableField(value = "table_incr_columns", typeHandler = ListTabColHandler.class)
+  private List<TableColumnPair> incrTableColumns;
+
   @TableField("excluded_flag")
   private Boolean excludedFlag;
+
+  @TableField("pre_sql_scripts")
+  private String preSqlScripts;
+
+  @TableField("post_sql_scripts")
+  private String postSqlScripts;
 
   @TableField("target_connection_id")
   private Long targetConnectionId;

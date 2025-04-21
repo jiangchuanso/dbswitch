@@ -9,23 +9,24 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.core.service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+import javax.sql.DataSource;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
 import org.dromara.dbswitch.core.provider.ProductProviderFactory;
 import org.dromara.dbswitch.core.provider.meta.MetadataProvider;
 import org.dromara.dbswitch.core.provider.query.TableDataQueryProvider;
 import org.dromara.dbswitch.core.schema.ColumnDescription;
+import org.dromara.dbswitch.core.schema.ColumnValue;
 import org.dromara.dbswitch.core.schema.IndexDescription;
 import org.dromara.dbswitch.core.schema.SchemaTableData;
 import org.dromara.dbswitch.core.schema.SchemaTableMeta;
-import org.dromara.dbswitch.core.schema.TableDescription;
 import org.dromara.dbswitch.core.schema.SourceProperties;
+import org.dromara.dbswitch.core.schema.TableDescription;
 import org.dromara.dbswitch.core.util.GenerateSqlUtils;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
-import javax.sql.DataSource;
 
 /**
  * 用DataSource对象的元数据获取服务
@@ -199,6 +200,15 @@ public class DefaultMetadataService implements MetadataService {
   public SchemaTableData queryTableData(String schemaName, String tableName, int rowCount) {
     try (Connection connection = dataSource.getConnection()) {
       return dataQueryProvider.queryTableData(connection, schemaName, tableName, rowCount);
+    } catch (SQLException se) {
+      throw new RuntimeException(se);
+    }
+  }
+
+  @Override
+  public ColumnValue queryIncrementPoint(String schemaName, String tableName, String filedName) {
+    try (Connection connection = dataSource.getConnection()) {
+      return dataQueryProvider.queryFieldMaxValue(connection, schemaName, tableName, filedName);
     } catch (SQLException se) {
       throw new RuntimeException(se);
     }

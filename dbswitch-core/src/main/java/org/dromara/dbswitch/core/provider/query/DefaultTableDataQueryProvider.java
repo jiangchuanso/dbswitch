@@ -10,13 +10,6 @@
 package org.dromara.dbswitch.core.provider.query;
 
 import cn.hutool.core.util.HexUtil;
-import org.dromara.dbswitch.common.consts.Constants;
-import org.dromara.dbswitch.common.entity.ResultSetWrapper;
-import org.dromara.dbswitch.common.util.ObjectCastUtils;
-import org.dromara.dbswitch.core.features.ProductFeatures;
-import org.dromara.dbswitch.core.provider.AbstractCommonProvider;
-import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
-import org.dromara.dbswitch.core.schema.SchemaTableData;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,6 +20,15 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.dbswitch.common.consts.Constants;
+import org.dromara.dbswitch.common.entity.IncrementPoint;
+import org.dromara.dbswitch.common.entity.ResultSetWrapper;
+import org.dromara.dbswitch.common.util.ObjectCastUtils;
+import org.dromara.dbswitch.core.features.ProductFeatures;
+import org.dromara.dbswitch.core.provider.AbstractCommonProvider;
+import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
+import org.dromara.dbswitch.core.schema.ColumnValue;
+import org.dromara.dbswitch.core.schema.SchemaTableData;
 
 @Slf4j
 public class DefaultTableDataQueryProvider
@@ -58,11 +60,17 @@ public class DefaultTableDataQueryProvider
 
   @Override
   public ResultSetWrapper queryTableData(String schemaName, String tableName, List<String> fields,
-      List<String> orders) {
+      IncrementPoint point, List<String> orders) {
     StringBuilder sb = new StringBuilder("SELECT ");
     sb.append(quoteName(StringUtils.join(fields, quoteName(","))));
     sb.append(" FROM ");
     sb.append(quoteSchemaTableName(schemaName, tableName));
+    if (IncrementPoint.EMPTY != point && point.isWorkable()) {
+      sb.append(" WHERE ");
+      sb.append(quoteName(point.getColumnName()));
+      sb.append(" > ");
+      sb.append(point.getMaxValue());
+    }
     if (CollectionUtils.isNotEmpty(orders)) {
       sb.append(" ORDER BY ");
       sb.append(quoteName(StringUtils.join(orders, quoteName(","))));
@@ -130,6 +138,24 @@ public class DefaultTableDataQueryProvider
         }
 
         return data;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public ColumnValue queryFieldMaxValue(Connection connection, String schemaName, String tableName, String filedName) {
+    String fullTableName = quoteSchemaTableName(schemaName, tableName);
+    String querySQL = String.format("SELECT MAX(%s) FROM %s ", quoteName(filedName), fullTableName);
+    try (Statement st = connection.createStatement()) {
+      try (ResultSet rs = st.executeQuery(querySQL)) {
+        ResultSetMetaData m = rs.getMetaData();
+        int dataType = m.getColumnType(1);
+        if (rs.next()) {
+          return new ColumnValue(dataType, rs.getObject(1));
+        }
+        return null;
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);

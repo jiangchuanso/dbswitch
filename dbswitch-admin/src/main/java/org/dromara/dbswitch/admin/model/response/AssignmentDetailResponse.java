@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import org.dromara.dbswitch.admin.type.IncludeExcludeEnum;
 import org.dromara.dbswitch.admin.type.ScheduleModeEnum;
 import org.dromara.dbswitch.common.entity.PatternMapper;
+import org.dromara.dbswitch.common.entity.TableColumnPair;
 import org.dromara.dbswitch.common.type.CaseConvertEnum;
 import org.dromara.dbswitch.common.type.ProductTableEnum;
 import org.dromara.dbswitch.common.type.SyncOptionEnum;
@@ -83,6 +84,15 @@ public class AssignmentDetailResponse {
     @ApiModelProperty("配置的表名列表")
     private List<String> sourceTables;
 
+    @ApiModelProperty("增量同步表配置")
+    private List<TableColumnPair> incrTableColumns;
+
+    @ApiModelProperty("源端同步前置执行SQL脚本")
+    private String sourceBeforeSqlScripts;
+
+    @ApiModelProperty("源端同步后置执行SQL脚本")
+    private String sourceAfterSqlScripts;
+
     @ApiModelProperty("目的端连接ID")
     private Long targetConnectionId;
 
@@ -125,10 +135,10 @@ public class AssignmentDetailResponse {
     @ApiModelProperty("同步操作方法")
     private SyncOptionEnum targetSyncOption;
 
-    @ApiModelProperty("同步前置执行SQL脚本")
-    private String beforeSqlScripts;
+    @ApiModelProperty("目标端同步前置执行SQL脚本")
+    private String targetBeforeSqlScripts;
 
-    @ApiModelProperty("同步后置执行SQL脚本")
-    private String afterSqlScripts;
+    @ApiModelProperty("目标端同步后置执行SQL脚本")
+    private String targetAfterSqlScripts;
   }
 }

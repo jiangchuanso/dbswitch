@@ -6,6 +6,7 @@ import org.dromara.dbswitch.admin.common.response.ResultCode;
 import org.dromara.dbswitch.admin.model.request.PreviewColumnNameMapperRequest;
 import org.dromara.dbswitch.admin.model.request.PreviewTableNameMapperRequest;
 import org.dromara.dbswitch.admin.model.response.PreviewNameMapperResponse;
+import org.dromara.dbswitch.common.util.JdbcTypesUtils;
 import org.dromara.dbswitch.common.util.PatterNameUtils;
 import org.dromara.dbswitch.core.schema.ColumnDescription;
 import org.dromara.dbswitch.core.schema.TableDescription;
@@ -92,11 +93,17 @@ public class PatternMapperService {
           result.add(PreviewNameMapperResponse.builder()
               .originalName(cd.getFieldName())
               .targetName(targetName)
+              .typeName(cd.getFieldTypeName())
+              .fieldType(cd.getFieldType())
+              .canIncrement(JdbcTypesUtils.isIncrement(cd.getFieldType()))
               .build());
         } else {
           result.add(PreviewNameMapperResponse.builder()
               .originalName(cd.getFieldName())
               .targetName(STRING_DELETE)
+              .typeName(cd.getFieldTypeName())
+              .fieldType(cd.getFieldType())
+              .canIncrement(false)
               .build());
         }
       }

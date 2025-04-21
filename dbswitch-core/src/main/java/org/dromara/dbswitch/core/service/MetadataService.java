@@ -9,15 +9,16 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.core.service;
 
+import java.util.List;
+import javax.sql.DataSource;
 import org.dromara.dbswitch.core.provider.meta.MetadataProvider;
 import org.dromara.dbswitch.core.schema.ColumnDescription;
-import org.dromara.dbswitch.core.schema.SourceProperties;
+import org.dromara.dbswitch.core.schema.ColumnValue;
 import org.dromara.dbswitch.core.schema.IndexDescription;
 import org.dromara.dbswitch.core.schema.SchemaTableData;
 import org.dromara.dbswitch.core.schema.SchemaTableMeta;
+import org.dromara.dbswitch.core.schema.SourceProperties;
 import org.dromara.dbswitch.core.schema.TableDescription;
-import java.util.List;
-import javax.sql.DataSource;
 
 public interface MetadataService {
 
@@ -144,6 +145,17 @@ public interface MetadataService {
    * @return
    */
   SchemaTableData queryTableData(String schemaName, String tableName, int rowCount);
+
+
+  /**
+   * 查询增量字段数据的最大值
+   *
+   * @param schemaName 模式名称
+   * @param tableName  表名称
+   * @param filedName  字段名称
+   * @return 最大值(可能为null)
+   */
+  ColumnValue queryIncrementPoint(String schemaName, String tableName, String filedName);
 
   /**
    * 根据字段结构信息组装对应数据库的建表DDL语句

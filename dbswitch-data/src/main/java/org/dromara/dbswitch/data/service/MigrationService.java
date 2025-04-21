@@ -9,6 +9,13 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.data.service;
 
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.dbswitch.common.entity.CloseableDataSource;
 import org.dromara.dbswitch.common.entity.LoggingRunnable;
 import org.dromara.dbswitch.common.entity.MdcKeyValue;
@@ -20,13 +27,6 @@ import org.dromara.dbswitch.data.config.DbswichPropertiesConfiguration;
 import org.dromara.dbswitch.data.entity.GlobalParamConfigProperties;
 import org.dromara.dbswitch.data.util.DataSourceUtils;
 import org.dromara.dbswitch.data.util.MachineUtils;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Service;
@@ -124,12 +124,19 @@ public class MigrationService implements Runnable {
       try (CloseableDataSource sourceDataSource = DataSourceUtils.createSourceDataSource(configuration.getSource())) {
         robotReader = new DefaultReaderRobot(mdcKeyValue, configuration, sourceDataSource, targetDataSource);
         robotWriter = new DefaultWriterRobot(mdcKeyValue, robotReader, writeThreadNum, concurrentWrite);
-        boolean success = executeSqlScripts(targetDataSource, configuration.getTarget().getBeforeSqlScripts());
+        boolean sourceSuccess = executeSqlScripts(sourceDataSource, configuration.getSource().getBeforeSqlScripts());
         try {
-          exchanger.exchange(robotReader, robotWriter);
+          boolean targetSuccess = executeSqlScripts(targetDataSource, configuration.getTarget().getBeforeSqlScripts());
+          try {
+            exchanger.exchange(robotReader, robotWriter);
+          } finally {
+            if (targetSuccess) {
+              executeSqlScripts(targetDataSource, configuration.getTarget().getAfterSqlScripts());
+            }
+          }
         } finally {
-          if (success) {
-            executeSqlScripts(targetDataSource, configuration.getTarget().getAfterSqlScripts());
+          if (sourceSuccess) {
+            executeSqlScripts(sourceDataSource, configuration.getSource().getAfterSqlScripts());
           }
         }
       }
@@ -160,7 +167,7 @@ public class MigrationService implements Runnable {
     }
   }
 
-  private boolean executeSqlScripts(CloseableDataSource targetDataSource, String sqlScripts) {
+  private boolean executeSqlScripts(CloseableDataSource closeableDataSource, String sqlScripts) {
     if (StringUtils.isBlank(sqlScripts) || StringUtils.isBlank(sqlScripts.trim())) {
       return true;
     }
@@ -171,7 +178,7 @@ public class MigrationService implements Runnable {
         sqlList);
     if (!sqlList.isEmpty()) {
       try {
-        try (Connection connection = targetDataSource.getConnection();
+        try (Connection connection = closeableDataSource.getConnection();
             Statement statement = connection.createStatement()) {
           for (String sql : sqlList) {
             log.info("Execute sql : {}", sql);

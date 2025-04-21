@@ -9,6 +9,18 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.admin.service;
 
+import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.dbswitch.admin.common.exception.DbswitchException;
 import org.dromara.dbswitch.admin.common.response.PageResult;
 import org.dromara.dbswitch.admin.common.response.Result;
@@ -20,6 +32,10 @@ import org.dromara.dbswitch.admin.dao.AssignmentConfigDAO;
 import org.dromara.dbswitch.admin.dao.AssignmentJobDAO;
 import org.dromara.dbswitch.admin.dao.AssignmentTaskDAO;
 import org.dromara.dbswitch.admin.dao.DatabaseConnectionDAO;
+import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
+import org.dromara.dbswitch.admin.entity.AssignmentJobEntity;
+import org.dromara.dbswitch.admin.entity.AssignmentTaskEntity;
+import org.dromara.dbswitch.admin.entity.DatabaseConnectionEntity;
 import org.dromara.dbswitch.admin.model.request.AssigmentCreateRequest;
 import org.dromara.dbswitch.admin.model.request.AssigmentUpdateRequest;
 import org.dromara.dbswitch.admin.model.request.AssignmentSearchRequest;
@@ -30,27 +46,14 @@ import org.dromara.dbswitch.admin.type.JobStatusEnum;
 import org.dromara.dbswitch.admin.type.ScheduleModeEnum;
 import org.dromara.dbswitch.admin.util.ExcelUtils;
 import org.dromara.dbswitch.admin.util.PageUtils;
-import org.dromara.dbswitch.admin.entity.AssignmentConfigEntity;
-import org.dromara.dbswitch.admin.entity.AssignmentJobEntity;
-import org.dromara.dbswitch.admin.entity.AssignmentTaskEntity;
-import org.dromara.dbswitch.admin.entity.DatabaseConnectionEntity;
 import org.dromara.dbswitch.common.converter.ConverterFactory;
+import org.dromara.dbswitch.common.entity.TableColumnPair;
 import org.dromara.dbswitch.common.type.ProductTypeEnum;
 import org.dromara.dbswitch.data.config.DbswichPropertiesConfiguration;
 import org.dromara.dbswitch.data.entity.GlobalParamConfigProperties;
 import org.dromara.dbswitch.data.entity.SourceDataSourceProperties;
 import org.dromara.dbswitch.data.entity.TargetDataSourceProperties;
 import org.dromara.dbswitch.data.util.JsonUtils;
-import com.google.common.collect.Lists;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -291,7 +294,16 @@ public class AssignmentService {
       }
     }
     sourceDataSourceProperties.setSourceSchema(sourceSchema);
-    sourceDataSourceProperties.setRegexTableMapper(assignmentConfigEntity.getTableNameMap());
+
+    Map<String, String> incrTableColumns = Optional
+        .ofNullable(assignmentConfigEntity.getIncrTableColumns())
+        .orElseGet(ArrayList::new)
+        .stream().collect(Collectors.toMap(TableColumnPair::getTableName,
+            TableColumnPair::getColumnName, (a, b) -> b));
+
+    sourceDataSourceProperties.setIncrTableColumns(incrTableColumns);
+    sourceDataSourceProperties.setBeforeSqlScripts(assignmentConfigEntity.getPreSqlScripts());
+    sourceDataSourceProperties.setAfterSqlScripts(assignmentConfigEntity.getPostSqlScripts());
     sourceDataSourceProperties.setRegexColumnMapper(assignmentConfigEntity.getColumnNameMap());
     sourceDataSourceProperties.setFetchSize(assignmentConfigEntity.getBatchSize());
     sourceDataSourceProperties.setTableType(assignmentConfigEntity.getTableType().name());
