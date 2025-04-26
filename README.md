@@ -9,7 +9,7 @@
 
 ### 1、功能描述
 
-一句话，dbswitch工具提供源端数据库向目的端数据库的离线**批量**迁移同步功能，支持数据的全量和增量方式同步。包括：
+一句话，dbswitch工具提供源端数据库向目的端数据库的离线**批量**迁移同步功能，支持数据的全量/增量/变化量方式同步。包括：
 
 - **结构迁移**
 
@@ -21,7 +21,9 @@
 
 基于JDBC的分批次离线读取源端数据库数据，并基于insert/copy方式将数据分批次写入目的数据库。
 
-支持有主键表的 **增量变更同步** （变化数据计算Change Data Calculate）功能(千万级以上数据量的性能尚需在生产环境验证)
+支持指定增量标识字段的**增量同步**(适用于日志表等存在增量标识字段的同步场景)
+
+支持有主键表的 **变化量同步** （变化数据计算Change Data Calculate）功能(千万级以上数据量的性能尚需在生产环境验证)
 
 ### 2、结构设计
   
@@ -230,6 +232,7 @@ dbswitch:
 | dbswitch.source.table-type | 来源端表的类型 | TABLE | 可选值为：TABLE、VIEW ,分别代表物理表和试图表 |
 | dbswitch.source.source-includes | 来源端schema下的表中需要包含的表名称 | users1,orgs1 | 支持多个表（多个之间用英文逗号分隔）；支持支持正则表达式(不能含有逗号) |
 | dbswitch.source.source-excludes | 来源端schema下的表中需要过滤的表名称 | users,orgs | 不包含的表名称，多个之间用英文逗号分隔 |
+| dbswitch.source.incr-table-columns | 来源端增量同步表的增量同步标识字段配置 | map结构，key为增量同步的表名，value为增量标识字段名 | 增量标识字段需正确存在完全递增的字段值 |
 | dbswitch.source.regex-table-mapper | 基于正则表达式的表名称映射关系 | [{"from-pattern": "^","to-value": "T_"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.source.regex-column-mapper | 基于正则表达式的字段名映射关系 | [{"from-pattern": "$","to-value": "_x"}] | 为list类型，元素存在顺序关系 |
 | dbswitch.target.url | 目的端JDBC连接的URL | jdbc:postgresql://10.17.1.90:5432/study | 可为：oracle/sqlserver/postgresql/greenplum,mysql/mariadb/db2/dm/kingbase8/highgo也支持，但字段类型兼容性问题比较多 |
@@ -277,7 +280,7 @@ bin/datasync.sh
 
 #### (3)、额外说明
 
-- 1、对于向目的库为PostgreSQL/Greenplum的数据离线同步默认采用copy方式写入数据，说明如下：
+- 1、对于向目的库为PostgreSQL的数据离线同步默认采用copy方式写入数据，说明如下：
   
   **（a）** 如若使用copy方式写入，配置文件中需配置为postgresql的jdbc url和驱动类（不能为greenplum的驱动包），
   
@@ -343,7 +346,7 @@ dbswitch:
 按照上述配置，只需修改```conf/application.yml```及```conf/application-???.yml```配置文件中的如下五个参数的配置:
 
 - ```spring.profiles.include```
-> 使用的数据库类型，可选值(单选): mysql,postgres
+> 使用的数据库类型，可选值(单选): h2, mysql, postgres
 - ```dbswitch.configuration.drivers-base-path```
 > 驱动JAR文件所在的目录位置
 - ```spring.datasource.url```
@@ -513,7 +516,7 @@ service.run();
 
 ## 八、项目推荐
 
-一款SQL2API的低代码开源工具SQLREST:[https://gitee.com/inrgihc/sqlrest](https://gitee.com/inrgihc/sqlrest)
+开源的SQL2API低代码工具SQLREST:[https://gitee.com/inrgihc/sqlrest](https://gitee.com/inrgihc/sqlrest)
 
 ## 九、社区推荐
 
