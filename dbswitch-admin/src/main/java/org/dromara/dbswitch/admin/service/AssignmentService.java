@@ -304,6 +304,7 @@ public class AssignmentService {
     sourceDataSourceProperties.setIncrTableColumns(incrTableColumns);
     sourceDataSourceProperties.setBeforeSqlScripts(assignmentConfigEntity.getPreSqlScripts());
     sourceDataSourceProperties.setAfterSqlScripts(assignmentConfigEntity.getPostSqlScripts());
+    sourceDataSourceProperties.setRegexTableMapper(assignmentConfigEntity.getTableNameMap());
     sourceDataSourceProperties.setRegexColumnMapper(assignmentConfigEntity.getColumnNameMap());
     sourceDataSourceProperties.setFetchSize(assignmentConfigEntity.getBatchSize());
     sourceDataSourceProperties.setTableType(assignmentConfigEntity.getTableType().name());
