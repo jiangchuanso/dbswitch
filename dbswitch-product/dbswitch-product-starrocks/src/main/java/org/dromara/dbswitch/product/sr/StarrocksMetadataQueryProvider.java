@@ -172,7 +172,7 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
                       " from information_schema.columns\n" +
                       " where TABLE_SCHEMA=\"%s\" and TABLE_NAME=\"%s\"\n" +
                       " and TABLE_CATALOG is null\n" +
-                      " and COLUMN_KEY is not null;",
+                      " and COLUMN_KEY = 'PRI';",
               schemaName, tableName
       );
       ResultSet primaryKeys = statement.executeQuery(sql);
