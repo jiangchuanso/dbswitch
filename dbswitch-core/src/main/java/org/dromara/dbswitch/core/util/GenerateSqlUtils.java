@@ -81,16 +81,19 @@ public final class GenerateSqlUtils {
     // StarRocks 当中，字段主键的情况下，必须将字段放在最前面，并且顺序一致。
     if (type.isPrimaryKeyShouldAtFirst()) {
       List<ColumnDescription> copyFieldNames = new ArrayList<>();
+      List<String> copyPrimaryKeys = new ArrayList<>();
       Integer fieldIndex = 0;
       for (int i = 0; i < fieldNames.size(); i++) {
         ColumnDescription cd = fieldNames.get(i);
         if (primaryKeys.contains(cd.getFieldName())) {
           copyFieldNames.add(fieldIndex++, cd);
+          copyPrimaryKeys.add(cd.getFieldName());
         } else {
           copyFieldNames.add(cd);
         }
       }
       fieldNames = copyFieldNames;
+      pks = copyPrimaryKeys;
     }
 
     for (int i = 0; i < fieldNames.size(); i++) {

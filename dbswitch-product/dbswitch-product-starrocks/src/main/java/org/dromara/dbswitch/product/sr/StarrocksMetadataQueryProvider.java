@@ -9,15 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.product.sr;
 
-import org.dromara.dbswitch.common.consts.Constants;
-import org.dromara.dbswitch.common.type.ProductTypeEnum;
-import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
-import org.dromara.dbswitch.core.provider.meta.AbstractMetadataProvider;
-import org.dromara.dbswitch.core.schema.ColumnDescription;
-import org.dromara.dbswitch.core.schema.ColumnMetaData;
-import org.dromara.dbswitch.core.schema.IndexDescription;
-import org.dromara.dbswitch.core.schema.TableDescription;
-import org.dromara.dbswitch.core.schema.SourceProperties;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,7 +20,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.dbswitch.common.consts.Constants;
+import org.dromara.dbswitch.common.type.ProductTypeEnum;
+import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
+import org.dromara.dbswitch.core.provider.meta.AbstractMetadataProvider;
+import org.dromara.dbswitch.core.schema.ColumnDescription;
+import org.dromara.dbswitch.core.schema.ColumnMetaData;
+import org.dromara.dbswitch.core.schema.IndexDescription;
+import org.dromara.dbswitch.core.schema.SourceProperties;
+import org.dromara.dbswitch.core.schema.TableDescription;
 
 /**
  * https://docs.starrocks.io/zh/docs/3.1/quick_start/Create_table/
@@ -269,7 +270,7 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
         retval += "DATETIME";
         break;
       case ColumnMetaData.TYPE_TIME:
-        retval += "TIME";
+        retval += "DATETIME";
         break;
       case ColumnMetaData.TYPE_DATE:
         retval += "DATE";
@@ -297,7 +298,7 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
                 // 18 significant digits
                 retval += "BIGINT";
               } else {
-                retval += "DECIMAL(" + length + ")";
+                retval += "DECIMAL(" + (length > 38 ? 38 : length) + ")";
               }
             } else {
               retval += "INT";
@@ -305,9 +306,10 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
           } else {
             // Floating point values...
             if (length > 15) {
-              retval += "DECIMAL(" + length;
+              int p = (length > 38 ? 38 : length);
+              retval += "DECIMAL(" + p;
               if (precision > 0) {
-                retval += ", " + precision;
+                retval += ", " + (precision > p ? p : precision);
               }
               retval += ")";
             } else {
@@ -321,21 +323,22 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
         break;
       case ColumnMetaData.TYPE_STRING:
         //see: https://docs.starrocks.io/zh/docs/category/string/
-        if (length <= 255) {
-          retval += "CHAR(" + length + ")";
-        } else if (length <= 65533) {
+        long newLength = length * 3;
+        if (newLength < 255) {
+          retval += "VARCHAR(" + newLength + ")";
+        } else if (newLength <= 65533) {
           retval += "STRING";
-        } else if (length <= 1048576){
-          retval += "VARCHAR(" + length + ")";
+        } else if (newLength <= 1048576) {
+          retval += "VARCHAR(" + newLength + ")";
         } else {
-          retval += "VARBINARY";
+          retval += "VARCHAR(1048576)";
         }
         break;
       case ColumnMetaData.TYPE_BINARY:
-        retval += "LONGBLOB";
+        retval += "VARBINARY ";
         break;
       default:
-        retval += "LONGTEXT";
+        retval += "VARCHAR(1048576)";
         break;
     }
 
@@ -363,8 +366,11 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public void postAppendCreateTableSql(StringBuilder builder, String tblComment, List<String> primaryKeys,
       SourceProperties tblProperties) {
-    String pk = getPrimaryKeyAsString(primaryKeys);
-    builder.append("PRIMARY KEY (").append(pk).append(")");
-    builder.append("\n DISTRIBUTED BY HASH(").append(pk).append(")");
+    // https://docs.mirrorship.cn/zh/docs/table_design/table_types/primary_key_table/
+    if (CollectionUtils.isNotEmpty(primaryKeys)) {
+      String pk = getPrimaryKeyAsString(primaryKeys);
+      builder.append("PRIMARY KEY (").append(pk).append(")");
+      builder.append("\n DISTRIBUTED BY HASH(").append(pk).append(")");
+    }
   }
 }

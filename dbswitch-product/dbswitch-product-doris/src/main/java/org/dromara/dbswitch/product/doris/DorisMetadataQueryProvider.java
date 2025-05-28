@@ -9,14 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.product.doris;
 
-import org.dromara.dbswitch.common.consts.Constants;
-import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
-import org.dromara.dbswitch.core.provider.meta.AbstractMetadataProvider;
-import org.dromara.dbswitch.core.schema.ColumnDescription;
-import org.dromara.dbswitch.core.schema.ColumnMetaData;
-import org.dromara.dbswitch.core.schema.IndexDescription;
-import org.dromara.dbswitch.core.schema.SourceProperties;
-import org.dromara.dbswitch.core.schema.TableDescription;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,6 +22,14 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.dbswitch.common.consts.Constants;
+import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
+import org.dromara.dbswitch.core.provider.meta.AbstractMetadataProvider;
+import org.dromara.dbswitch.core.schema.ColumnDescription;
+import org.dromara.dbswitch.core.schema.ColumnMetaData;
+import org.dromara.dbswitch.core.schema.IndexDescription;
+import org.dromara.dbswitch.core.schema.SourceProperties;
+import org.dromara.dbswitch.core.schema.TableDescription;
 
 @Slf4j
 public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
@@ -251,12 +251,13 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
 
     String retval = " `" + fieldname + "`  ";
 
+    // https://doris.apache.org/zh-CN/docs/table-design/data-type
     switch (type) {
       case ColumnMetaData.TYPE_TIMESTAMP:
         retval += "DATETIME";
         break;
       case ColumnMetaData.TYPE_TIME:
-        retval += "TIME";
+        retval += "DATETIME";
         break;
       case ColumnMetaData.TYPE_DATE:
         retval += "DATE";
@@ -282,7 +283,7 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
                 // 18 significant digits
                 retval += "BIGINT";
               } else {
-                retval += "DECIMAL(" + length + ")";
+                retval += "DECIMAL(" + (length > 38 ? 38 : length) + ")";
               }
             } else {
               retval += "INT";
@@ -290,9 +291,10 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
           } else {
             // Floating point values...
             if (length > 15) {
-              retval += "DECIMAL(" + length;
+              int p = (length > 38 ? 38 : length);
+              retval += "DECIMAL(" + p;
               if (precision > 0) {
-                retval += ", " + precision;
+                retval += ", " + (precision > p ? p : precision);
               }
               retval += ")";
             } else {
@@ -307,7 +309,7 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
       case ColumnMetaData.TYPE_STRING:
         long newLength = length * 3;
         if (newLength < 255) {
-          retval += "CHAR(" + newLength + ")";
+          retval += "VARCHAR(" + newLength + ")";
         } else if (newLength < 65533) {
           retval += "VARCHAR(" + newLength + ")";
         } else {
