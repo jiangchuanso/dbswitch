@@ -323,10 +323,7 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
         break;
       case ColumnMetaData.TYPE_STRING:
         //see: https://docs.starrocks.io/zh/docs/category/string/
-        long newLength = length * 3;
-        if (newLength < 255) {
-          retval += "VARCHAR(" + newLength + ")";
-        } else if (newLength <= 65533) {
+        if (length <= 65533) {
           retval += "STRING";
         } else if (newLength <= 1048576) {
           retval += "VARCHAR(" + newLength + ")";

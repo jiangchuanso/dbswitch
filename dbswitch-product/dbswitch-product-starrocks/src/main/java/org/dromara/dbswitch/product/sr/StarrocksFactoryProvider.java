@@ -39,12 +39,12 @@ public class StarrocksFactoryProvider extends AbstractFactoryProvider {
 
   @Override
   public TableDataWriteProvider createTableDataWriteProvider(boolean useInsert) {
-    return new AutoCastTableDataWriteProvider(this);
+    return new StarrocksTableDataWriteProvider(this);
   }
 
   @Override
   public TableDataSynchronizeProvider createTableDataSynchronizeProvider() {
-    return new AutoCastTableDataSynchronizeProvider(this);
+    return new StarrocksTableDataSynchronizer(this);
   }
 
 
