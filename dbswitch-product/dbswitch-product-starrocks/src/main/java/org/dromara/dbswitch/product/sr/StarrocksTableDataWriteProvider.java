@@ -9,42 +9,41 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.dbswitch.product.sr;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.dbswitch.common.entity.CloseableDataSource;
 import org.dromara.dbswitch.core.provider.ProductFactoryProvider;
-import org.dromara.dbswitch.core.provider.write.DefaultTableDataWriteProvider;
-
-import java.util.List;
+import org.dromara.dbswitch.core.provider.write.AutoCastTableDataWriteProvider;
 
 @Slf4j
-public class StarrocksTableDataWriteProvider extends DefaultTableDataWriteProvider {
+public class StarrocksTableDataWriteProvider extends AutoCastTableDataWriteProvider {
 
+  private final CloseableDataSource dataSource;
+  private final StarRocksUtils starRocksUtils = new StarRocksUtils();
 
-    private final CloseableDataSource dataSource;
-    private final StarRocksUtils starRocksUtils = new StarRocksUtils();
-    ;
+  public StarrocksTableDataWriteProvider(ProductFactoryProvider factoryProvider) {
+    super(factoryProvider);
+    dataSource = (CloseableDataSource) factoryProvider.getDataSource();
+  }
 
-    public StarrocksTableDataWriteProvider(ProductFactoryProvider factoryProvider) {
-        super(factoryProvider);
-        dataSource = (CloseableDataSource) factoryProvider.getDataSource();
-
+  @Override
+  public void prepareWrite(String schemaName, String tableName, List<String> fieldNames) {
+    super.prepareWrite(schemaName, tableName, fieldNames);
+    try {
+      starRocksUtils.init(schemaName, tableName, dataSource);
+    } catch (Exception e) {
+      log.warn("Failed to init by StarRocksUtils#init(),information: {}", e.getMessage());
     }
+  }
 
-    @Override
-    public void prepareWrite(String schemaName, String tableName, List<String> fieldNames) {
-        starRocksUtils.init(schemaName, tableName, dataSource);
+  @Override
+  public long write(List<String> fieldNames, List<Object[]> recordValues) {
+    try {
+      return starRocksUtils.addOrUpdateData(fieldNames, recordValues);
+    } catch (Exception e) {
+      log.warn("Failed to insertOrUpdate data by StarRocksUtils#addOrUpdateData(),information: {}", e.getMessage());
+      return super.write(fieldNames, recordValues);
     }
-
-    @Override
-    public long write(List<String> fieldNames, List<Object[]> recordValues) {
-        if (CollectionUtils.isEmpty(fieldNames) || CollectionUtils.isEmpty(recordValues)) {
-            return 0L;
-        }
-
-        return starRocksUtils.addOrUpdateData(fieldNames, recordValues);
-
-    }
-    
+  }
 
 }

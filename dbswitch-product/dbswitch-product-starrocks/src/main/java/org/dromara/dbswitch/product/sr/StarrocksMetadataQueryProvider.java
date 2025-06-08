@@ -48,6 +48,11 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
   private static final String QUERY_TABLE_METADATA_SQL =
       "SELECT `TABLE_COMMENT`,`TABLE_TYPE` FROM `information_schema`.`TABLES` "
           + "WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ?";
+  private static final String QUERY_TABLE_PRIMARY_KEY_SQL = " SELECT COLUMN_NAME \n" +
+      " from information_schema.columns\n" +
+      " where TABLE_SCHEMA=? and TABLE_NAME=?\n" +
+      " and TABLE_CATALOG is null\n" +
+      " and COLUMN_KEY = 'PRI'";
 
   public StarrocksMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
     super(factoryProvider);
@@ -166,21 +171,16 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
 
   @Override
   public List<String> queryTablePrimaryKeys(Connection connection, String schemaName, String tableName) {
-    List<String> ret = new ArrayList<>();
-    try {
-      Statement statement = connection.createStatement();
-      String sql = String.format(" SELECT * \n" +
-                      " from information_schema.columns\n" +
-                      " where TABLE_SCHEMA=\"%s\" and TABLE_NAME=\"%s\"\n" +
-                      " and TABLE_CATALOG is null\n" +
-                      " and COLUMN_KEY = 'PRI';",
-              schemaName, tableName
-      );
-      ResultSet primaryKeys = statement.executeQuery(sql);
-      while (primaryKeys.next()) {
-        ret.add(primaryKeys.getString("COLUMN_NAME"));
+    try (PreparedStatement statement = connection.prepareStatement(QUERY_TABLE_PRIMARY_KEY_SQL)) {
+      statement.setString(1, schemaName);
+      statement.setString(2, tableName);
+      try (ResultSet primaryKeys = statement.executeQuery()) {
+        List<String> ret = new ArrayList<>();
+        while (primaryKeys.next()) {
+          ret.add(primaryKeys.getString(1));
+        }
+        return ret.stream().distinct().collect(Collectors.toList());
       }
-      return ret.stream().distinct().collect(Collectors.toList());
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -323,7 +323,10 @@ public class StarrocksMetadataQueryProvider extends AbstractMetadataProvider {
         break;
       case ColumnMetaData.TYPE_STRING:
         //see: https://docs.starrocks.io/zh/docs/category/string/
-        if (length <= 65533) {
+        long newLength = length * 3;
+        if (newLength < 255) {
+          retval += "VARCHAR(" + newLength + ")";
+        } else if (newLength <= 65533) {
           retval += "STRING";
         } else if (newLength <= 1048576) {
           retval += "VARCHAR(" + newLength + ")";
