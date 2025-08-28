@@ -50,6 +50,7 @@ public class SqlserverMetadataQueryProvider extends AbstractMetadataProvider {
     excludesSchemaNames.add("db_owner");
     excludesSchemaNames.add("sys");
     excludesSchemaNames.add("INFORMATION_SCHEMA");
+    excludesSchemaNames.add("cdc");
   }
 
   public SqlserverMetadataQueryProvider(ProductFactoryProvider factoryProvider) {
