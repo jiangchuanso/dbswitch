@@ -348,13 +348,13 @@ public class DorisMetadataQueryProvider extends AbstractMetadataProvider {
   @Override
   public void postAppendCreateTableSql(StringBuilder builder, String tblComment, List<String> primaryKeys,
       SourceProperties tblProperties) {
+    if (StringUtils.isNotBlank(tblComment)) {
+      builder.append(String.format(" COMMENT '%s' ", tblComment.replace("'", "\\'" )));
+    }
     if (CollectionUtils.isNotEmpty(primaryKeys)) {
       String primaryKeyAsString = getPrimaryKeyAsString(primaryKeys);
       // 自动分桶（BUCKETS AUTO）功能要求 Apache Doris 1.2.2 及以上版本
-      builder.append(" DISTRIBUTED BY HASH(").append(primaryKeyAsString).append(") BUCKETS AUTO");
-      if (StringUtils.isNotBlank(tblComment)) {
-        builder.append(String.format(" COMMENT='%s' ", tblComment.replace("'", "\\'")));
-      }
+      builder.append(" DISTRIBUTED BY HASH(").append(primaryKeyAsString).append(") BUCKETS AUTO ");
     }
   }
 
