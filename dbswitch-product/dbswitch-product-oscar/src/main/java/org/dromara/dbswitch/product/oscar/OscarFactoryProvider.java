@@ -18,7 +18,6 @@ import org.dromara.dbswitch.core.provider.meta.MetadataProvider;
 import org.dromara.dbswitch.core.provider.manage.TableManageProvider;
 import org.dromara.dbswitch.core.provider.sync.AutoCastTableDataSynchronizeProvider;
 import org.dromara.dbswitch.core.provider.sync.TableDataSynchronizeProvider;
-import org.dromara.dbswitch.core.provider.write.AutoCastTableDataWriteProvider;
 import org.dromara.dbswitch.core.provider.write.TableDataWriteProvider;
 import javax.sql.DataSource;
 
@@ -41,7 +40,7 @@ public class OscarFactoryProvider extends AbstractFactoryProvider {
 
   @Override
   public TableDataWriteProvider createTableDataWriteProvider(boolean useInsert) {
-    return new AutoCastTableDataWriteProvider(this);
+    return new OscarTableDataWriteProvider(this);
   }
 
   @Override
