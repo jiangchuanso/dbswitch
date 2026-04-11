@@ -7,16 +7,37 @@
     :close-on-click-modal="false"
     :before-close="handleClose"
   >
-    <el-alert title="说明信息"
+    <el-alert
       type="info"
-      show-icon
       :closable="false"
       style="margin-bottom: 12px"
-    />
-       <p>(1) 点击左侧表名即可按需加载并编辑该表的 CREATE TABLE 建表语句。</p>
-       <p>(2) 被修改了得表的 CREATE TABLE 建表语句要符合数据库语法，否则会导致任务执行失败。</p>
-       <p>(3) 未加载或未修改的表将使用系统自动生成的默认语句。</p>
-       <p>(4) 不要修改建表语句中的表名与字段名，否则可能会导致字段名映射错误导致数据同步写入失败。</p>
+    >
+      <div slot="title" style="display:flex;align-items:center;gap:6px">
+        <i class="el-icon-info" style="font-size:15px"></i>
+        <span style="font-weight:600">使用说明</span>
+      </div>
+      <div class="ddl-tips-list">
+        <div class="ddl-tip-item">
+          <span class="tip-num">1</span>
+          <span>点击左侧表名即可按需加载并编辑该表的 <b>CREATE TABLE</b> 建表语句</span>
+        </div>
+        <div class="ddl-tip-item">
+          <span class="tip-num">2</span>
+          <span>修改后的建表语句<b>必须符合目标数据库语法</b>，否则会导致任务执行失败</span>
+        </div>
+        <div class="ddl-tip-item">
+          <span class="tip-num">3</span>
+          <span>未加载或未修改的表将使用<b>系统自动生成</b>的默认语句</span>
+        </div>
+        <div class="ddl-tip-item tip-warning">
+          <span class="tip-num"><i class="el-icon-warning"></i>4</span>
+          <span><b>请勿修改</b>建表语句中的表名与字段名，否则可能导致字段映射错误，数据同步写入失败</span>
+        </div>
+        <div class="ddl-tip-item tip-warning">
+          <span class="tip-num"><i class="el-icon-warning"></i>5</span>
+          <span>当修改了表名/列名转换方法或表名/字段名映射后，请注意这里要先重置已修改DDL的表，然后再次修改对应的DDL</span>
+        </div>
+      </div>
     </el-alert>
     <el-row :gutter="12" style="height: 520px">
       <!-- 左侧：表名列表 -->
@@ -392,6 +413,55 @@ export default {
   justify-content: center;
   border: 1px solid #EBEEF5;
   border-radius: 4px;
+}
+
+/* 说明信息样式 */
+.ddl-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ddl-tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.ddl-tip-item b {
+  color: #303133;
+}
+
+.tip-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #E6F0FB;
+  color: #409EFF;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ddl-tip-item.tip-warning {
+  color: #E6A23C;
+}
+
+.ddl-tip-item.tip-warning b {
+  color: #D48806;
+}
+
+.ddl-tip-item.tip-warning .tip-num {
+  background: #FDF6EC;
+  color: #E6A23C;
 }
 
 /* SQL文本框样式 */

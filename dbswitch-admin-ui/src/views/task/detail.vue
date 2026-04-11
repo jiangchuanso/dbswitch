@@ -1,16 +1,48 @@
 <template>
-  <el-card>
-    <div style="margin-top: 15px">
-      <commonInfo :infoform="infoform"></commonInfo>
-      <el-button type="primary"
-                 size="mini"
-                 icon="el-icon-arrow-left"
-                 @click="handleGoBack"
-                 style="margin: 12px 0px 20px;float: right">
-        返回
-      </el-button>
+  <div class="detail-page">
+    <!-- 页面头部 -->
+    <div class="detail-header">
+      <div class="header-left">
+        <el-button
+          type="text"
+          icon="el-icon-arrow-left"
+          @click="handleGoBack"
+          class="back-btn">返回列表</el-button>
+        <span class="header-divider">|</span>
+        <span class="task-name-title">{{ infoform.name || '任务详情' }}</span>
+        <el-tag
+          v-if="infoform.scheduleMode"
+          size="small"
+          :type="infoform.scheduleMode === 'MANUAL' ? 'info' : 'primary'"
+          style="margin-left:10px"
+          effect="plain">
+          {{ infoform.scheduleMode === 'MANUAL' ? '手动调度' : '定时调度' }}
+        </el-tag>
+      </div>
+      <div class="header-right">
+        <el-button
+          size="small"
+          icon="el-icon-edit"
+          type="primary"
+          plain
+          @click="handleGoEdit">
+          编辑任务
+        </el-button>
+        <el-button
+          size="small"
+          icon="el-icon-notebook-2"
+          @click="handleGoSchedule">
+          调度日志
+        </el-button>
+      </div>
     </div>
-  </el-card>
+
+    <el-card class="detail-card">
+      <div style="margin-top: 8px">
+        <commonInfo :infoform="infoform"></commonInfo>
+      </div>
+    </el-card>
+  </div>
 </template>
 
 <script>
@@ -105,24 +137,71 @@ export default {
           }
         } else {
           if (res.data.message) {
-            alert("查询任务失败," + res.data.message);
+            this.$message.error("查询任务失败：" + res.data.message);
           }
         }
       });
     },
     handleGoBack () {
-      this.$router.go(-1);
+      this.$router.push('/task/list');
+    },
+    handleGoEdit () {
+      this.$router.push({ path: '/task/update', query: { id: this.$route.query.id } });
+    },
+    handleGoSchedule () {
+      this.$router.push({ path: '/task/schedule?id=' + this.$route.query.id });
     }
   },
   created () {
     this.loadAssignmentDetail();
   },
-
 }
 </script>
 
 <style scoped>
-.el-card {
+.detail-page {
+  padding: 4px 0;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #fff;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,21,41,.06);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.back-btn {
+  font-size: 14px;
+  padding: 0;
+}
+
+.header-divider {
+  margin: 0 12px;
+  color: #dcdfe6;
+}
+
+.task-name-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.header-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.detail-card {
   width: 100%;
   height: 100%;
   overflow: auto;
