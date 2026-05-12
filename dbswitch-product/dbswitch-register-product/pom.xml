@@ -133,6 +133,11 @@
       <artifactId>dbswitch-product-tdengine</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.dromara.dbswitch</groupId>
+      <artifactId>dbswitch-product-kafka</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

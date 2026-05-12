@@ -241,6 +241,15 @@ public enum ProductTypeEnum {
       "jdbc:uxdb://",
       new String[]{"jdbc:uxdb://{host}[:{port}]/[{database}][\\?{params}]"},
       "jdbc:uxdb://127.0.0.1:52025/uxdb"),
+  /**
+   * KAFKA数据库类型
+   */
+  KAFKA(25, "\"", "Kafka", "org.apache.kafka.connect.jdbc.JdbcSinkConnector", 9092,
+      "SELECT 1",
+      "jdbc:kafka://",
+      new String[]{"jdbc:kafka://{host}[:{port}]/[{database}][\\?{params}]"},
+      "jdbc:kafka://127.0.0.1:9092/test"),
+
 
   ;
 

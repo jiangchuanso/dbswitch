@@ -179,3 +179,10 @@ jdbc驱动名称：com.gitee.jdbc.elasticsearch.JdbcDriver
 ```
 
 > 项目地址：https://gitee.com/inrgihc/jdbc-jest-driver
+
+**Kafka数据库**
+
+```
+jdbc连接地址：jdbc:kafka://127.0.0.1:9092/test
+jdbc驱动名称：org.apache.kafka.connect.jdbc.JdbcSinkConnector
+```
