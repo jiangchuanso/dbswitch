@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -29,6 +31,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration("dbswitchSwaggerConfig")
 @EnableSwagger2
 public class SwaggerConfig {
+
+  @Value("${swagger.enable}")
+  private boolean isEnableSwagger;
 
   public static final String API_PREFIX = "/dbswitch/admin/api";
   public static final String API_V1 = API_PREFIX + "/v1";
@@ -55,6 +60,7 @@ public class SwaggerConfig {
     pars.add(ticketPar.build());
 
     return new Docket(DocumentationType.SWAGGER_2)
+            .enable(isEnableSwagger)
         .groupName("需要认证的接口")
         .apiInfo(createApiInfo())
         .select()
@@ -68,6 +74,7 @@ public class SwaggerConfig {
   @Bean(value = "publicApi")
   public Docket publicApi() {
     return new Docket(DocumentationType.SWAGGER_2)
+            .enable(isEnableSwagger)
         .groupName("无需认证的接口")
         .apiInfo(createApiInfo())
         .select()

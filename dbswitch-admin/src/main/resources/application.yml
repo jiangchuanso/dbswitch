@@ -25,3 +25,19 @@ mybatis:
 dbswitch:
   configuration:
     drivers-base-path: ${APP_DRIVERS_PATH}
+
+# Swagger 两种方式都可以关闭
+swagger:
+  enable: false
+
+springfox:
+  documentation:
+    # 关键：全局禁用开关
+    enabled: false
+    swagger-ui:
+      enabled: false
+    swagger:
+      enabled: false
+      v2:
+        enabled: false
+    auto-startup: false
