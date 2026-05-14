@@ -547,7 +547,7 @@
               </el-tag>
             </div>
             <div class="field-tips" v-if="!canPreviewDdl">
-              请先选择【源端数据源】【源端模式名】和【目的端数据源】【目的端模式名】，并完成【表名配置】后，方可使用此功能
+              请先选择【源端数据源】【源端模式名】【目的端数据源】【目的端模式名】和【配置方式】，方可使用此功能
             </div>
             <div class="field-tips" v-else>
               查看和编辑系统为每张目标表自动生成的 CREATE TABLE 建表语句，适用于需要调整字段类型、添加表属性等场景
@@ -886,7 +886,7 @@ export default {
         && this.dataform.sourceSchema
         && this.dataform.targetConnectionId > 0
         && this.dataform.targetSchema
-        && (this.dataform.sourceTables.length > 0 || this.dataform.includeOrExclude === 'INCLUDE')
+        && !!this.dataform.includeOrExclude
     }
   },
   methods: {
@@ -1232,23 +1232,31 @@ export default {
     handlePreviewDdl: function () {
       if (!this.canPreviewDdl) return;
       var tablesToPreview = [];
-      if (this.dataform.includeOrExclude === 'EXCLUDE' && this.dataform.sourceTables.length > 0) {
+      var includeOrExclude = this.dataform.includeOrExclude;
+      if (includeOrExclude === 'INCLUDE') {
+        // 包含模式：选了表则用选中的，否则用全部表
+        tablesToPreview = this.dataform.sourceTables && this.dataform.sourceTables.length > 0
+          ? this.dataform.sourceTables.slice()
+          : JSON.parse(JSON.stringify(this.sourceSchemaTables));
+      } else if (includeOrExclude === 'EXCLUDE') {
+        // 排除模式：全部表去掉排除的
         tablesToPreview = JSON.parse(JSON.stringify(this.sourceSchemaTables));
-        for (var i = 0; i < this.dataform.sourceTables.length; ++i) {
-          var one = this.dataform.sourceTables[i];
-          tablesToPreview.some(function (item, index) {
-            if (item === one) { tablesToPreview.splice(index, 1); return true; }
+        if (this.dataform.sourceTables && this.dataform.sourceTables.length > 0) {
+          var excludeSet = this.dataform.sourceTables;
+          tablesToPreview = tablesToPreview.filter(function (t) {
+            return excludeSet.indexOf(t) < 0;
           });
         }
-      } else if (this.dataform.includeOrExclude === 'INCLUDE') {
-        tablesToPreview = this.dataform.sourceTables.length > 0
-          ? this.dataform.sourceTables
-          : JSON.parse(JSON.stringify(this.sourceSchemaTables));
+      } else {
+        // 未选配置方式：使用全部表
+        tablesToPreview = JSON.parse(JSON.stringify(this.sourceSchemaTables));
       }
       if (tablesToPreview.length === 0) {
-        this.$message.warning('没有可预览的表，请先配置表名');
+        this.$message.warning('当前没有可预览的表，请检查源端模式下的表列表或调整表名配置');
         return;
       }
+      // 前端已将 EXCLUDE 模式计算为最终净表列表，统一以 isInclude=true 传给后端
+      var isIncludeForApi = true;
       var self = this;
       var tableNameMapper = this.dataform.tableNameMapper || [];
       var tableNameCase = this.dataform.tableNameCase || 'NONE';
@@ -1259,7 +1267,7 @@ export default {
         data: JSON.stringify({
           id: this.dataform.sourceConnectionId,
           schemaName: this.dataform.sourceSchema,
-          isInclude: this.dataform.includeOrExclude === 'INCLUDE',
+          isInclude: isIncludeForApi,
           tableNames: tablesToPreview,
           nameMapper: tableNameMapper,
           tableNameCase: tableNameCase

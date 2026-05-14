@@ -33,6 +33,7 @@ logs/
 
 ### AI Coding ###
 .workbuddy/
+.codebuddy/
 .opencode/
-.cloudecode/
+.claude/
 .trae/

@@ -37,7 +37,6 @@
     <module>dbswitch-product-doris</module>
     <module>dbswitch-product-oceanbase</module>
     <module>dbswitch-product-tdengine</module>
-    <module>dbswitch-product-kafka</module>
   </modules>
 
 </project>

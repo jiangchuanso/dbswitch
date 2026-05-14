@@ -32,9 +32,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-  @Value("${swagger.enable}")
-  private boolean isEnableSwagger;
-
   public static final String API_PREFIX = "/dbswitch/admin/api";
   public static final String API_V1 = API_PREFIX + "/v1";
   private static final String API_DEFAULT_PACKAGE = "org.dromara.dbswitch.admin.controller.privateapi";
@@ -60,7 +57,6 @@ public class SwaggerConfig {
     pars.add(ticketPar.build());
 
     return new Docket(DocumentationType.SWAGGER_2)
-            .enable(isEnableSwagger)
         .groupName("需要认证的接口")
         .apiInfo(createApiInfo())
         .select()
@@ -74,7 +70,6 @@ public class SwaggerConfig {
   @Bean(value = "publicApi")
   public Docket publicApi() {
     return new Docket(DocumentationType.SWAGGER_2)
-            .enable(isEnableSwagger)
         .groupName("无需认证的接口")
         .apiInfo(createApiInfo())
         .select()
