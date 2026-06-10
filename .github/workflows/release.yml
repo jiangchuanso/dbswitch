@@ -1,0 +1,107 @@
+name: Multi-Platform Build & Release
+
+# 触发：发布Release / 推送v开头Tag
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*'
+
+# 权限：读写Release与仓库文件
+permissions:
+  contents: write
+  releases: write
+
+jobs:
+  # 并行三个编译任务
+  build-linux:
+    name: Linux(build.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 8 & Maven
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run build.sh
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+
+      - name: Collect artifacts
+        id: get-linux-art
+        run: |
+          ART=$(find . -maxdepth 3 -name "dbswitch-*.tar.gz" -o -name "dbswitch-*.zip" | head -n1)
+          echo "path=$ART" >> $GITHUB_OUTPUT
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get-linux-art.outputs.path }}
+          append_body: false
+
+  build-windows:
+    name: Windows(build.cmd)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 8 & Maven
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run build.cmd
+        run: .\build.cmd
+
+      - name: Collect artifacts
+        id: get-win-art
+        run: |
+          $ART = (Get-ChildItem -Recurse -Filter "dbswitch-*.*" | Select-Object -First 1).FullName
+          echo "path=$ART" | Out-File $env:GITHUB_OUTPUT -Append
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get-win-art.outputs.path }}
+          append_body: false
+
+  build-docker:
+    name: Docker(docker-maven-build.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 8 & Maven
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run docker build script
+        run: |
+          chmod +x ./docker-maven-build.sh
+          ./docker-maven-build.sh
+
+      - name: Collect artifacts
+        id: get-docker-art
+        run: |
+          ART=$(find . -maxdepth 3 -name "dbswitch-*.tar.gz" -o -name "dbswitch-*.zip" | head -n1)
+          echo "path=$ART" >> $GITHUB_OUTPUT
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get-docker-art.outputs.path }}
+          append_body: false
