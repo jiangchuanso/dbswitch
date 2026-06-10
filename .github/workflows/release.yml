@@ -1,6 +1,5 @@
 name: Multi-Platform Build & Release
 
-# 触发：发布Release / 推送v开头Tag
 on:
   release:
     types: [published]
@@ -76,6 +75,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 启用 Docker 环境（必加）
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Setup JDK 8 & Maven
         uses: actions/setup-java@v4
         with:
@@ -86,7 +89,7 @@ jobs:
       - name: Run docker build script
         run: |
           chmod +x ./docker-maven-build.sh
-          ./docker-maven-build.sh
+          script -q -c "./docker-maven-build.sh" /dev/null
 
       - name: Collect artifacts
         id: get-docker-art
