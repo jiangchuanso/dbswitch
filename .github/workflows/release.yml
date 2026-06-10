@@ -50,34 +50,25 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-      # 直接使用 Maven 构建，不依赖 docker-maven-build.sh
+      # 使用 Maven 构建
       - name: Build dbswitch package with Maven
         run: |
-          # 设置版本号（如果需要）
-          if [ -n "${{ steps.get_version.outputs.version }}" ]; then
-            mvn versions:set -DnewVersion=${{ steps.get_version.outputs.version }}
-          fi
-          # 执行打包命令（参考原始的 docker-maven-build.sh）
           mvn clean package -DskipTests
-          # 或者使用 profile
-          # mvn clean package -Prelease -DskipTests
 
       - name: Find generated tar.gz file
         id: find_tar
         run: |
-          # 查找打包生成的文件
           TAR_FILE=$(find target -name "dbswitch-release-*.tar.gz" -type f | head -n 1)
           if [ -z "$TAR_FILE" ]; then
-            echo "Error: No tar.gz file found in target/"
-            echo "Available files:"
-            ls -la target/ || true
+            echo "Error: No tar.gz file found"
+            find target/ -name "*.tar.gz" || true
             exit 1
           fi
           echo "tar_file=${TAR_FILE}" >> $GITHUB_OUTPUT
           echo "tar_name=$(basename ${TAR_FILE})" >> $GITHUB_OUTPUT
           echo "Found: ${TAR_FILE}"
 
-      # 后续步骤保持不变...
+      # 创建 Release
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
@@ -91,17 +82,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 关键修复：复制 tar.gz 到 Docker 构建目录
       - name: Prepare Docker build files
         run: |
-          mkdir -p /tmp/dbswitch-extract
-          tar -xzf ${{ steps.find_tar.outputs.tar_file }} -C /tmp/dbswitch-extract
-          EXTRACT_DIR=$(ls -d /tmp/dbswitch-extract/dbswitch-release-* | head -n 1)
+          # 创建 Docker 构建目录（如果不存在）
+          mkdir -p ./build-docker/dbswitch
           
-          DOCKER_BUILD_DIR=./build-docker/dbswitch/dbswitch-release
-          mkdir -p $DOCKER_BUILD_DIR/{lib,ext,drivers,bin,config}
+          # 直接复制 tar.gz 文件到 Docker 构建目录
+          cp ${{ steps.find_tar.outputs.tar_file }} ./build-docker/dbswitch/dbswitch-release.tar.gz
           
-          cp -r $EXTRACT_DIR/* $DOCKER_BUILD_DIR/ 2>/dev/null || true
-          rm -rf /tmp/dbswitch-extract
+          # 验证文件已复制
+          ls -lh ./build-docker/dbswitch/dbswitch-release.tar.gz
           
           echo "Docker build files prepared"
 
