@@ -11,6 +11,8 @@ jobs:
   build-linux:
     name: Linux(build.sh)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 关键：允许创建/修改 release
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,10 +40,15 @@ jobs:
         with:
           files: ${{ steps.get-linux-art.outputs.path }}
           append_body: false
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     name: Windows(build.cmd)
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -59,7 +66,7 @@ jobs:
       - name: Collect artifacts
         id: get-win-art
         run: |
-          $ART = (Get-ChildItem -Recurse -Filter "dbswitch-*.*" | Select-Object -First 1).FullName
+          $ART = (Get-ChildItem -Recurse -Filter "dbswitch-*.tar.gz" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
           echo "path=$ART" | Out-File $env:GITHUB_OUTPUT -Append
 
       - name: Upload to Release
@@ -67,15 +74,19 @@ jobs:
         with:
           files: ${{ steps.get-win-art.outputs.path }}
           append_body: false
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-docker:
-    name: Docker(docker-maven-build.sh)
+    name: Docker(build-maven-build.sh)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 启用 Docker 环境（必加）
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -89,7 +100,7 @@ jobs:
       - name: Run docker build script
         run: |
           chmod +x ./docker-maven-build.sh
-          script -q -c "./docker-maven-build.sh" /dev/null
+          ./docker-maven-build.sh < /dev/null
 
       - name: Collect artifacts
         id: get-docker-art
@@ -102,3 +113,6 @@ jobs:
         with:
           files: ${{ steps.get-docker-art.outputs.path }}
           append_body: false
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
