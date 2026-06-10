@@ -1,43 +1,101 @@
-name: Package and Release dbswitch
+name: Build, Release and Publish Docker Image
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  # 推送 v1.0.0, v2.0.2 等标签时触发
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 2.0.2)'
+        required: true
+        default: '2.0.2'
 
-# ========== 关键：在此处添加全局权限设置 ==========
+# 关键：授予必要的权限
 permissions:
-  contents: write    # 允许创建/更新 Release 和上传附件
-  # packages: write  # 如果你还需要推送包到 GitHub Packages，可能需要这个，但这里不是必需的
+  contents: write  # 用于创建 Release 和上传附件
+  packages: write   # 用于推送 Docker 镜像到 ghcr.io
 
 jobs:
-  build-and-release:
+  build-and-publish:
     runs-on: ubuntu-latest
+    
     steps:
+      # 1. 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ... 这里是你原有的编译、打包步骤 ...
+      # 2. 设置 JDK 1.8
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
 
-      # 查找 tar.gz 文件
+      # 3. 缓存 Maven 依赖
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # 4. 提取版本号
+      - name: Extract version
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+          else
+            TAG_NAME="${{ github.ref_name }}"
+            VERSION=${TAG_NAME#v}
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      # 5. 编译打包生成 dbswitch-release-xxx.tar.gz
+      - name: Build dbswitch package
+        run: |
+          chmod +x docker-maven-build.sh
+          sh ./docker-maven-build.sh
+        env:
+          DBSWITCH_VERSION: ${{ steps.get_version.outputs.version }}
+
+      # 6. 查找生成的 tar.gz 文件
       - name: Find generated tar.gz file
         id: find_tar
         run: |
-          cd dbswitch
           TAR_FILE=$(ls target/dbswitch-release-*.tar.gz | head -n 1)
-          echo "tar_file=$TAR_FILE" >> $GITHUB_OUTPUT
-          echo "tar_name=$(basename $TAR_FILE)" >> $GITHUB_OUTPUT
+          if [ -z "$TAR_FILE" ]; then
+            echo "Error: No tar.gz file found in target/"
+            exit 1
+          fi
+          echo "tar_file=${TAR_FILE}" >> $GITHUB_OUTPUT
+          echo "tar_name=$(basename ${TAR_FILE})" >> $GITHUB_OUTPUT
+          echo "Found: ${TAR_FILE}"
 
-      # 创建 Release 并上传附件
+      # 7. 创建 GitHub Release 并上传 tar.gz 附件
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: ${{ steps.get_version.outputs.tag_name }}
+          name: Release ${{ steps.get_version.outputs.tag_name }}
           body: |
-            ## dbswitch ${{ github.ref_name }}
+            ## dbswitch ${{ steps.get_version.outputs.version }}
+            
             This release is automatically built by GitHub Actions.
-          files: dbswitch/${{ steps.find_tar.outputs.tar_file }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+            ### 📦 Package includes:
+            - dbswitch core modules
+            - All required dependencies
+            - JDBC drivers
+            
+            ### 🔧 Build Environment:
+            - JDK 1.8
+            - Maven 3.6+
+            
+            ### 🐳 Docker Image:
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/dbswitch:${{ steps.get_version.outputs.version }}
