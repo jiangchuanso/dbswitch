@@ -8,13 +8,7 @@ on:
     tags:
       - 'v*'
 
-# 权限：读写Release与仓库文件
-permissions:
-  contents: write
-  releases: write
-
 jobs:
-  # 并行三个编译任务
   build-linux:
     name: Linux(build.sh)
     runs-on: ubuntu-latest
