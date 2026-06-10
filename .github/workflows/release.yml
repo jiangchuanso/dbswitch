@@ -1,118 +1,54 @@
-name: Multi-Platform Build & Release
+name: Package and Release dbswitch
 
 on:
-  release:
-    types: [published]
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
-  build-linux:
-    name: Linux(build.sh)
+  build-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # 关键：允许创建/修改 release
+
     steps:
+      # 1. 检出代码（当前仓库）
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK 8 & Maven
+      # 2. 设置 JDK 1.8
+      - name: Set up JDK 1.8
         uses: actions/setup-java@v4
         with:
           java-version: '8'
           distribution: 'temurin'
-          cache: maven
 
-      - name: Run build.sh
+      # 3. 缓存 Maven 依赖
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # 4. 编译打包
+      - name: Build with Maven
         run: |
-          chmod +x ./build.sh
-          ./build.sh
+          chmod +x build.sh
+          sh ./build.sh
 
-      - name: Collect artifacts
-        id: get-linux-art
+      # 5. 查找 tar.gz 文件
+      - name: Find tar.gz file
+        id: find_tar
         run: |
-          ART=$(find . -maxdepth 3 -name "dbswitch-*.tar.gz" -o -name "dbswitch-*.zip" | head -n1)
-          echo "path=$ART" >> $GITHUB_OUTPUT
+          TAR_FILE=$(ls target/dbswitch-release-*.tar.gz | head -n 1)
+          echo "tar_file=$TAR_FILE" >> $GITHUB_OUTPUT
+          echo "tar_name=$(basename $TAR_FILE)" >> $GITHUB_OUTPUT
 
-      - name: Upload to Release
+      # 6. 发布到 Releases
+      - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.get-linux-art.outputs.path }}
-          append_body: false
-          overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-windows:
-    name: Windows(build.cmd)
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK 8 & Maven
-        uses: actions/setup-java@v4
-        with:
-          java-version: '8'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Run build.cmd
-        run: .\build.cmd
-
-      - name: Collect artifacts
-        id: get-win-art
-        run: |
-          $ART = (Get-ChildItem -Recurse -Filter "dbswitch-*.tar.gz" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-          echo "path=$ART" | Out-File $env:GITHUB_OUTPUT -Append
-
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ steps.get-win-art.outputs.path }}
-          append_body: false
-          overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-docker:
-    name: Docker(build-maven-build.sh)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Setup JDK 8 & Maven
-        uses: actions/setup-java@v4
-        with:
-          java-version: '8'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Run docker build script
-        run: |
-          chmod +x ./docker-maven-build.sh
-          ./docker-maven-build.sh < /dev/null
-
-      - name: Collect artifacts
-        id: get-docker-art
-        run: |
-          ART=$(find . -maxdepth 3 -name "dbswitch-*.tar.gz" -o -name "dbswitch-*.zip" | head -n1)
-          echo "path=$ART" >> $GITHUB_OUTPUT
-
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ steps.get-docker-art.outputs.path }}
-          append_body: false
-          overwrite_files: true
+          files: ${{ steps.find_tar.outputs.tar_file }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
