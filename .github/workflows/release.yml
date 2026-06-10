@@ -63,9 +63,10 @@ jobs:
             find target/ -name "*.tar.gz" || true
             exit 1
           fi
-          echo "tar_file=${TAR_FILE}" >> $GITHUB_OUTPUT
+          ABSOLUTE_PATH="${PWD}/${TAR_FILE}"
+          echo "tar_file=${ABSOLUTE_PATH}" >> $GITHUB_OUTPUT
           echo "tar_name=$(basename ${TAR_FILE})" >> $GITHUB_OUTPUT
-          echo "Found: ${TAR_FILE}"
+          echo "Found: ${ABSOLUTE_PATH}"
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
@@ -84,9 +85,9 @@ jobs:
         run: |
           set -e
           mkdir -p ./docker-context/dbswitch
+          cp "${{ steps.find_tar.outputs.tar_file }}" ./docker-context/original.tar.gz
           cd ./docker-context
           
-          cp ${{ steps.find_tar.outputs.tar_file }} ./original.tar.gz
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
@@ -101,7 +102,6 @@ jobs:
           tar -czf dbswitch/dbswitch-release.tar.gz ./dbswitch-release
           rm -rf tmp_extract original.tar.gz
           
-          # 用 printf 写 Dockerfile，避免 heredoc 带来的 YAML 解析问题
           printf 'FROM eclipse-temurin:8-jre\n\n' > dbswitch/Dockerfile
           printf 'COPY dbswitch-release.tar.gz /tmp/\n\n' >> dbswitch/Dockerfile
           printf 'RUN mkdir -p /dbswitch-release \\\n' >> dbswitch/Dockerfile
