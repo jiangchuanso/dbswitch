@@ -80,21 +80,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 关键：将原始 tar.gz 解压并重组为 docker 需要的目录结构
       - name: Prepare Docker build context
         run: |
-          # 创建临时目录
+          set -e
           mkdir -p ./docker-context/dbswitch
           cd ./docker-context
           
-          # 复制原始 tar.gz
           cp ${{ steps.find_tar.outputs.tar_file }} ./original.tar.gz
-          
-          # 解压到临时目录
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
-          # 查找解压后的唯一顶层目录（例如 dbswitch-release-2.0.2）
           EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
           if [ -z "$EXTRACTED_DIR" ]; then
             echo "Error: No directory found after extraction"
@@ -102,43 +97,19 @@ jobs:
           fi
           
           echo "Extracted directory: $EXTRACTED_DIR"
-          
-          # 将顶层目录下的所有内容移动到 dbswitch-release 目录
           mv "$EXTRACTED_DIR" ./dbswitch-release
-          
-          # 重新打包，使其解压后直接得到 dbswitch-release 目录
           tar -czf dbswitch/dbswitch-release.tar.gz ./dbswitch-release
-          
-          # 清理临时文件
           rm -rf tmp_extract original.tar.gz
           
-          # 验证最终 tar.gz 的目录结构（调试用）
-          echo "Contents of final tar.gz:"
-          tar -tzf dbswitch/dbswitch-release.tar.gz | head -10
-          
-          # 同时准备 Dockerfile（如果项目中没有，需要在这里创建）
-          # 假设 Dockerfile 存在于仓库根目录的 docker/Dockerfile，复制过来
-          # 如果没有，可以在此处生成一个标准 Dockerfile
-          if [ -f ../Dockerfile ]; then
-            cp ../Dockerfile dbswitch/
-          else
-            cat > dbswitch/Dockerfile << 'EOF'
-FROM eclipse-temurin:8-jre
-
-COPY dbswitch-release.tar.gz /tmp/
-
-RUN mkdir -p /dbswitch-release \
-    && tar -xzf /tmp/dbswitch-release.tar.gz -C /dbswitch-release \
-    && rm /tmp/dbswitch-release.tar.gz
-
-WORKDIR /dbswitch-release
-
-# 确保启动脚本可执行（目录结构现在是 /dbswitch-release/bin/startup.sh）
-RUN chmod u+x bin/startup.sh
-
-CMD ["/dbswitch-release/bin/startup.sh"]
-EOF
-          fi
+          # 用 printf 写 Dockerfile，避免 heredoc 带来的 YAML 解析问题
+          printf 'FROM eclipse-temurin:8-jre\n\n' > dbswitch/Dockerfile
+          printf 'COPY dbswitch-release.tar.gz /tmp/\n\n' >> dbswitch/Dockerfile
+          printf 'RUN mkdir -p /dbswitch-release \\\n' >> dbswitch/Dockerfile
+          printf '    && tar -xzf /tmp/dbswitch-release.tar.gz -C /dbswitch-release \\\n' >> dbswitch/Dockerfile
+          printf '    && rm /tmp/dbswitch-release.tar.gz\n\n' >> dbswitch/Dockerfile
+          printf 'WORKDIR /dbswitch-release\n\n' >> dbswitch/Dockerfile
+          printf 'RUN chmod u+x bin/startup.sh\n\n' >> dbswitch/Dockerfile
+          printf 'CMD ["/dbswitch-release/bin/startup.sh"]\n' >> dbswitch/Dockerfile
           
           echo "Docker context prepared at ./docker-context/dbswitch"
           ls -lh dbswitch/
@@ -165,4 +136,3 @@ EOF
           tags: |
             ghcr.io/${{ github.repository_owner }}/dbswitch:${{ steps.get_version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/dbswitch:latest
-          # 不再需要 build-args，因为我们已经预处理了目录结构
