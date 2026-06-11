@@ -84,13 +84,15 @@ jobs:
       - name: Prepare Docker build context
         run: |
           set -e
-          mkdir -p ./docker-context/dbswitch
-          cp "${{ steps.find_tar.outputs.tar_file }}" ./docker-context/original.tar.gz
+          mkdir -p ./docker-context/dbswitch/contents
           cd ./docker-context
           
+          # 复制原始 tarball 并解压
+          cp "${{ steps.find_tar.outputs.tar_file }}" ./original.tar.gz
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
+          # 找到解压出的唯一顶层目录（如 dbswitch-release-2.0.2）
           EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
           if [ -z "$EXTRACTED_DIR" ]; then
             echo "Error: No directory found after extraction"
@@ -98,21 +100,25 @@ jobs:
           fi
           
           echo "Extracted directory: $EXTRACTED_DIR"
-          mv "$EXTRACTED_DIR" ./dbswitch-release
-          tar -czf dbswitch/dbswitch-release.tar.gz ./dbswitch-release
+          # 将其内部所有内容移动到 contents/ 目录下
+          mv "$EXTRACTED_DIR"/* ./dbswitch/contents/
+          
+          # 清理临时文件
           rm -rf tmp_extract original.tar.gz
           
-          printf 'FROM eclipse-temurin:8-jre\n\n' > dbswitch/Dockerfile
-          printf 'COPY dbswitch-release.tar.gz /tmp/\n\n' >> dbswitch/Dockerfile
-          printf 'RUN mkdir -p /dbswitch-release \\\n' >> dbswitch/Dockerfile
-          printf '    && tar -xzf /tmp/dbswitch-release.tar.gz -C /dbswitch-release \\\n' >> dbswitch/Dockerfile
-          printf '    && rm /tmp/dbswitch-release.tar.gz\n\n' >> dbswitch/Dockerfile
-          printf 'WORKDIR /dbswitch-release\n\n' >> dbswitch/Dockerfile
-          printf 'RUN chmod u+x bin/startup.sh\n\n' >> dbswitch/Dockerfile
-          printf 'CMD ["/dbswitch-release/bin/startup.sh"]\n' >> dbswitch/Dockerfile
+          # 生成 Dockerfile（直接复制目录，不涉及 tar）
+          cat > dbswitch/Dockerfile << 'EOF'
+FROM eclipse-temurin:8-jre
+
+COPY contents /dbswitch-release
+WORKDIR /dbswitch-release
+RUN chmod u+x bin/startup.sh
+
+CMD ["/dbswitch-release/bin/startup.sh"]
+EOF
           
           echo "Docker context prepared at ./docker-context/dbswitch"
-          ls -lh dbswitch/
+          ls -lh dbswitch/contents/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
