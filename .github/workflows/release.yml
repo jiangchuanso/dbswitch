@@ -1,0 +1,43 @@
+name: Package and Release dbswitch
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# ========== 关键：在此处添加全局权限设置 ==========
+permissions:
+  contents: write    # 允许创建/更新 Release 和上传附件
+  # packages: write  # 如果你还需要推送包到 GitHub Packages，可能需要这个，但这里不是必需的
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ... 这里是你原有的编译、打包步骤 ...
+
+      # 查找 tar.gz 文件
+      - name: Find generated tar.gz file
+        id: find_tar
+        run: |
+          cd dbswitch
+          TAR_FILE=$(ls target/dbswitch-release-*.tar.gz | head -n 1)
+          echo "tar_file=$TAR_FILE" >> $GITHUB_OUTPUT
+          echo "tar_name=$(basename $TAR_FILE)" >> $GITHUB_OUTPUT
+
+      # 创建 Release 并上传附件
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## dbswitch ${{ github.ref_name }}
+            This release is automatically built by GitHub Actions.
+          files: dbswitch/${{ steps.find_tar.outputs.tar_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
