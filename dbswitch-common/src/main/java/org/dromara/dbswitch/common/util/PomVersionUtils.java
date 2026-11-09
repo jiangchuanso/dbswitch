@@ -78,7 +78,7 @@ public final class PomVersionUtils {
         }
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Failed to get project version from jar", e);
     }
     return null;
   }

@@ -81,7 +81,8 @@ public final class ObjectCastUtils {
     } else if (in instanceof java.lang.String || in instanceof java.lang.Character) {
       return in.toString().getBytes();
     } else if (in instanceof java.sql.Clob) {
-      return clob2Str((java.sql.Clob) in).getBytes();
+      String str = clob2Str((java.sql.Clob) in);
+      return null == str ? null : str.getBytes();
     } else {
       try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
           ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -864,8 +865,6 @@ public final class ObjectCastUtils {
     if (in instanceof java.lang.Character) {
       return in.toString();
     } else if (in instanceof java.lang.String) {
-      return in.toString();
-    } else if (in instanceof java.lang.Character) {
       return in.toString();
     } else if (in instanceof java.sql.Clob) {
       return clob2Str((java.sql.Clob) in);
